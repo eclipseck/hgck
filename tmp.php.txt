@@ -1,0 +1,158 @@
+chrome      --disable-web-security --user-data-dir
+
+
+$conf["fnum"]=40;
+$conf["countMax"]=10;
+$conf["incTest"]=1.0030;
+$conf["minTradeChart"]=0.5;
+$conf["maxTradeChart"]=2.5;
+$conf["dayback"]=0*180;
+$conf["stockCompany"]="sbs";
+$conf["future"]="'VN30F1708','VN30F1709','VN30F1712','VN30F1803'";
+
+
+
+
+
+$conf["capital"]=(1617+1126+81)*1000000; //08.08
+//$conf["capital"]=(1593+1105+83)*1000000; //03.08
+//$conf["capital"]=(1603+1107+86)*1000000; //20.07
+//$conf["capital"]=(1573+1105+86)*1000000; //20.07 +100
+//$conf["capital"]=(1567+1051+92)*1000000; //07.07.2017 
+//$conf["capital"]=(1586+1068+93)*1000000; //06.07.2017 
+//$conf["capital"]=(1575+1047+95)*1000000; //05.07.2017 
+//$conf["capital"]=(1568+1030+94)*1000000; //03.07.2017 
+//$conf["capital"]=(1572+1015+94)*1000000; //03.07.2017 
+//$conf["capital"]=(1549+998+95)*1000000; //29.06.2017 
+//$conf["capital"]=(1536+1000+95)*1000000; //+220
+//$conf["capital"]=(1530+783+95)*1000000; //27.06.2017
+//$conf["capital"]=(1535+787+95)*1000000; //26.06.2017
+//$conf["capital"]=(1532+791+95)*1000000; //21.06.2017
+//$conf["capital"]=(1529+782+96)*1000000; //21.06.2017
+//$conf["capital"]=(1530+780+96)*1000000; //21.06.2017
+//$conf["capital"]=(1526+787+96)*1000000; //20.06.2017
+//$conf["capital"]=(1504+785+96)*1000000; //19.06.2017
+//$conf["capital"]=(1501+784+95)*1000000; //14.06.2017
+//$conf["capital"]=(1511+785+95)*1000000; //14.06.2017
+//$conf["capital"]=(1500+786+95)*1000000; //13.06.2017
+//$conf["capital"]=(1493+784+95)*1000000; //12.06.2017
+//$conf["capital"]=(1491+780+95)*1000000; //09.06.2017
+//$conf["capital"]=(1490+763+95)*1000000; //08.06.2017
+//$conf["capital"]=(1470+748+95)*1000000; //31.05.2017
+//$conf["capital"]=(1453+745+98)*1000000; //24.05.2017
+
+
+<? if($count%2==1 || $count==-1) {?>
+		<td style="<?= $trStyle ?>"><a _tag2="symbolLeft" _value="<?=$symbol?>" href="#" onclick="return false;" style="text-decoration:none;color:black;background-color:white;"><?= $this->formatSymbol($symbol) ?></a></td>
+<? } else { ?>
+		<td _tag2="symbolLeft0" _value="<?=$symbol?>" style="font-weight:normal;<?= $trStyle ?>"><?= $this->formatSymbol($symbol) ?></td>
+<? } ?>
+
+ViewStock/onRpcStockMap
+<td><a _tag="symbol" _value="<?=$symbol?>" href="#" onclick="return false;" style="text-decoration:none;color:black;background-color:white;"><?= $this->formatSymbol($symbol) ?></a></td>
+
+
+
+
+public function rpcMakeTable(){
+//<@ $this->json();
+		$vo=$this->voPrice3;
+		$voS=get(new stock_Vo())->_con("close,value,value2,per,min,imin,minClose,max,imax,maxClose","");
+		$rowSymbolArr=$this->getRowSymbolArr();
+		$rowStatMap = array();
+		$lenInt=count($this->intervalArr);
+		for($k=0; $k<count($rowSymbolArr); $k++){
+			$symbol = $rowSymbolArr[$k][0];
+			if(strlen($symbol)<3) continue;
+			if($symbol=="VNINDEX" || $symbol=="HAINDEX" ) continue;
+			
+			$rowPriceArr=$this->getRowPriceArrS($vo,$symbol,100);
+			$len=count($rowPriceArr);
+			for($i=0; $i<$len; $i++){
+				if($rowStatMap[$i]==null) $rowStatMap[$i] = array(
+				);
+				
+				$value2tmp=0;
+				$value2=null;
+				for($j=1; $j<=$this->intervalArr[$lenInt-1] ;$j++){
+					$value2tmp+=$rowPriceArr[$i+$j][$vo->close]*$rowPriceArr[$i+$j][$vo->volume];
+					if($j==$this->intervalArr[1]){
+						$value2=round($value2tmp/$this->intervalArr[1]);
+						if($value2<500000) $value2=null;
+					}
+				}
+				if($value2==null) continue;
+				
+				
+				if($rowStatMap[$i][$symbol]==null) $rowStatMap[$i][$symbol]=array();
+				$rowStatMap[$i][$symbol][$voS->close]=$rowPriceArr[$i][$vo->close];
+				$rowStatMap[$i][$symbol][$voS->value]=round($rowPriceArr[$i][$vo->volume]*$rowPriceArr[$i][$vo->close]);
+				$rowStatMap[$i][$symbol][$voS->value2]=$value2;
+				$rowStatMap[$i][$symbol][$voS->per]=round(100*($rowPriceArr[$i][$vo->close]-$rowPriceArr[$i+1][$vo->close])/$rowPriceArr[$i+1][$vo->close],1);
+				
+				$min=99999999; $max=0;
+				for($j=1; $j<= $this->intervalArr[$lenInt-1] ;$j++){
+					if($rowPriceArr[$i+$j][$vo->close]==0) break;
+					if($rowPriceArr[$i+$j][$vo->close]<$min){
+						$min=$rowPriceArr[$i+$j][$vo->close];
+						$imin=$i+$j;
+					}
+					if($rowPriceArr[$i+$j][$vo->close]>$max){
+						$max=$rowPriceArr[$i+$j][$vo->close];
+						$imax=$i+$j;
+					}
+					if($j==$this->intervalArr[3]){
+						$rowStatMap[$i][$symbol][$voS->min]=$min;
+						$rowStatMap[$i][$symbol][$voS->imin]=$imin;
+						$rowStatMap[$i][$symbol][$voS->minClose]=round(100*($rowPriceArr[$i][$vo->close] - $min)/$min);
+						
+						$rowStatMap[$i][$symbol][$voS->max]=$max;
+						$rowStatMap[$i][$symbol][$voS->imax]=$imax;
+						$rowStatMap[$i][$symbol][$voS->maxClose]=round(100*($max-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close]);
+					}
+				}
+				
+			}
+			//if($k==5) break;
+		}
+		
+		//$SORT=$voS->value2;
+		//print_p($SORT);
+		function sortFunc($a, $b){
+			$SORT=2;
+			if($a[$SORT] > $b[$SORT]) return -1;
+			if($a[$SORT] < $b[$SORT]) return 1;
+			return 0;
+		}
+		$len=count($rowStatMap);
+		for($i=0; $i<$len; $i++){
+			uasort($rowStatMap[$i], "sortFunc");
+		}
+?><table border=1>
+<th></th>
+<?
+for($i=0; $i<$len; $i++){ 
+	if($i==10) break;
+?>
+<tr>
+<?
+	foreach($rowStatMap[$i] as $symbol=>$row){
+?><tr>
+		<td><?= $symbol ?></td>
+		<td><?= $row[$voS->close] ?></td>
+		<td><?= $row[$voS->value] ?></td>
+		<td><?= $row[$voS->value2] ?></td>
+		<td><?= $row[$voS->per] ?></td>
+		<td><?= $row[$voS->imin] ?></td>
+		<td><?= $row[$voS->min] ?></td>
+		<td><?= $row[$voS->minClose] ?></td>
+		<td><?= $row[$voS->imax] ?></td>
+		<td><?= $row[$voS->max] ?></td>
+		<td><?= $row[$voS->maxClose] ?></td>
+	</tr>
+<?
+	}
+?> </tr><?	
+}		
+?></table><?
+	}
