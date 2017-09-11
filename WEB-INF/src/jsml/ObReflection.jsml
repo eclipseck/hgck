@@ -1,0 +1,8 @@
+<?php
+class jsml_ObReflection{
+	public function getFuncName($func){
+		foreach ($this->__class->prototype as $i => $value){
+			if($value==$func) return $i;
+		}
+	}
+}

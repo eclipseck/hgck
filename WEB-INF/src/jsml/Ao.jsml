@@ -1,0 +1,178 @@
+<?php
+//<@
+function import($str){
+	$fileJsml = implode('', array ( str_replace('_', '/', $str), '.jsml' ) );
+	$filePhp = implode('', array ( str_replace('_', '/', $str), '.php' ) );
+	if(
+		file_exists("WEB-INF/src/".$fileJsml) && !file_exists("WEB-INF/src/".$filePhp) ||
+		file_exists("WEB-INF/test/".$fileJsml) && !file_exists("WEB-INF/test/".$filePhp)
+	){
+		require_once $fileJsml;
+		return;
+	}
+	require_once $filePhp;
+}
+function print_p($var,$return=false){
+	if($return == true){
+		$str = "<pre>".print_r($var,true)."</pre>";
+		return $str;
+	}
+	echo "<pre>";
+	print_r($var);
+	echo "</pre>";
+}
+function get($obj){
+	return $obj;
+}
+//@>
+/*<@
+import ("jsml/jquery-1.7.1.min.js");
+import ("jsml/php.default.min.js");
+import ("jsml/json2.js");
+import ("jsml_ObReflection");
+import ("jsml/ao.css");
+import ("jsml/ao.js");
+@>*/
+class jsml_Ao{
+	protected static $obj;
+	public static function get(){if(self::$obj == null){self::$obj = new self();self::$obj->con();} return self::$obj;}
+	public function con(){
+		return $this;
+	}
+//<@
+	public static function main(){
+		require_once "fb.php";
+		$str=null;
+		if($_REQUEST['c'] != null) $str = $_REQUEST['c'];
+		if($_REQUEST['s'] != null) $str = $_REQUEST['s'];
+		if($_SERVER['HTTP_JSML_S'] != null) $str = $_SERVER['HTTP_JSML_S'];
+		if($str!=null){
+			$arr = explode("_", $str, 2);
+			$str=$arr[0]."_Ao";
+			import($str);
+			$ao = call_user_func_array(array($str, 'get'),array());
+			//$ao=new $str;
+			//$ao->con();
+			$ao->exe();
+		}
+	}
+	public function exe(){
+		if($_REQUEST['c'] != null){
+			import("jsml_parser_ObParser");
+			jsml_parser_ObParser::get()->parse($_REQUEST['c']);
+			return;
+		} 
+		else if($_REQUEST['s']!=null || $_SERVER['HTTP_JSML_S']!=null){
+			//$old_E = error_reporting(E_ERROR);
+			//ob_start('ob_gzhandler');
+			//error_reporting($old_E);
+
+			if($_REQUEST['s']!=null) $s = $_REQUEST['s'];
+			if($_SERVER['HTTP_JSML_S']!=null) $s = urldecode($_SERVER['HTTP_JSML_S']);
+			$arr = explode("/", $s, 3);
+			/*
+			if(strpos($arr[1] ,"rpc")===0){
+				
+			} else {
+				$this->echoJson(null);
+				return;
+			}
+			*/
+			import($arr[0]);
+			$bean = $this->bean($arr[0]."/con");
+			$func = $arr[1];
+			$param = $arr[2];//stripslashes($arr[2]);
+			
+			$paramArray = json_decode($param, TRUE);
+			if($_POST["paramArray"]!=null) $paramArray=json_decode($_POST["paramArray"],TRUE);
+			if($paramArray==null) $paramArray=array();
+			$result = $this->getResult( call_user_func_array(array(&$bean, $func), $paramArray) );
+			
+			if($_REQUEST['result']==="0"){
+				$this->echoJson(null);
+				return;
+			}
+			
+			$this->echoJson($result);
+		} else {
+			echo "hello";
+		}
+	}
+	public function echoJson($result){
+		if($_REQUEST['callback']!=null){
+			echo $_REQUEST['callback'], '(';
+			echo json_encode($result);
+			echo ');';
+		}else{
+			echo json_encode($result);
+		}
+	}
+	public function getResult($return){
+		$result = array();
+		$result["return"] = $return;
+		return $result;
+	}
+//@>
+	protected $beanMap;
+	public function bean($name){
+		if($this->beanMap==null) $this->beanMap=array(
+		);
+		if($this->beanMap[$name]==null){
+			$arr=explode("/",$name);
+			eval('$bean=new '.$arr[0].'();');
+			$this->beanMap[$name] = $bean;
+			//<@ eval('$bean.'.$arr[1].'();');
+			eval('$bean->'.$arr[1].'();');
+			//@>
+			//call_user_func_array(array(&$bean, $arr[1]),array());
+		}
+		return $this->beanMap[$name];
+	}
+	public function canExe(){
+		return true;
+	}
+	public function getUrlBrowser(){
+		return $this->getUrlExcept( array("#",".php",".htm",".html") );
+		$arr = explode("/" ,$__win->location->href);
+		do{
+			$str = trim(array_pop($arr));
+			if($str == "") continue;
+			if($str->indexOf("#")>=0) continue;
+			if($str->indexOf(".php")>=0) continue;
+			if($str->indexOf(".htm")>=0) continue;
+			if($str->indexOf(".html")>=0) continue;
+			array_push($arr,$str);
+			break;
+		} while(1==1);
+		array_push($arr,"");
+		$re = implode("/",$arr);
+		////alert($re);
+		return $re;
+		//return store_A_getUrlBrowser();
+	}
+	public function getUrlBase(){
+		return $this->getUrlExcept( array("#",".php",".htm",".html","-") );
+	}
+	public function getUrlExcept($exceptArr){
+		$arr = explode("/" ,$__win->location->href);
+		do{
+			$str = trim(array_pop($arr));
+			if($str == "") continue;
+			$break = false;
+			foreach($exceptArr as $i=>$val){
+				if($str->indexOf($val)>=0) {
+					$break = true;
+					break;
+				}
+			}
+			if($break) break;
+			array_push($arr,$str);
+			break;
+		} while(1==1);
+		array_push($arr,"");
+		$re = implode("/",$arr);
+		////alert($re);
+		return $re;
+		//return store_A_getUrlBrowser();
+	}
+}

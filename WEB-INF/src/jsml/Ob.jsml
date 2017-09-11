@@ -1,0 +1,113 @@
+<?php
+class jsml_Ob{
+	public function con(){
+		return $this;
+	}
+	public $__jsonOptionMap = array(
+	);
+	public function jsonOption($map){
+		$this->__jsonOptionMap = $map;
+		return $this;
+	}
+	public function json(){
+		$func = $this->__class->__getObReflection()->getFuncName($this->json->caller);
+		$arr = explode("_" ,$this->__class->__className);
+		$aoClass = $arr[0]."_Ao";
+		eval('$this.ao = '.$aoClass.'.get()');
+		if($this->ao->canExe($this->__class->__className ,$func)==false) {
+			//$result["__jsmlErrorBy__"] = "canExe";
+			//return;
+		}
+		
+		//jsonpUrl ;data ;contentType
+		$jsonpUrl = $this->__jsonOptionMap["jsonpUrl"]; if($jsonpUrl==null) $jsonpUrl = "";
+		if($jsonpUrl != ""){
+			$crossDomain = true;
+			$dataType = "jsonp";
+		} else {
+			$crossDomain = false;
+			$dataType = "jsonp";
+		}
+		$data = $this->__jsonOptionMap["data"]; if($data ==null) $data = array(
+		);
+		$contentType = $this->__jsonOptionMap["contentType"]; if($contentType ==null) "application/json";
+		$type = $this->__jsonOptionMap["type"]; if($type ==null) $type = "GET";
+		$contentType = $this->__jsonOptionMap["contentType"]; if($contentType ==null) "application/json";
+		$this->__jsonOptionMap = array(
+		);
+		
+		$paramArr = array();
+		for( $i=0; $i<$__arguments->length; $i++){
+			$paramArr->push($__arguments[$i]);
+		}
+		
+		$url="j.php";
+		if($jsonpUrl!="") $url = $jsonpUrl.$url;
+		
+		////$arr = array("s=".$this->__class->__className."/".$func."/".JSON::stringify($paramArr));
+		//$arr = array("".$this->__class->__className."/".$func);
+		$headers = array(
+		);
+		$headers["jsml_idSession"] = 0;
+		// $headers["jsml_s"] = array("".$this->__class->__className."/".$func)->join("");
+		$s = array($this->__class->__className,"/",$func,"/", JSON::stringify($paramArr))->join("");
+		
+		$lenMax=4000;
+		if($s->length<$lenMax){
+			//$headers["jsml_s"] = encodeURIComponent($s);
+			$data["s"]=$s;
+		} else {
+			$type = "POST";
+			$data["s"]=$s;
+		}
+		/*
+		if($jsonpUrl!=""){
+			foreach($headers as $key=>$value){
+				if($key=="jsml_s") $data[$key] = $s;
+				else $data[$key] = $value;
+			}
+		}
+		*/
+		//fb($url);
+		return $__que->ajax(array(
+			url=> $url
+			,"data"=> $data
+			,"dataType"=> $dataType
+			,"crossDomain"=> $crossDomain
+			,"type"=> $type
+			,"contentType"=> $contentType
+			,"__paramArr__"=>$paramArr
+			,"headers"=>$headers
+			,"success"=> function($result, $textStatus){
+				//try{
+					//@ $dataType = this->dataType;
+					//@ $_paramArr = this->__paramArr__;
+					////$id = $result["__id__"];
+					////$result["paramArr"] = $this->__paramArrMap[$id];
+					////$this->__paramArrMap[$id] = null;
+					// @if(typeof $this['rpcSuccess'] != 'undefined') $this->rpcSuccess($event ,$result);
+					
+					if($dataType=="html") $result = $__que->parseJSON($result);
+					if($result["__jsmlErrorBy__"] != null) return;
+					////if($result["idSession"]!=null) $ao->idSession = $result["idSession"];
+					////if($result["sessionMap"]!=null) $ao->sessionMap = $result["sessionMap"];
+					////$this->setResult($result);
+					$event = $__que->Event( "rpc.".$func , array( "paramArr"=>$_paramArr ) );
+					que($this)->trigger($event, arg($result["return"]));
+					////////////////////////////////eval($this->"rpc.".$func($event, $result["return"]);
+				////} catch(Exception $ex){
+					////$__console->error($ex);
+					/////$__console->trace();
+				////}
+			}
+			,"error"=> function ($XMLHttpRequest, $textStatus, $errorThrown) {
+				//$this->__paramArrMap[$id] = null;
+				$event = $__que->Event( "rpc.".$func , array( "paramArr"=>$_paramArr ) );
+				//@ if(typeof $this['rpcError'] != 'undefined') $this->rpcError($event);
+				$__console->error($errorThrown);
+				//throw $errorThrown;
+			}
+		));
+		return $this;
+	}
+}

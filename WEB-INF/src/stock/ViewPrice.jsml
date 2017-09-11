@@ -1,0 +1,1304 @@
+<?php
+//<@
+import("Zend_Http_Client");
+//@>
+import("stock_Ao");
+import("stock_VoPrice");
+import("stock_ObJfile");
+class stock_ViewPrice {
+	public function con(){
+		$this->ao=stock_Ao::get();
+//<@
+		$this->obJfile=$this->ao->bean("stock_ObJfile/con");
+		$this->voPrice2=$this->ao->bean("stock_VoPrice/con2");
+//@>
+		return $this;
+	}
+	
+	public function view(){
+		return $this;
+	}
+	
+	public function tess(){
+//<@
+		$httpClient = new Zend_Http_Client('http://priceboard.fpts.com.vn/?s=33&t=aAll');
+		$html = $httpClient->request('GET')->getBody();
+		
+		$pos=strpos($html,"var g_HNX_Index");
+		$txt1=substr($html,$pos);
+		$pos=strpos($txt1,";");
+		$txt1=substr($txt1,18,$pos-18);
+		$obj=json_decode($txt1);
+		$close=$obj->i02_3;
+		$volume=str_replace(",","",$obj->i02_7);
+		$ref=$close-$obj->i02_5;
+		echo $close." ".$volume." ".$ref."<br>";
+		
+		$pos=strpos($html,"var g_HSX_Index");
+		$txt1=substr($html,$pos);
+		$pos=strpos($txt1,";");
+		$txt1=substr($txt1,18,$pos-18);
+		$obj=json_decode($txt1);
+		$close=$obj->VNI_IndexValue;
+		$volume=str_replace(",","",$obj->VNI_TotalSharesAOM);
+		$ref=$close-$obj->VNI_Change;
+		$date=$this->toDate($obj->STAT_Date);
+		echo $close." ".$volume." ".$ref." ".$date;
+//@>		
+	}
+	
+	public function tess2(){
+//<@
+
+		$httpClient = new Zend_Http_Client('https://banggiaphaisinh.vndirect.com.vn/Acc/amw');
+		$arr=array(
+			'Accept'=>'application/json, text/javascript, *'.'/'.'*; q=0.01',
+			'Accept-Encoding'=>'gzip, deflate, br',
+			'Accept-Language'=>'en-US,en;q=0.8,vi;q=0.6',
+			'Connection'=>'keep-alive',
+			'Content-Length'=>'165',
+			'Content-Type'=>'application/json',
+			//'Cookie'=>'vnds-uuid=0fdbf8e9-95c3-47fc-9089-5cc5b372c9b9; vnds-uuid-d=1500819976008; pll_language=vi; _ga=GA1.3.1470556010.1500819976; _gid=GA1.3.861590314.1502449099; MainTabCK=1; __zlcmid=hegcHDGjyCqYQb; accessToken=eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJpc3N1ZXIiLCJzdWIiOiJzdWJqZWN0IiwiYXVkIjpbImF1ZGllbmNlIiwiaW9zIiwib25saW5lIiwidHJhZGVhcGkiLCJhdXRoIl0sImV4cCI6MTUwMjQ3OTE4NCwibmJmIjoxNTAyNDQ4ODg0LCJpZGdJZCI6IiIsInNlY29uZEZhIjoiZmFsc2UiLCJzZWNvbmRGYUV4cCI6MTUwMjQ3Nzk4NCwicm9sZXMiOiJbXSIsImFjY291bnRUeXBlIjoiIiwiY3VzdG9tZXJJZCI6IkZCMTMyNTczNzEzNzUyNDU4OSIsInVzZXJJZCI6IkZCMTMyNTczNzEzNzUyNDU4OSIsImN1c3RvbWVyTmFtZSI6IkdpYW5nIE5ndXllbiIsImVtYWlsIjpudWxsLCJ1c2VybmFtZSI6IkZCMTMyNTczNzEzNzUyNDU4OSIsInN0YXR1cyI6bnVsbH0.vxmUwQe81cJDKzMac79fG6zpH865VrzYwpMvMzz0_ca8G-0CbJf2z2AT5fODofcsEbvTcknkV5KB1DgBIKl8qPx6zztSncUtHcuZThCw0sNRzAAr47go8NWHK5rL-ynUbrlhZ4d6_6JIBlEkZ8Kt-I4s2MdUrpFuHxLNvUpsZl7CkkjxX4_O3vMhz325vDY546PiH4QrL1ucOHRpC5utGP_JEuRZ7LbvHDU5tbsrD6FKAkcNbWOGNDnnALGf8SLktxbAGUEEJVeaiGK41UdoGJXyl28jhJqGDVUODFpq_oEuI6qK4J5-8x-UuNNAL0bycjsIht_wcl9fnJDFlLc0zQ; vnds-remember-login=true; loginType=social-acc; ASP.NET_SessionId=s3ip3so1kk3a1t5eos0arfso; LISTSETTINGMKT=%7C%7CCookie%7C%7CHOSE%7C%7CCookie%7C%7C30%7C%7CCookie%7C%7CHNX%7C%7CCookie%7C%7CHNX30%7C%7CCookie%7C%7CUPCOM%7C%7CCookie%7C%7CHNXMan%7C%7CCookie%7C%7CHNXFin%7C%7CCookie%7C%7CSML%7C%7CCookie%7C%7CMID%7C%7CCookie%7C%7CALL%7C%7CCookie%7C%7CXALL%7C%7CCookie%7C%7C100%7C%7CCookie%7C%7CHNXCON%7C%7CCookie%7C%7CETF%7C%7CCookie%7C%7CHNXMSCap%7C%7CCookie%7C%7CHNX30TRI%7C%7CCookie%7C%7CHNXLCap; checkAllMkt=true; HOSE=true; 30=true; HNX=true; HNX30=true; UPCOM=true; HNXMan=true; HNXFin=true; SML=true; MID=true; ALL=true; XALL=true; 100=true; HNXCON=true; ETF=true; HNXMSCap=true; HNX30TRI=true; HNXLCap=true; s_8_s=false; delChartCookie=2; mp_cd9ae8452a76e95a30c43ceedbfdd456_mixpanel=%7B%22distinct_id%22%3A%20%22FB1325737137524589%22%2C%22%24search_engine%22%3A%20%22google%22%2C%22%24initial_referrer%22%3A%20%22https%3A%2F%2Fwww.google.com.vn%2F%22%2C%22%24initial_referring_domain%22%3A%20%22www.google.com.vn%22%2C%22Channel%22%3A%20%22smartboard%22%7D; mp_mixpanel__c=0; TabIdselectTab=14; viewIdselectTab=2; critIdselectTab=-14; groupIdTab=',
+			'Host'=>'banggiaphaisinh.vndirect.com.vn',
+			'Origin'=>'https://banggiaphaisinh.vndirect.com.vn',
+			'Referer'=>'https://banggiaphaisinh.vndirect.com.vn/',
+			'User-Agent'=>'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
+			'X-Requested-With'=>'XMLHttpRequest'
+		);
+		//$httpClient->setParameterPost($arr);
+		$map= array(
+			"selectedStocks"=>"VN30F1708,VN30F1709,VN30F1712,VN30F1803,",
+			"criteriaId"=>"-14",
+			"marketId"=>0,
+			"lastSeq"=>0,
+			"isReqTL"=>false,
+			"isReqMK"=>false,
+			"tlSymbol"=>"",
+			"pthMktId"=>""
+		);
+		$json = json_encode($map);
+		$httpClient->setRawData($json, 'application/json');
+			
+		/////$httpClient->setRawData();
+		print_p($arr);
+		$html = $httpClient->request('POST')->getBody();
+		
+		echo $html;
+//@>		
+	}
+	
+	public function getNumStar($str){
+		$pos1=strpos($str,"*");
+		$pos2=strrpos($str,"*");
+		$str=substr($str,$pos1+1,$pos2-$pos1-1);
+		$str=str_replace(",","",$str);
+		return $str; 
+	}
+	public function tess3(){
+//<@
+		$rowPriceLiveMap = array(
+		);
+		$vo = $this->voPrice2;
+		
+		$httpClient = new Zend_Http_Client('https://banggia.hnx.vn/Home/GetDerivative');
+		$httpClient->setParameterPost('pType','DETAILS');
+		$html = $httpClient->request('POST')->getBody();
+		$mapHtml=json_decode($html);
+		$arrHtml=$mapHtml->obj;
+		$arr2=array();
+		foreach($arrHtml as $i=>$str){
+			$vo->newRow();
+			$arr=explode("|",$str);
+			$symbol=substr($arr[0],0,strpos($arr[0],"_"));
+			
+			
+			$vo->newRow();
+			$vo->row[$vo->ref]=$this->getNumStar($arr[1]);
+			//$vo->row[$vo->buyPrice3]=$val[5][1];
+			//$vo->row[$vo->buyVolume3]=$val[6][1];
+			$vo->row[$vo->buyPrice2]=$this->getNumStar($arr[7]);
+			$vo->row[$vo->buyVolume2]=$this->getNumStar($arr[6]);
+			$vo->row[$vo->buyPrice1]=$this->getNumStar($arr[9]);
+			$vo->row[$vo->buyVolume1]=$this->getNumStar($arr[8]);
+			
+			$vo->row[$vo->close]=$this->getNumStar($arr[13]);
+			$vo->row[$vo->volume0]=$this->getNumStar($arr[14]);
+			
+			$vo->row[$vo->sellPrice1]=$this->getNumStar($arr[20]);
+			$vo->row[$vo->sellVolume1]=$this->getNumStar($arr[19]);
+			$vo->row[$vo->sellPrice2]=$this->getNumStar($arr[18]);
+			$vo->row[$vo->sellVolume2]=$this->getNumStar($arr[17]);
+			//$vo->row[$vo->sellPrice3]=$val[18][1];
+			//$vo->row[$vo->sellVolume3]=$val[19][1];
+			
+			$vo->row[$vo->volume]=$this->getNumStar($arr[21]);
+			$vo->row[$vo->open]=$this->getNumStar($arr[25]);
+			$vo->row[$vo->high]=$this->getNumStar($arr[26]);
+			$vo->row[$vo->low]=$this->getNumStar($arr[27]);
+			
+			$vo->row[$vo->market] = "vn";
+			
+			if($vo->row[$vo->open] == null || $vo->row[$vo->open] == 0) $vo->row[$vo->open] = $vo->row[$vo->ref];
+			if($vo->row[$vo->high] == null || $vo->row[$vo->high] == 0) $vo->row[$vo->high] = $vo->row[$vo->ref];
+			if($vo->row[$vo->low] == null  || $vo->row[$vo->low] == 0) $vo->row[$vo->low] = $vo->row[$vo->ref];
+			
+			if($vo->row[$vo->sellPrice1] == "ATO" || $vo->row[$vo->sellPrice1] == "ATC" || $vo->row[$vo->sellPrice1] == 0 || $vo->row[$vo->sellPrice1] == null ) $vo->row[$vo->sellPrice1] = $vo->row[$vo->low];
+			if($vo->row[$vo->buyPrice1] == "ATO" || $vo->row[$vo->buyPrice1] == "ATC" || $vo->row[$vo->buyPrice1] == 0 || $vo->row[$vo->buyPrice1] == null) $vo->row[$vo->buyPrice1] = $vo->row[$vo->high];
+			
+			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->buyPrice1];
+			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->sellPrice1];
+			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->ref];
+			
+			if($vo->row[$vo->sellVolume1]==0|| $vo->row[$vo->sellVolume1]==null) $vo->row[$vo->sellPrice1]=null;
+			if($vo->row[$vo->sellVolume2]==0|| $vo->row[$vo->sellVolume2]==null) $vo->row[$vo->sellPrice2]=null;
+			if($vo->row[$vo->buyVolume1]==0|| $vo->row[$vo->buyVolume1]==null) $vo->row[$vo->buyPrice1]=null;
+			if($vo->row[$vo->buyVolume2]==0|| $vo->row[$vo->buyVolume2]==null) $vo->row[$vo->buyPrice2]=null;
+			
+			
+
+			$rowPriceLiveMap[$symbol] = $vo->row;
+		}
+		print_p($rowPriceLiveMap);
+//@>		
+	}
+	
+	public function getRowPriceLiveMap(){
+//<@ $this->jsonp();
+		if($this->ao->conf["stockCompany"]=="sbs") return $this->getRowPriceLiveMapSbs();
+		if($this->ao->conf["stockCompany"]=="fpt") return $this->getRowPriceLiveMapFpt();
+//@>
+	}
+
+	public function getRowPriceLiveMapSbs(){
+//<@ $this->jsonp();
+try{
+		$rowPriceLiveMap = array(
+		);
+		if($this->ao->isOffline()){
+			$rowPriceLiveMap=$this->obJfile->load("stock_ViewPrice/rowPriceLiveMap");
+			return $rowPriceLiveMap;
+		}
+		
+		$httpClient = new Zend_Http_Client('http://stockboard.sbsc.com.vn/HO.ashx?FileName=0');
+		$html = trim($httpClient->request('GET')->getBody());
+		
+		$this->date=$this->toDate(substr($html,0,10));
+		//echo $this->date 
+		$refMap=$this->obJfile->load("stock_ViewPrice/refMap");
+		$isClean=false;
+		if(count($refMap)==0) $isClean=true;
+		//$today = $this->date;//date('Y-m-d')." 00:00:00";
+		$today=date('Y-m-d')." 00:00:00";
+		
+		if($refMap["__date__"]==$this->date){
+			//print_p($refMap);return;
+		} else {
+			$httpClient = new Zend_Http_Client('http://stockboard.sbsc.com.vn/HO.ashx?FileName=ref');
+			$html2 = trim($httpClient->request('GET')->getBody());
+			$arr=explode("|",$html2);
+			$ref2Map=array();
+			$ref2Map["__date__"]=$this->date;
+			$isUpdateRef=false;
+			foreach($arr as $i=>$str){
+				$arr2=explode(";",$str);
+				if($arr2==null || $arr2[0]==null || $arr2[0]=="") continue;
+				$symbol=$arr2[0];
+				$ref2Map[$symbol]=(double)$arr2[3];
+				if($ref2Map[$symbol]!=$refMap[$symbol]) $isUpdateRef=true;
+			}
+			if($isUpdateRef){
+				$this->obJfile->save("stock_ViewPrice/refMap",$ref2Map);
+				$refMap=$ref2Map;
+			}
+		}
+		
+		$pos1=strpos($html,"@");
+		$pos2=strpos($html,"|@");
+		
+		$text=substr($html,$pos1+3,$pos2-$pos1-3);
+		
+		$vo = $this->voPrice2;
+		
+		$arr=explode("|",$text);
+		foreach($arr as $i=>$str){
+			$arr2=explode(";",$str);
+			if($arr2[0]=="VNIndex" || $arr2[0]=="HNXIndex" || $arr2[0]=="VN30" || $arr2[0]=="VNXALL" || $arr2[0]=="HNX30ZZZZZZ"){
+				//print_p( $arr2 );
+				$vo->newRow();
+				if($arr2[0]=="VNIndex")$symbol="VNINDEX";
+				if($arr2[0]=="HNXIndex")$symbol="HAINDEX";
+				if($arr2[0]=="VN30")$symbol="VN30INDEX";
+				if($arr2[0]=="VNXALL")$symbol="VNALLINDEX";
+				if($arr2[0]=="HNX30")$symbol="HA30INDEX";
+				$close=$arr2[2];
+				$ref=$close-$arr2[3];
+				$volume=round($arr2[5]*1000000/$close);//$arr2[6];
+				
+				$vo->row[$vo->close] = $close;
+				$vo->row[$vo->open] = $ref;
+				$vo->row[$vo->volume] = $volume;
+				if($vo->row[$vo->close] >= $vo->row[$vo->open]){
+					$vo->row[$vo->high] = $vo->row[$vo->close];
+					$vo->row[$vo->low] = $vo->row[$vo->open];
+				} else {
+					$vo->row[$vo->high] = $vo->row[$vo->open];
+					$vo->row[$vo->low] = $vo->row[$vo->close];
+				}
+				$vo->row[$vo->ref] = $vo->row[$vo->open];
+				$vo->row[$vo->market] = "";
+				$rowPriceLiveMap[$symbol] = $vo->row;
+			}
+		}
+		
+		
+		//print_p($refMap);
+		//return;
+		
+		$pos3=strrpos($html,"|@");
+		$text=substr($html,$pos2+2,$pos3-$pos2-2);
+		
+		$arr=explode("|",$text);
+		foreach($arr as $i=>$str){
+			$arr2=explode(";",$str);
+			if($arr2==null || $arr2[0]==null || $arr2[0]=="") continue;
+			if($arr2[32]==100) $market="vn";
+			else if($arr2[32]==2) $market="ha";
+			else if($arr2[32]==3) $market="uc";
+			else continue;
+			
+			$symbol=$arr2[0];
+			if($refMap[$symbol]==null || $refMap[$symbol]=="") continue;
+			
+			$vo->newRow();
+			$vo->row[$vo->ref]=$refMap[$symbol];
+			//$vo->row[$vo->buyPrice3]=$val[5][1];
+			//$vo->row[$vo->buyVolume3]=$val[6][1];
+			//$vo->row[$vo->buyPrice2]=$arr2[3];
+			//$vo->row[$vo->buyVolume2]=$arr2[4]*10;
+			$vo->row[$vo->buyPrice1]=$arr2[5];
+			$vo->row[$vo->buyVolume1]=$arr2[6]*10;
+			
+			$vo->row[$vo->close]=$arr2[8];
+			$vo->row[$vo->volume0]=$arr2[9]*10;
+			
+			$vo->row[$vo->sellPrice1]=$arr2[11];
+			$vo->row[$vo->sellVolume1]=$arr2[12]*10;
+			//$vo->row[$vo->sellPrice2]=$arr2[13];
+			//$vo->row[$vo->sellVolume2]=$arr2[14]*10;
+			//$vo->row[$vo->sellPrice3]=$val[18][1];
+			//$vo->row[$vo->sellVolume3]=$val[19][1];
+			
+			$vo->row[$vo->volume]=$arr2[10]*10;
+			$vo->row[$vo->open]=$arr2[17];
+			$vo->row[$vo->high]=$arr2[18];
+			$vo->row[$vo->low]=$arr2[19];
+			
+			$vo->row[$vo->market] = $market;
+			
+			if($vo->row[$vo->open] == null || $vo->row[$vo->open] == 0) $vo->row[$vo->open] = $vo->row[$vo->ref];
+			if($vo->row[$vo->high] == null || $vo->row[$vo->high] == 0) $vo->row[$vo->high] = $vo->row[$vo->ref];
+			if($vo->row[$vo->low] == null  || $vo->row[$vo->low] == 0) $vo->row[$vo->low] = $vo->row[$vo->ref];
+			
+			if($vo->row[$vo->sellPrice1] == "ATO" || $vo->row[$vo->sellPrice1] == "ATC" || $vo->row[$vo->sellPrice1] == 0 || $vo->row[$vo->sellPrice1] == null ) $vo->row[$vo->sellPrice1] = $vo->row[$vo->low];
+			if($vo->row[$vo->buyPrice1] == "ATO" || $vo->row[$vo->buyPrice1] == "ATC" || $vo->row[$vo->buyPrice1] == 0 || $vo->row[$vo->buyPrice1] == null) $vo->row[$vo->buyPrice1] = $vo->row[$vo->high];
+			
+			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->buyPrice1];
+			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->sellPrice1];
+			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->ref];
+			
+			if($vo->row[$vo->sellVolume1]==0|| $vo->row[$vo->sellVolume1]==null) $vo->row[$vo->sellPrice1]=null;
+			//if($vo->row[$vo->sellVolume2]==0|| $vo->row[$vo->sellVolume2]==null) $vo->row[$vo->sellPrice2]=null;
+			if($vo->row[$vo->buyVolume1]==0|| $vo->row[$vo->buyVolume1]==null) $vo->row[$vo->buyPrice1]=null;
+			//if($vo->row[$vo->buyVolume2]==0|| $vo->row[$vo->buyVolume2]==null) $vo->row[$vo->buyPrice2]=null;
+			
+			$rowPriceLiveMap[$symbol] = $vo->row;
+			
+		}
+		
+		/////////future
+		$isSaveFuture=false;
+		if($this->date==$today || $isClean) $isSaveFuture=true;
+
+		$httpClient = new Zend_Http_Client('https://banggia.hnx.vn/Home/GetDerivative');
+		$httpClient->setParameterPost('pType','DETAILS');
+		$html = $httpClient->request('POST')->getBody();
+		$mapHtml=json_decode($html);
+		$arrHtml=$mapHtml->obj;
+		if($arrHtml==null) $arrHtml=array();
+		$rowFuturePriceLiveMap=array(
+		);
+		foreach($arrHtml as $i=>$str){
+			$vo->newRow();
+			$arr=explode("|",$str);
+			$symbol=substr($arr[0],0,strpos($arr[0],"_"));
+			
+			
+			$vo->newRow();
+			$vo->row[$vo->ref]=$this->getNumStar($arr[1]);
+			//$vo->row[$vo->buyPrice3]=$val[5][1];
+			//$vo->row[$vo->buyVolume3]=$val[6][1];
+			//$vo->row[$vo->buyPrice2]=$this->getNumStar($arr[7]);
+			//$vo->row[$vo->buyVolume2]=$this->getNumStar($arr[6])*1000;
+			$vo->row[$vo->buyPrice1]=$this->getNumStar($arr[9]);
+			$vo->row[$vo->buyVolume1]=$this->getNumStar($arr[8])*1000;
+			
+			$vo->row[$vo->close]=$this->getNumStar($arr[13]);
+			$vo->row[$vo->volume0]=$this->getNumStar($arr[14])*1000;
+			
+			$vo->row[$vo->sellPrice1]=$this->getNumStar($arr[20]);
+			$vo->row[$vo->sellVolume1]=$this->getNumStar($arr[19])*1000;
+			//$vo->row[$vo->sellPrice2]=$this->getNumStar($arr[18]);
+			//$vo->row[$vo->sellVolume2]=$this->getNumStar($arr[17])*1000;
+			//$vo->row[$vo->sellPrice3]=$val[18][1];
+			//$vo->row[$vo->sellVolume3]=$val[19][1];
+			
+			$vo->row[$vo->volume]=$this->getNumStar($arr[21])*1000;
+			$vo->row[$vo->open]=$this->getNumStar($arr[25]);
+			$vo->row[$vo->high]=$this->getNumStar($arr[26]);
+			$vo->row[$vo->low]=$this->getNumStar($arr[27]);
+			
+			$vo->row[$vo->market] = "vn";
+			
+			if($vo->row[$vo->open] == null || $vo->row[$vo->open] == 0) $vo->row[$vo->open] = $vo->row[$vo->ref];
+			if($vo->row[$vo->high] == null || $vo->row[$vo->high] == 0) $vo->row[$vo->high] = $vo->row[$vo->ref];
+			if($vo->row[$vo->low] == null  || $vo->row[$vo->low] == 0) $vo->row[$vo->low] = $vo->row[$vo->ref];
+			
+			if($vo->row[$vo->sellPrice1] == "ATO" || $vo->row[$vo->sellPrice1] == "ATC" || $vo->row[$vo->sellPrice1] == 0 || $vo->row[$vo->sellPrice1] == null ) $vo->row[$vo->sellPrice1] = $vo->row[$vo->low];
+			if($vo->row[$vo->buyPrice1] == "ATO" || $vo->row[$vo->buyPrice1] == "ATC" || $vo->row[$vo->buyPrice1] == 0 || $vo->row[$vo->buyPrice1] == null) $vo->row[$vo->buyPrice1] = $vo->row[$vo->high];
+			
+			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->buyPrice1];
+			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->sellPrice1];
+			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->ref];
+			
+			if($vo->row[$vo->sellVolume1]==0|| $vo->row[$vo->sellVolume1]==null) $vo->row[$vo->sellPrice1]=null;
+			//if($vo->row[$vo->sellVolume2]==0|| $vo->row[$vo->sellVolume2]==null) $vo->row[$vo->sellPrice2]=null;
+			if($vo->row[$vo->buyVolume1]==0|| $vo->row[$vo->buyVolume1]==null) $vo->row[$vo->buyPrice1]=null;
+			//if($vo->row[$vo->buyVolume2]==0|| $vo->row[$vo->buyVolume2]==null) $vo->row[$vo->buyPrice2]=null;
+			
+			if(!$isSaveFuture) $rowFuturePriceLiveMap[$symbol] = $vo->row;
+			if($isSaveFuture) $rowPriceLiveMap[$symbol] = $vo->row;
+		}
+		
+		$isEmpty=false;
+		if(count($rowPriceLiveMap)==0 || $rowPriceLiveMap["HAINDEX"][$vo->volume]==0){
+			//$rowPriceLiveMap=$this->obJfile->load("stock_ViewPrice/rowPriceLiveMap");
+			$isEmpty=true;
+		}else{
+			$this->saveRowPriceLiveMap( $rowPriceLiveMap );
+		}
+		if(!$isSaveFuture){
+			if($isEmpty) $rowPriceLiveMap=$this->obJfile->load("stock_ViewPrice/rowPriceLiveMap");
+			foreach($rowFuturePriceLiveMap as $symbol=>$value){
+				$rowPriceLiveMap[$symbol]=$rowFuturePriceLiveMap[$symbol];
+			}
+			$this->obJfile->save("stock_ViewPrice/rowPriceLiveMap", $rowPriceLiveMap);
+		}
+		if(count($rowPriceLiveMap)==0 || $rowPriceLiveMap["HAINDEX"][$vo->volume]==0){
+			$rowPriceLiveMap=$this->obJfile->load("stock_ViewPrice/rowPriceLiveMap");
+		}
+		//print_p($rowPriceLiveMap); return;
+} catch (Exception $ex){
+	$rowPriceLiveMap=$this->obJfile->load("stock_ViewPrice/rowPriceLiveMap");
+	return $rowPriceLiveMap;
+}
+		return $rowPriceLiveMap;
+//@>
+	}
+	
+	public function getRowPriceLiveMapFpt(){
+//<@ $this->jsonp();
+return;
+try{
+		$rowPriceLiveMap = array(
+		);
+		if($this->ao->isOffline()){
+			$rowPriceLiveMap=$this->obJfile->load("stock_ViewPrice/rowPriceLiveMap");
+			return $rowPriceLiveMap;
+		}
+		
+		$httpClient = new Zend_Http_Client('http://priceboard.fpts.com.vn/?s=33&t=aAll');
+		$html = $httpClient->request('GET')->getBody();
+		
+		$pos=strpos($html,"var g_HNX_Index");
+		$txt1=substr($html,$pos);
+		$pos=strpos($txt1,";");
+		$txt1=substr($txt1,18,$pos-18);
+		$obj=json_decode($txt1);
+		
+		$haclose=$this->toPrice($obj->i02_3);
+		//$havolume=$this->toVolume(str_replace(",","",$obj->i02_7));
+		$haref=$haclose-$this->toPrice($obj->i02_5);
+		
+		$ha30close=$this->toPrice($obj->i41_3);
+		//$ha30volume=$this->toVolume(str_replace(",","",$obj->i41_7));
+		$ha30ref=$ha30close-$this->toPrice($obj->i41_5);
+		
+		$pos=strpos($html,"var g_HSX_Index");
+		$txt1=substr($html,$pos);
+		$pos=strpos($txt1,";");
+		$txt1=substr($txt1,18,$pos-18);
+		$obj=json_decode($txt1);
+		
+		$vnclose=$this->toPrice($obj->VNI_IndexValue);
+		//$vnvolume=$this->toVolume(str_replace(",","",$obj->VNI_TotalSharesAOM));
+		$vnref=$vnclose-$this->toPrice($obj->VNI_Change);
+		
+		$vn30close=$this->toPrice($obj->VN30_IndexValue);
+		//$vn30volume=$this->toVolume(str_replace(",","",$obj->VN30_TotalSharesAOM));
+		$vn30ref=$vn30close-$this->toPrice($obj->VN30_Change);
+		
+		$vnallclose=$this->toPrice($obj->VNXALL_IndexValue);
+		//$vnallvolume=$this->toVolume(str_replace(",","",$obj->VNXALL_TotalSharesAOM));
+		$vnallref=$vnallclose-$this->toPrice($obj->VNXALL_Change);
+		
+		$date=$this->toDate($obj->STAT_Date);
+		
+		$market = "vn";
+		$httpClient = new Zend_Http_Client('http://priceboard.fpts.com.vn/hsx/data.ashx?s=quote&l=All');
+		$html = $httpClient->request('GET')->getBody();
+		$obj = json_decode($html);
+		
+		//index
+		$vo = $this->voPrice2;
+		$symbol= "VNINDEX";//$vo->row[$vo->symbol] = "VNINDEX";
+		$this->date = $date;
+		$vo->row[$vo->close] = $vnclose;
+		$vo->row[$vo->open] = $vnref;
+		$vo->row[$vo->volume] = $vnvolume;
+		if($vo->row[$vo->close] >= $vo->row[$vo->open]){
+			$vo->row[$vo->high] = $vo->row[$vo->close];
+			$vo->row[$vo->low] = $vo->row[$vo->open];
+		} else {
+			$vo->row[$vo->high] = $vo->row[$vo->open];
+			$vo->row[$vo->low] = $vo->row[$vo->close];
+		}
+		$vo->row[$vo->ref] = $vo->row[$vo->open];
+		$vo->row[$vo->market] = $market;
+		$rowPriceLiveMap[$symbol] = $vo->row;
+		
+		$vo->newRow();
+		$symbol= "VN30INDEX";//$vo->row[$vo->symbol] = "VNINDEX";
+		$this->date = $date;
+		$vo->row[$vo->close] = $vn30close;
+		$vo->row[$vo->open] = $vn30ref;
+		$vo->row[$vo->volume] = $vn30volume;
+		if($vo->row[$vo->close] >= $vo->row[$vo->open]){
+			$vo->row[$vo->high] = $vo->row[$vo->close];
+			$vo->row[$vo->low] = $vo->row[$vo->open];
+		} else {
+			$vo->row[$vo->high] = $vo->row[$vo->open];
+			$vo->row[$vo->low] = $vo->row[$vo->close];
+		}
+		$vo->row[$vo->ref] = $vo->row[$vo->open];
+		$vo->row[$vo->market] = $market;
+		$rowPriceLiveMap[$symbol] = $vo->row;
+		
+		$vo->newRow();
+		$symbol= "VNALLINDEX";//$vo->row[$vo->symbol] = "VNINDEX";
+		$this->date = $date;
+		$vo->row[$vo->close] = $vnallclose;
+		$vo->row[$vo->open] = $vnallref;
+		$vo->row[$vo->volume] = $vnallvolume;
+		if($vo->row[$vo->close] >= $vo->row[$vo->open]){
+			$vo->row[$vo->high] = $vo->row[$vo->close];
+			$vo->row[$vo->low] = $vo->row[$vo->open];
+		} else {
+			$vo->row[$vo->high] = $vo->row[$vo->open];
+			$vo->row[$vo->low] = $vo->row[$vo->close];
+		}
+		$vo->row[$vo->ref] = $vo->row[$vo->open];
+		$vo->row[$vo->market] = $market;
+		$rowPriceLiveMap[$symbol] = $vo->row;
+		
+		
+		foreach($obj as $value){
+			$val=$value->Info;
+			$vo->newRow();
+			
+			$symbol=$val[0][1];
+			$vo->row[$vo->ref]=$val[1][1];
+			//$vo->row[$vo->buyPrice3]=$val[5][1];
+			//$vo->row[$vo->buyVolume3]=$val[6][1];
+			$vo->row[$vo->buyPrice2]=$val[7][1];
+			$vo->row[$vo->buyVolume2]=$val[8][1];
+			$vo->row[$vo->buyPrice1]=$val[9][1];
+			$vo->row[$vo->buyVolume1]=$val[10][1];
+			
+			$vo->row[$vo->close]=$val[11][1];
+			$vo->row[$vo->volume0]=$val[12][1];
+			
+			$vo->row[$vo->sellPrice1]=$val[14][1];
+			$vo->row[$vo->sellVolume1]=$val[15][1];
+			$vo->row[$vo->sellPrice2]=$val[16][1];
+			$vo->row[$vo->sellVolume2]=$val[17][1];
+			//$vo->row[$vo->sellPrice3]=$val[18][1];
+			//$vo->row[$vo->sellVolume3]=$val[19][1];
+			
+			$vo->row[$vo->volume]=$val[21][1];
+			$vo->row[$vo->open]=$val[22][1];
+			$vo->row[$vo->high]=$val[23][1];
+			$vo->row[$vo->low]=$val[24][1];
+			
+			$vo->row[$vo->market] = $market;
+			
+			if($vo->row[$vo->open] == null || $vo->row[$vo->open] == 0) $vo->row[$vo->open] = $vo->row[$vo->ref];
+			if($vo->row[$vo->high] == null || $vo->row[$vo->high] == 0) $vo->row[$vo->high] = $vo->row[$vo->ref];
+			if($vo->row[$vo->low] == null  || $vo->row[$vo->low] == 0) $vo->row[$vo->low] = $vo->row[$vo->ref];
+			
+			if($vo->row[$vo->sellPrice1] == "ATO" || $vo->row[$vo->sellPrice1] == "ATC" || $vo->row[$vo->sellPrice1] == 0 || $vo->row[$vo->sellPrice1] == null ) $vo->row[$vo->sellPrice1] = $vo->row[$vo->low];
+			if($vo->row[$vo->buyPrice1] == "ATO" || $vo->row[$vo->buyPrice1] == "ATC" || $vo->row[$vo->buyPrice1] == 0 || $vo->row[$vo->buyPrice1] == null) $vo->row[$vo->buyPrice1] = $vo->row[$vo->high];
+			
+			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->buyPrice1];
+			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->sellPrice1];
+			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->ref];
+			
+			if($vo->row[$vo->sellVolume1]==0|| $vo->row[$vo->sellVolume1]==null) $vo->row[$vo->sellPrice1]=null;
+			if($vo->row[$vo->sellVolume2]==0|| $vo->row[$vo->sellVolume2]==null) $vo->row[$vo->sellPrice2]=null;
+			if($vo->row[$vo->buyVolume1]==0|| $vo->row[$vo->buyVolume1]==null) $vo->row[$vo->buyPrice1]=null;
+			if($vo->row[$vo->buyVolume2]==0|| $vo->row[$vo->buyVolume2]==null) $vo->row[$vo->buyPrice2]=null;
+			
+			$rowPriceLiveMap[$symbol] = $vo->row;
+		}
+		
+		
+		
+		$market = "ha";
+		$httpClient = new Zend_Http_Client('http://priceboard.fpts.com.vn/hnx/data.ashx?s=quote&l=HNXIndex');
+		$html = $httpClient->request('GET')->getBody();
+		$obj = json_decode($html);
+		
+		//index
+		$vo->newRow();
+		$symbol= "HAINDEX";//$vo->row[$vo->symbol] = "VNINDEX";
+		$this->date = $date;
+		$vo->row[$vo->close] = $haclose;
+		$vo->row[$vo->open] = $haref;
+		$vo->row[$vo->volume] = $havolume;
+		if($vo->row[$vo->close] >= $vo->row[$vo->open]){
+			$vo->row[$vo->high] = $vo->row[$vo->close];
+			$vo->row[$vo->low] = $vo->row[$vo->open];
+		} else {
+			$vo->row[$vo->high] = $vo->row[$vo->open];
+			$vo->row[$vo->low] = $vo->row[$vo->close];
+		}
+		$vo->row[$vo->ref] = $vo->row[$vo->open];
+		$vo->row[$vo->market] = $market;
+		$rowPriceLiveMap[$symbol] = $vo->row;
+		
+		/*
+		$vo->newRow();
+		$symbol= "HA30INDEX";//$vo->row[$vo->symbol] = "VNINDEX";
+		$this->date = $date;
+		$vo->row[$vo->close] = $ha30close;
+		$vo->row[$vo->open] = $ha30ref;
+		$vo->row[$vo->volume] = $ha30volume;
+		if($vo->row[$vo->close] >= $vo->row[$vo->open]){
+			$vo->row[$vo->high] = $vo->row[$vo->close];
+			$vo->row[$vo->low] = $vo->row[$vo->open];
+		} else {
+			$vo->row[$vo->high] = $vo->row[$vo->open];
+			$vo->row[$vo->low] = $vo->row[$vo->close];
+		}
+		$vo->row[$vo->ref] = $vo->row[$vo->open];
+		$vo->row[$vo->market] = $market;
+		$rowPriceLiveMap[$symbol] = $vo->row;
+		*/
+		
+		foreach($obj as $value){
+			$symbol=$value->RowID;
+			$val=$value->Info;
+			$vo->newRow();
+			
+			$vo->row[$vo->buyPrice1]=$val[0][1];
+			$vo->row[$vo->buyVolume1]=$val[1][1];
+			
+			$vo->row[$vo->sellPrice1]=$val[2][1];
+			$vo->row[$vo->sellVolume1]=$val[3][1];
+			
+			$vo->row[$vo->buyPrice2]=$val[4][1];
+			$vo->row[$vo->buyVolume2]=$val[5][1];
+			
+			$vo->row[$vo->sellPrice2]=$val[6][1];
+			$vo->row[$vo->sellVolume2]=$val[7][1];
+			
+			$symbol=$val[12][1];
+			
+			$vo->row[$vo->ref]=$val[13][1];
+			
+			$vo->row[$vo->close]=$val[18][1];
+			$vo->row[$vo->volume0]=$val[19][1];
+			$vo->row[$vo->volume]=$val[20][1];
+			
+			$vo->row[$vo->open]=$val[21][1];
+			$vo->row[$vo->high]=$val[22][1];
+			$vo->row[$vo->low]=$val[23][1];
+			
+			$vo->row[$vo->market] = $market;
+			
+			if($vo->row[$vo->open] == null || $vo->row[$vo->open] == 0) $vo->row[$vo->open] = $vo->row[$vo->ref];
+			if($vo->row[$vo->high] == null || $vo->row[$vo->high] == 0) $vo->row[$vo->high] = $vo->row[$vo->ref];
+			if($vo->row[$vo->low] == null  || $vo->row[$vo->low] == 0) $vo->row[$vo->low] = $vo->row[$vo->ref];
+			
+			if($vo->row[$vo->sellPrice1] == "ATO" || $vo->row[$vo->sellPrice1] == "ATC" || $vo->row[$vo->sellPrice1] == 0 || $vo->row[$vo->sellPrice1] == null ) $vo->row[$vo->sellPrice1] = $vo->row[$vo->low];
+			if($vo->row[$vo->buyPrice1] == "ATO" || $vo->row[$vo->buyPrice1] == "ATC" || $vo->row[$vo->buyPrice1] == 0 || $vo->row[$vo->buyPrice1] == null) $vo->row[$vo->buyPrice1] = $vo->row[$vo->high];
+			
+			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->buyPrice1];
+			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->sellPrice1];
+			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->ref];
+			
+			if($vo->row[$vo->sellVolume1]==0|| $vo->row[$vo->sellVolume1]==null) $vo->row[$vo->sellPrice1]=null;
+			if($vo->row[$vo->sellVolume2]==0|| $vo->row[$vo->sellVolume2]==null) $vo->row[$vo->sellPrice2]=null;
+			if($vo->row[$vo->buyVolume1]==0|| $vo->row[$vo->buyVolume1]==null) $vo->row[$vo->buyPrice1]=null;
+			if($vo->row[$vo->buyVolume2]==0|| $vo->row[$vo->buyVolume2]==null) $vo->row[$vo->buyPrice2]=null;
+			
+			$rowPriceLiveMap[$symbol] = $vo->row;
+		}
+		if(count($rowPriceLiveMap)==0 || $rowPriceLiveMap["HAINDEX"][$vo->volume]==0){
+			$rowPriceLiveMap=$this->obJfile->load("stock_ViewPrice/rowPriceLiveMap");
+		}else{
+			$this->saveRowPriceLiveMap( $rowPriceLiveMap );
+		}
+		//print_p($rowPriceLiveMap); return;
+} catch (Exception $ex){
+	$rowPriceLiveMap=$this->obJfile->load("stock_ViewPrice/rowPriceLiveMap");
+	return $rowPriceLiveMap;
+}
+		return $rowPriceLiveMap;
+//@>
+	}
+	
+	public function getRowPriceLiveMapzzzzzz(){
+//<@ $this->jsonp();
+		$runtime = microtime(true);
+		$rowPriceLiveMap = array(
+		);
+		if($this->ao->isOffline()){
+			$rowPriceLiveMap=$this->obJfile->load("stock_ViewPrice/rowPriceLiveMap");
+			return $rowPriceLiveMap;
+		}
+		
+		//try{
+			$market = "vn";
+			$httpClient = new Zend_Http_Client('http://priceboard.fpts.com.vn/HO4/VN/get.asp?a=1');
+			$httpClient->setHeaders(array(
+				'Accept'=>'application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5',
+				'Accept-Charset'=>'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+				'Accept-Encoding'=>'gzip,deflate,sdch',
+				'Accept-Language'=>'en-US,en;q=0.8',
+				'Cache-Control'=>'max-age=0',
+				'Connection'=>'keep-alive',
+				'Host'=>'priceboard.fpts.com.vn',
+				'User-Agent'=>'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.237 Safari/534.10'
+			));
+			$html = $httpClient->request('GET')->getBody();
+			$html = str_replace("&nbsp;", '', $html);
+			$html = '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/></head><body>'.$html.'</body></html>';
+
+			$doc = new DOMDocument();
+			$old_E = error_reporting(E_ERROR);
+			$doc->loadHTML($html);
+			error_reporting($old_E);
+			
+			//index
+			$vo = $this->voPrice2;
+			$symbol= "VNINDEX";//$vo->row[$vo->symbol] = "VNINDEX";
+			$this->date = $this->toDate( $doc->getElementById("FPTSDateHO")->childNodes->item(0)->childNodes->item(1)->nodeValue );
+			//$vo->row[$vo->stockDate] = $date;
+			$vo->row[$vo->close] = $this->toPrice( $doc->getElementById("tdMHO1")->nodeValue );
+			$vo->row[$vo->open] = $vo->row[$vo->close] - $this->toPrice( $doc->getElementById("tdMHO2")->nodeValue );
+			$vo->row[$vo->volume] = $this->toVolume( $doc->getElementById("tdMHO4")->nodeValue );
+			if($vo->row[$vo->close] >= $vo->row[$vo->open]){
+				$vo->row[$vo->high] = $vo->row[$vo->close];
+				$vo->row[$vo->low] = $vo->row[$vo->open];
+			} else {
+				$vo->row[$vo->high] = $vo->row[$vo->open];
+				$vo->row[$vo->low] = $vo->row[$vo->close];
+			}
+			$vo->row[$vo->ref] = $vo->row[$vo->open];
+			$vo->row[$vo->market] = $market;
+			$rowPriceLiveMap[$symbol] = $vo->row;
+
+			//each stock
+			$trNodes = $doc->getElementById("FPTSQuote")->childNodes;
+			foreach($trNodes as $i=> $tr){
+				if( $tr->getAttribute("class") == "row" ){
+					$tdNodes = $tr->childNodes;
+					$vo->newRow();
+					foreach($tdNodes as $j=> $td){
+						if($j==0) $symbol = $td->childNodes->item(0)->textContent;
+						if($j==1) $ceil = $this->toPrice( $td->childNodes->item(0)->textContent );
+						//if($j==2) $vo->row[$vo->floor] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==3) $vo->row[$vo->ref] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						
+						//if($j==4) $vo->row[$vo->buyPrice3] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						//if($j==5) $vo->row[$vo->buyVolume3] = $this->toVolume10( $td->childNodes->item(0)->textContent );
+						if($j==6) $vo->row[$vo->buyPrice2] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==7) $vo->row[$vo->buyVolume2] = $this->toVolume10( $td->childNodes->item(0)->textContent );
+						if($j==8) $vo->row[$vo->buyPrice1] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==9) $vo->row[$vo->buyVolume1] = $this->toVolume10( $td->childNodes->item(0)->textContent );
+						
+						if($j==10) $vo->row[$vo->close] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==11) $vo->row[$vo->volume0] = $this->toVolume10( $td->childNodes->item(0)->textContent );
+						if($j==12) continue;
+						if($j==13) $vo->row[$vo->sellPrice1] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==14) $vo->row[$vo->sellVolume1] = $this->toVolume10( $td->childNodes->item(0)->textContent );
+						if($j==15) $vo->row[$vo->sellPrice2] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==16) $vo->row[$vo->sellVolume2] = $this->toVolume10( $td->childNodes->item(0)->textContent );
+						//if($j==17) $vo->row[$vo->sellPrice3] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						//if($j==18) $vo->row[$vo->sellVolume3] = $this->toVolume10( $td->childNodes->item(0)->textContent );
+						
+						if($j==19) {
+							$vo->row[$vo->volume] = $this->toVolume10( $td->childNodes->item(0)->textContent );
+							if($vo->row[$vo->buyPrice1] == $ceil) $vo->row[$vo->volume] += $vo->row[$vo->buyVolume1];
+						}
+						if($j==20) continue;
+						if($j==21) $vo->row[$vo->open] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==22) $vo->row[$vo->high] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==23) $vo->row[$vo->low] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						//if($j==24) $vo->row[$vo->buyVolumeF] = $this->toVolume10( $td->childNodes->item(0)->textContent );
+						if($j==25) continue;
+					}
+					//$vo->row[$vo->stockDate] = $date;
+					$vo->row[$vo->market] = $market;
+					if($vo->row[$vo->open] == null) $vo->row[$vo->open] = $vo->row[$vo->ref];
+					if($vo->row[$vo->high] == null) $vo->row[$vo->high] = $vo->row[$vo->ref];
+					if($vo->row[$vo->low] == null) $vo->row[$vo->low] = $vo->row[$vo->ref];
+					if($vo->row[$vo->close] == null) $vo->row[$vo->close] = $vo->row[$vo->ref];
+					if($vo->row[$vo->sellPrice1] == "ATO" || $vo->row[$vo->sellPrice1] == "ATC") $vo->row[$vo->sellPrice1] = $vo->row[$vo->close];
+					if($vo->row[$vo->buyPrice1] == "ATO" || $vo->row[$vo->buyPrice1] == "ATC") $vo->row[$vo->buyPrice1] = $vo->row[$vo->close];
+					$rowPriceLiveMap[$symbol] = $vo->row;
+				}
+			}
+
+			//////////////////////////////
+			$market = "ha";
+			$httpClient = new Zend_Http_Client('http://priceboard.fpts.com.vn/HA4/VN/get.asp?a=1');
+			$httpClient->setHeaders(array(
+				'Accept'=>'application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5',
+				'Accept-Charset'=>'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+				'Accept-Encoding'=>'gzip,deflate,sdch',
+				'Accept-Language'=>'en-US,en;q=0.8',
+				'Cache-Control'=>'max-age=0',
+				'Connection'=>'keep-alive',
+				'Host'=>'priceboard.fpts.com.vn',
+				'User-Agent'=>'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.237 Safari/534.10'
+			));
+			$html = $httpClient->request('GET')->getBody();
+			$html = str_replace("&nbsp;", '', $html);
+			$html = '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/></head><body>'.$html.'</body></html>';
+			
+			$doc = new DOMDocument();
+			$old_E = error_reporting(E_ERROR);			
+			$doc->loadHTML($html);
+			error_reporting($old_E);
+			
+			//index
+			$vo->newRow();
+			$symbol = "HAINDEX";
+			$this->date = $this->toDate( $doc->getElementById("FPTSDateHA")->childNodes->item(0)->childNodes->item(1)->nodeValue );
+			//$vo->row[$vo->stockDate] = $date;
+			$vo->row[$vo->close] = $this->toPrice( $doc->getElementById("tdMHA1")->nodeValue );
+			$vo->row[$vo->open] = $vo->row[$vo->close] - $this->toPrice( $doc->getElementById("tdMHA2")->nodeValue );
+			$vo->row[$vo->volume] = $this->toVolume( $doc->getElementById("tdMHA4")->nodeValue );
+			if($vo->row[$vo->close] >= $vo->row[$vo->open]){
+				$vo->row[$vo->high] = $vo->row[$vo->close];
+				$vo->row[$vo->low] = $vo->row[$vo->open];
+			} else {
+				$vo->row[$vo->high] = $vo->row[$vo->open];
+				$vo->row[$vo->low] = $vo->row[$vo->close];
+			}
+			$vo->row[$vo->ref] = $vo->row[$vo->open];
+			$vo->row[$vo->market] = $market;
+			$rowPriceLiveMap[$symbol] = $vo->row;
+			
+			//each stock
+			$trNodes = $doc->getElementById("FPTSQuote")->childNodes;
+			foreach($trNodes as $i=> $tr){
+				if( $tr->getAttribute("class") == "row" ){
+					$tdNodes = $tr->childNodes;
+					$vo->newRow();
+					foreach($tdNodes as $j=> $td){
+						if($j==0) $symbol = $td->childNodes->item(0)->textContent;
+						if($j==1) $ceil = $this->toPrice( $td->childNodes->item(0)->textContent );
+						//if($j==2) $vo->row[$vo->floor] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==3) $vo->row[$vo->ref] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						
+						//if($j==4) $vo->row[$vo->buyPrice3] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						//if($j==5) $vo->row[$vo->buyVolume3] = $this->toVolume( $td->childNodes->item(0)->textContent );
+						if($j==6) $vo->row[$vo->buyPrice2] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==7) $vo->row[$vo->buyVolume2] = $this->toVolume( $td->childNodes->item(0)->textContent );
+						if($j==8) $vo->row[$vo->buyPrice1] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==9) $vo->row[$vo->buyVolume1] = $this->toVolume( $td->childNodes->item(0)->textContent );
+						
+						if($j==10) $vo->row[$vo->close] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==11) $vo->row[$vo->volume0] = $this->toVolume( $td->childNodes->item(0)->textContent );
+						if($j==12) continue;
+						if($j==13) $vo->row[$vo->sellPrice1] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==14) $vo->row[$vo->sellVolume1] = $this->toVolume( $td->childNodes->item(0)->textContent );
+						if($j==15) $vo->row[$vo->sellPrice2] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==16) $vo->row[$vo->sellVolume2] = $this->toVolume( $td->childNodes->item(0)->textContent );
+						//if($j==17) $vo->row[$vo->sellPrice3] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						//if($j==18) $vo->row[$vo->sellVolume3] = $this->toVolume( $td->childNodes->item(0)->textContent );
+						
+						if($j==19) {
+							$vo->row[$vo->volume] = $this->toVolume( $td->childNodes->item(0)->textContent );
+							if($vo->row[$vo->buyPrice1] == $ceil) $vo->row[$vo->volume] += $vo->row[$vo->buyVolume1];
+						}
+						//if($j==20) $vo->row[$vo->average] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==21) $vo->row[$vo->open] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==22) $vo->row[$vo->high] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						if($j==23) $vo->row[$vo->low] = $this->toPrice( $td->childNodes->item(0)->textContent );
+						//if($j==24) $vo->row[$vo->buyVolumeF] = $this->toVolume( $td->childNodes->item(0)->textContent );
+						//if($j==25) $vo->row[$vo->sellVolumeF] = $this->toVolume( $td->childNodes->item(0)->textContent );
+					}
+					//$vo->row[$vo->stockDate] = $date;
+					$vo->row[$vo->market] = $market;
+					if($vo->row[$vo->open] == null) $vo->row[$vo->open] = $vo->row[$vo->ref];
+					if($vo->row[$vo->high] == null) $vo->row[$vo->high] = $vo->row[$vo->ref];
+					if($vo->row[$vo->low] == null) $vo->row[$vo->low] = $vo->row[$vo->ref];
+					if($vo->row[$vo->close] == null) $vo->row[$vo->close] = $vo->row[$vo->ref];
+					if($vo->row[$vo->sellPrice1] == "ATO" || $vo->row[$vo->sellPrice1] == "ATC") $vo->row[$vo->sellPrice1] = $vo->row[$vo->close];
+					if($vo->row[$vo->buyPrice1] == "ATO" || $vo->row[$vo->buyPrice1] == "ATC") $vo->row[$vo->buyPrice1] = $vo->row[$vo->close];
+					$rowPriceLiveMap[$symbol] = $vo->row;
+				}
+			}
+			if(count($rowPriceLiveMap)==0 || $rowPriceLiveMap["HAINDEX"][$vo->volume]==0){
+				$rowPriceLiveMap=$this->obJfile->load("stock_ViewPrice/rowPriceLiveMap");
+			}else{
+				$this->saveRowPriceLiveMap( $rowPriceLiveMap );
+			}
+		//} catch (Exception $ex){
+		//	$rowPriceLiveMap=$this->obJfile->load("stock_ViewPrice/rowPriceLiveMap");
+		//}
+		
+		$runtime = microtime(true) - $runtime;
+		//return $runtime;
+		return $rowPriceLiveMap;
+//@>
+	}
+	
+	protected $importDir = 'WEB-INF/files/stock/metastock/';
+	protected $year = 2000;
+
+	public function getZipDir(){
+		return $this->importDir . "istock_" . $this->year . ".zip";
+	}
+	public function getHoDir(){
+		return $this->importDir . "HO_" . $this->year . ".txt";
+	}
+	public function getHaDir(){
+		return $this->importDir . "HA_" . $this->year . ".txt";
+	}
+	public function impMetastock(){
+//<@ $this->jsonp();
+		$stockA = stock_A::get();
+		$pdo = $stockA->pdo;
+		$sql = $stockA->sqlReplacePrice;
+		$stm = $pdo->prepare( $sql );
+	
+		/*
+		$runtime = microtime(true);
+		$httpClient = new Zend_Http_Client("http://www.cophieu68.com/filemetastock/hose.txt.zip");
+		$httpClient->setHeaders(array(
+			'Host'=>	'www.cophieu68.com',
+			'Accept'=>	'*'.'/'.'*',
+			'Referer'=>	'http://www.cophieu68.com/export.php',
+			'Connection'=>	'keep-alive',
+		));
+		$html = $httpClient->request('GET')->getBody();
+		$zipDir = $this->importDir . "hose.txt.zip";
+		file_put_contents($zipDir, $html);
+		if(file_exists($zipDir)){
+			$zip = new ZipArchive();
+			$res = $zip->open($zipDir);
+			$zip->extractTo($this->importDir);
+			$zip->close();
+		}
+		
+		$httpClient = new Zend_Http_Client("http://www.cophieu68.com/filemetastock/hnx.txt.zip");
+		$httpClient->setHeaders(array(
+			'Host'=>	'www.cophieu68.com',
+			'Accept'=>	'*'.'/'.'*',
+			'Referer'=>	'http://www.cophieu68.com/export.php',
+			'Connection'=>	'keep-alive',
+		));
+		$html = $httpClient->request('GET')->getBody();
+		$zipDir = $this->importDir . "hnx.txt.zip";
+		file_put_contents($zipDir, $html);
+		if(file_exists($zipDir)){
+			$zip = new ZipArchive();
+			$res = $zip->open($zipDir);
+			$zip->extractTo($this->importDir);
+			$zip->close();
+		}
+		
+		$httpClient = new Zend_Http_Client("http://www.cophieu68.com/export/metastock.php?id=%5Evnindex");
+		$httpClient->setHeaders(array(
+			'Host'=>	'www.cophieu68.com',
+			'Accept'=>	'*'.'/'.'*',
+			'Referer'=>	'http://www.cophieu68.com/export.php',
+			'Connection'=>	'keep-alive',
+		));
+		$html = $httpClient->request('GET')->getBody();
+		$zipDir = $this->importDir . "vnindex.txt";
+		file_put_contents($zipDir, $html);
+		
+		$httpClient = new Zend_Http_Client("http://www.cophieu68.com/export/metastock.php?id=%5Ehastc");
+		$httpClient->setHeaders(array(
+			'Host'=>	'www.cophieu68.com',
+			'Accept'=>	'*'.'/'.'*',
+			'Referer'=>	'http://www.cophieu68.com/export.php',
+			'Connection'=>	'keep-alive',
+		));
+		$html = $httpClient->request('GET')->getBody();
+		$zipDir = $this->importDir . "hastc.txt";
+		file_put_contents($zipDir, $html);
+	
+		$dirArray = array(
+			$this->importDir . "filemetastock/hose.txt",
+			$this->importDir . "filemetastock/hnx.txt"
+			,$this->importDir . "vnindex.txt"
+			,$this->importDir . "hastc.txt"
+		);
+		foreach($dirArray as $i=>$dir){
+			if($handle = @fopen($dir, "r", 1)) {
+				fgets($handle);//omit first row
+				$line=null;
+				while (!feof($handle)) {
+					$line = trim(fgets($handle));
+					if($line=='') continue;
+
+					$vo = new stock_VoPrice();
+					
+					$array = explode(',',$line);
+					if(substr($array[1],0,4) != $this->year) continue;
+					//echo substr($array[1],0,4);
+					if($array[0] == 'VF4') $array[0] = 'VFMVF4';
+					if($array[0] == 'VF1') $array[0] = 'VFMVF1';
+					if($array[0] == 'BF1') $array[0] = 'PRUBF1';
+					if($array[0] == 'PF1') $array[0] = 'MAFPF1';
+					if($array[0] == '^HASTC') $array[0] = 'HAINDEX';
+					if($array[0] == '^VNINDEX') $array[0] = 'VNINDEX';
+
+					$vo->row[$vo->stock_symbol"] = $array[0];
+					$vo->row[$vo->stockDate"] = implode('-', array( substr($array[1],0,4), substr($array[1],4,2), substr($array[1],6,2) ) );
+					$vo->row[$vo->open"] =  $array[2];
+					$vo->row[$vo->high"] =  $array[3];
+					$vo->row[$vo->low"] =  $array[4];
+					$vo->row[$vo->close"] =  $array[5];
+					$vo->row[$vo->volume"] =  $array[6];
+					if( $i==0 || $i==2) $vo->row[$vo->market"] = "vn";
+					else if( $i==1 || $i==3) $vo->row[$vo->market"] = "ha";
+					
+					if($vo->row[$vo->close"] == "0.0" || $vo->row[$vo->close"] == "") $vo->row[$vo->close"] = $vo->row[$vo->open"];
+					if($vo->row[$vo->low"] == "0.0" || $vo->row[$vo->low"] == "") $vo->row[$vo->low"] = $vo->row[$vo->close"];
+					if($vo->row[$vo->high"] == "0.0" || $vo->row[$vo->high"] == "") $vo->row[$vo->high"] = $vo->row[$vo->close"];
+					if($vo->row[$vo->open"] == "0.0" || $vo->row[$vo->open"] == "") $vo->row[$vo->open"] = $vo->row[$vo->close"];
+					
+					$stm->execute( $vo->row );
+				}
+				fclose($handle);
+			}
+		}
+		$runtime = microtime(true) - $runtime;
+		return $runtime;
+		*/
+		
+		$runtime = microtime(true);
+		$httpClient = new Zend_Http_Client("http://www.istock.vn/GDDDownloader.aspx?id=istock_" . $this->year . ".zip");
+		$httpClient->setHeaders(array(
+			'Host'=>	'www.istock.vn',
+			'Accept'=>	'*'.'/'.'*',
+			'Referer'=>	'http://www.istock.vn/gdddownloaded.aspx',
+			'Connection'=>	'keep-alive',
+		));
+		$html = $httpClient->request('GET')->getBody();
+		file_put_contents($this->getZipDir(), $html);
+		if(file_exists($this->getZipDir())){
+			$zip = new ZipArchive();
+			$res = $zip->open($this->getZipDir());
+			$zip->extractTo($this->importDir);
+			$zip->close();
+		}
+
+		$dirArray = array($this->getHoDir(), $this->getHaDir());
+		foreach($dirArray as $i=>$dir){
+			if($handle = @fopen($dir, "r", 1)) {
+				fgets($handle);//omit first row
+				$line=null;
+				while (!feof($handle)) {
+					$line = trim(fgets($handle));
+					if($line=='') continue;
+					
+					$vo = new stock_VoPrice();
+
+					$array = explode(',',$line);
+					if($array[0] == 'VF4') $array[0] = 'VFMVF4';
+					if($array[0] == 'VF1') $array[0] = 'VFMVF1';
+					if($array[0] == 'BF1') $array[0] = 'PRUBF1';
+					if($array[0] == 'PF1') $array[0] = 'MAFPF1';
+
+					$vo->row[$vo->symbol] = $array[0];
+					$vo->row[$vo->stockDate] = implode('-', array( substr($array[2],0,4), substr($array[2],4,2), substr($array[2],6,2) ) ) . " 00:00:00";
+					//$vo->row[$vo->stockDate"] = mktime(0,0,0,substr($array[2],4,2), substr($array[2],6,2), substr($array[2],0,4));
+					$vo->row[$vo->open] =  $array[4];
+					$vo->row[$vo->high] =  $array[5];
+					$vo->row[$vo->low] =  $array[6];
+					$vo->row[$vo->close] =  $array[7];
+					$vo->row[$vo->volume] =  $array[8];
+					if( $i==0 ) $vo->row[$vo->market] = "vn";
+					else if( $i==1 ) $vo->row[$vo->market] = "ha";
+					
+					$stm->execute( $vo->row );
+					//if($stockA->rowPriceMapMap[ $vo->row[$vo->symbol"] ] == null) $stockA->rowPriceMapMap[ $vo->row[$vo->symbol"] ] = array(
+					//);
+					//$stockA->rowPriceMapMap[ $vo->row[$vo->symbol"] ] [ $vo->row[$vo->stockDate"] ] = $vo->row;
+				}
+				fclose($handle);
+			}
+		}
+		$runtime = microtime(true) - $runtime;
+		return $runtime;
+//@>
+	}
+	
+	public function saveRowPriceLiveMap($rowPriceLiveMap){
+//<@
+		$this->obJfile->save("stock_ViewPrice/rowPriceLiveMap", $rowPriceLiveMap);
+		$sql = "REPLACE INTO stock_price SET
+			symbol = :symbol,
+			stockDate = :stockDate,
+			open = :open,
+			high = :high,
+			low = :low,
+			close = :close,
+			volume = :volume,
+
+			ref = :ref
+		";
+		$vo=$this->voPrice2;
+		$stm = $this->ao->pdo->prepare($sql);
+		foreach ( $rowPriceLiveMap as $symbol => $row ){
+			$row2 = array(
+				"symbol" => $symbol,
+				"stockDate" => $this->date,
+				"open" => $row[$vo->open],
+				"high" => $row[$vo->high],
+				"low" => $row[$vo->low],
+				"close" => $row[$vo->close],
+				"volume" => $row[$vo->volume],
+
+				"ref" => $row[$vo->ref]
+			);
+			$stm->execute($row2);
+		}
+//@>
+	}
+	
+	public function saveRowPriceLiveMapMs(){
+	//<@
+		$stockA = stock_A::get();
+		$stockA->rowPriceLiveMap = jsml_A::get()->loadJson("stock/rowPriceLiveMap");
+		
+		$str = "<TICKER>,<DTYYYYMMDD>,<OPEN>,<HIGH>,<LOW>,<CLOSE>,<VOLUME>\r\n";
+		foreach ( $stockA->rowPriceLiveMap as $symbol => $row ){
+			$volume = $row["volume"];
+			if($volume == "") $row["volume"]=0;
+			$symbol = $row["symbol"];
+			if($symbol == "HAINDEX") $symbol = "HNXINDEX";
+			$str .= $symbol.",".$this->toDateMs($row["stockDate"]).",".$row["open"].",".$row["high"].",".$row["low"].",".$row["close"].",".$row["volume"]."\r\n";
+		}
+		header('Content-type: text/plain');                             
+		header('Content-Disposition: attachment; filename="ms'.date('Ymd').'.txt"');
+		echo $str;
+	//@>
+	}
+	
+	public function rpcMstock($strMstock){
+//<@ $this->json($strMstock);
+		$arrHref=array(
+			"VN30INDEX"=>"http://s.cafef.vn/Lich-su-giao-dich-VN30INDEX-1.chn",
+			"VNINDEX"=>"http://s.cafef.vn/Lich-su-giao-dich-VNINDEX-1.chn",
+			"HAINDEX"=>"http://s.cafef.vn/Lich-su-giao-dich-HNX-INDEX-1.chn"
+		);
+		foreach($arrHref as $symbol=>$href){
+			if($symbol=="VN30INDEX"||$symbol=="VNINDEX"){
+				$sql = "UPDATE stock_price SET
+					open = :open,
+					high = :high,
+					low = :low,
+					close = :close
+					WHERE symbol = :symbol AND stockDate = :stockDate
+				";
+				$stm = $this->ao->pdo->prepare($sql);
+			}
+			if($symbol=="HAINDEX"){
+				$sql = "UPDATE stock_price SET
+					high = :high,
+					low = :low,
+					close = :close
+					WHERE symbol = :symbol AND stockDate = :stockDate
+				";
+				$stm = $this->ao->pdo->prepare($sql);
+			}
+			$httpClient = new Zend_Http_Client($href);
+			$html = trim($httpClient->request('GET')->getBody());
+			$pos1=strpos($html,'<table cellpadding="2" cellspacing="0"');
+			$html = substr($html,$pos1);
+			$pos1=strpos($html,'</table>');
+			$html = substr($html,0,$pos1+9);
+			
+			$doc = new DOMDocument();
+			$old_E = error_reporting(E_ERROR);			
+			$doc->loadHTML($html);
+			error_reporting($old_E);
+			
+			
+			$tableArr = $doc->getElementsByTagName('table');
+			foreach( $tableArr as $table){
+			}
+			$trNodes = $table->childNodes;
+			foreach($trNodes as $i=> $tr){
+				$tdNodes = $tr->childNodes;
+				if($i==0 || $i==1) continue;
+				$row2 = array(
+					"symbol" => $symbol
+					//"stockDate" => $arr[1],
+					//"open" => $arr[2],
+					//"high" => $arr[3],
+					//"low" => $arr[4],
+					//"close" => $arr[5]
+				);
+				foreach($tdNodes as $j=> $td){
+					if($j==0) $row2["stockDate"] = $this->toDate(trim($td->textContent)) ;
+					if($j==2) $row2["close"] = trim($td->textContent, "\xC2\xA0");
+					
+					if($symbol=="HAINDEX"){
+						if($j==16) $row2["high"] = trim($td->textContent, "\xC2\xA0");
+						if($j==18) $row2["low"] = trim($td->textContent, "\xC2\xA0");
+					} else {
+						if($j==16) $row2["open"] = trim($td->textContent, "\xC2\xA0");
+						if($j==18) $row2["high"] = trim($td->textContent, "\xC2\xA0");
+						if($j==20) $row2["low"]  = trim($td->textContent, "\xC2\xA0");
+					}
+				}
+				//if($symbol=="HAINDEX") print_p($row2);
+				$stm->execute($row2);
+			}
+		}
+		// return;
+		if($strMstock==null||trim($strMstock)=="") {
+			return;
+		}
+		/*
+		$sql = "REPLACE stock_price SET
+			symbol = :symbol,
+			stockDate = :stockDate,
+			open = :open,
+			high = :high,
+			low = :low,
+			close = :close
+		";
+		*/
+		$sql = "UPDATE stock_price SET
+			open = :open,
+			high = :high,
+			low = :low,
+			close = :close
+			WHERE symbol = :symbol AND stockDate = :stockDate
+		";
+		$stm = $this->ao->pdo->prepare($sql);
+		$arrM=explode("\n",$strMstock);
+		foreach($arrM as $i=>$str){
+			if($i==0) continue;
+			if(strpos($str,"TICKER")>0) continue;
+			$arr=explode(",",$str);
+			//<TICKER>,<DTYYYYMMDD>,<OPEN>,<HIGH>,<LOW>,<CLOSE>,<VOL>
+			//[0] => VN30
+			//[1] => 20160119
+			//[2] => 0.00
+			//[3] => 0.00
+			//[4] => 0.00
+			//[5] => 0.00
+			//[6] => 5.4078281447693E-315
+			if($arr[0]=="VN30" || $arr[0]=="^VN30" ) $arr[0]="VN30INDEX";
+			if($arr[0]=="HNXINDEX" || $arr[0]=="HNX-INDEX") $arr[0]="HAINDEX";
+			if($arr[0]=="UPCOMINDEX") continue;
+			$arr[1]=$this->toDateFromMs($arr[1]);
+			if($arr[2]<=0.1 || $arr[3]<=0.1 || $arr[4]<=0.1 || $arr[5]<=0.1) continue;
+			$row2 = array(
+				"symbol" => $arr[0],
+				"stockDate" => $arr[1],
+				"open" => $arr[2],
+				"high" => $arr[3],
+				"low" => $arr[4],
+				"close" => $arr[5]
+			);
+			//print_p($row2);break;
+			$stm->execute($row2);
+		}
+//@>
+	}
+	
+	public function expOnce(){
+	//<@
+		$runtime = microtime(true);
+		$stockA = stock_A::get();
+
+		$this->rpcPriceLive();
+		$this->saveRowPriceLiveMapMs();
+
+		$runtime = microtime(true) - $runtime;
+		return $runtime;
+	//@>
+	}
+	
+	public function toDateFromMs($str){
+		if($str==null || trim($str)=="") return null;
+		//20170130
+		return substr($str,0,4) ."-". substr($str,4,2) ."-". substr($str,6,2)." 00:00:00";
+	}
+	public function toDateMs($str){
+		if($str==null || trim($str)=="") return null;
+		return substr($str,0,4) . substr($str,5,2) . substr($str,8,2);
+	}
+	
+	public function toDate($str){
+		if($str==null || trim($str)=="") return null;
+		
+		$arr = explode("/", $str);
+		$arr2 = array();
+		$arr2[0] = $arr[2];
+		$arr2[1] = substr("0".$arr[1], -2);
+		$arr2[2] = substr("0".$arr[0], -2);
+		$str = implode("-", $arr2);
+		return $str . " 00:00:00";
+		
+		
+		//$arr = explode("/", $str);
+		//return mktime(0,0,0,$arr[1],$arr[0],$arr[2]);
+	}
+	
+	public function toPrice($str){
+		if($str==null || trim($str)=="") return null;
+		$str=str_replace(",","",$str);
+		return doubleval($str);
+	}
+	
+	public function toNoNbsp($str){
+		$str=str_replace("&nbsp;","",$str);
+		return trim($str);
+	}
+	
+	public function toVolume($str){
+		if($str==null || trim($str)=="") return null;
+		$str = str_replace(",", "", $str);
+		return doubleval($str);
+	}
+	
+	public function toVolume10($str){
+		if($str==null || trim($str)=="") return null;
+		$str = str_replace(",", "", $str);
+		return 10*doubleval($str);
+	}
+}

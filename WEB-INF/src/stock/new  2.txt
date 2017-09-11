@@ -1,0 +1,23 @@
+if($i<=1000){
+					if($j==$this->intervalArr[0]-1 || $j==$this->intervalArr[1]-1 || $j==$this->intervalArr[2]-1 || $j==$this->intervalArr[3]-1){
+						$close=1.00*$rowPriceArr[$i][$vo->close];
+						if($i==0) $close=1.03*$rowPriceArr[$i][$vo->close];
+						$maC0=$maC/($j+1);
+						$maC0=round(100*($close-$maC0)/$maC0);
+						if($maC0<0) $re[$i][$voRe->status]="less";
+					}
+				}
+				
+				if($i<=1000 && $j==6){
+					$close=1.00*$rowPriceArr[$i][$vo->close];
+					if($i==0) $close=1.03*$rowPriceArr[$i][$vo->close];
+					
+					if($re[$i][$voRe->status]=="great" && $close >= $max){
+						$re[$i][$voRe->status]="greatAll";
+					}
+					////if($i==0) 
+					///////////$close=1.04*$rowPriceArr[$i][$vo->close];
+					if($re[$i+1][$voRe->status]!="greatF" && $re[$i+1][$voRe->status]!="greatAll" && $re[$i][$voRe->status]=="greatAll" && $close >= $max){
+						$re[$i][$voRe->status]="greatF";
+					}
+				}

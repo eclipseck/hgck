@@ -1,0 +1,170 @@
+<?php
+class stock_ObDs{
+	public $pdo;
+	public function con() {
+//<@
+		//if( $_SERVER["SERVER_NAME"] == "cophieunong.tk" ){
+		if( $_SERVER["SERVER_ADDR"] == "93.185.104.29" ){//pipni
+			$this->pdo = new PDO(
+				"mysql:host=sql19.pipni.cz;dbname=ck_cophieunong_tk",
+				"ck.cophieunong.tk","ck",
+			array(
+			PDO::ATTR_PERSISTENT => false
+			,PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION
+			,PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+			)
+			);
+		} else if( strpos($_SERVER["SERVER_NAME"], ".aws.af.cm") > 0 ){//appfog
+			$this->pdo = new PDO(
+				"mysql:host=10.0.62.24;dbname=d1ec12429fcb944449c14a2c7046bc182",
+				"uH9WPgqP9Ipvs","pW70KqGXgdLf5",
+			array(
+			PDO::ATTR_PERSISTENT => false
+			,PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION
+			,PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+			)
+			);
+		} else if( strpos($_SERVER["SERVER_NAME"], ".hp.af.cm") > 0 ){//appfog
+			$this->pdo = new PDO(
+				"mysql:host=10.7.187.104;dbname=ddf13f09ec6c84c21bdaaf9a5ee5ce492",
+				"uNDyNF8L1jZSM","p2xbMoPib65he",
+			array(
+			PDO::ATTR_PERSISTENT => false
+			,PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION
+			,PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+			)
+			);
+		}
+		else if( $_SERVER["SERVER_NAME"] == "cophieunong.com" ){
+			$this->pdo = new PDO(
+				"mysql:host=localhost;dbname=cophieun_ck;charset=UTF-8",
+				"cophieun_ck","ck",
+			array(
+			PDO::ATTR_PERSISTENT => false
+			,PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION
+			,PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+			)
+			);
+		} else if( $_SERVER["SERVER_NAME"] == "cophieunong.vncty.com" ){
+			$this->pdo = new PDO(
+				"mysql:host=localhost;dbname=cophieun_ck;charset=UTF-8",
+				"cophieun_ck","ck12345",
+			array(
+			PDO::ATTR_PERSISTENT => false
+			,PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION
+			,PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+			)
+			);
+		} else if( $_SERVER["SERVER_NAME"] == "ck.vnns.info" ){
+			$this->pdo = new PDO(
+				"mysql:host=localhost;dbname=ckvnnsin_ck;charset=UTF-8",
+				"ckvnnsin_ck","ck12345",
+			array(
+			PDO::ATTR_PERSISTENT => false
+			,PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION
+			,PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+			)
+			);
+		} else if( $_SERVER["SERVER_ADDR"] == "31.170.160.102" ){//000web
+			$this->pdo = new PDO(
+				"mysql:host=mysql12.000webhost.com;dbname=a6823594_ck;charset=UTF-8",
+				"a6823594_ck","ck12345",
+			array(
+			PDO::ATTR_PERSISTENT => false
+			,PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION
+			,PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+			)
+			);
+		} else if( $_SERVER["SERVER_NAME"] == "ck-hotstock.rhcloud.com" ){
+			$this->pdo = new PDO(
+				"mysql:host=127.12.205.2;dbname=ck",
+				"adminZUNJDgx","hrWLCT5VhClz",
+			array(
+			PDO::ATTR_PERSISTENT => false
+			,PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION
+			,PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+			)
+			);
+		}  else if( $_SERVER["SERVER_ADDR"] == "31.170.165.111" ){//hostinger vn
+			$this->pdo = new PDO(
+				"mysql:host=localhost;dbname=u611999872_ck",
+				"u611999872_ck","ck12345",
+			array(
+			PDO::ATTR_PERSISTENT => false
+			,PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION
+			,PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+			)
+			);
+		}
+		else if( $_SERVER["SERVER_NAME"] == "hgck.000webhostapp.com" ){
+			$this->pdo = new PDO(
+				"mysql:host=localhost;dbname=id2712292_ck",
+				"id2712292_ck","ck12345",
+			array(
+			PDO::ATTR_PERSISTENT => false
+			,PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION
+			,PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+			)
+			);
+		}
+		else if( $_SERVER["SERVER_NAME"] == "ck.16mb.com" ){
+			$this->pdo = new PDO(
+				"mysql:host=localhost;dbname=u622823776_ck",
+				"u622823776_ck","ck12345",
+			array(
+			PDO::ATTR_PERSISTENT => false
+			,PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION
+			,PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+			)
+			);
+		}
+		else if( $_SERVER["SERVER_NAME"] == "hgck-hgck.193b.starter-ca-central-1.openshiftapps.com" ){//
+			$this->pdo = new PDO(
+				"mysql:host=172.30.204.124;dbname=ck",
+				"ck","ck12345",
+			array(
+			PDO::ATTR_PERSISTENT => false
+			,PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION
+			,PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+			)
+			);
+		}
+		else if( $_SERVER["SERVER_NAME"] == "hgck-hgck.a3c1.starter-us-west-1.openshiftapps.com" ){//
+			$this->pdo = new PDO(
+				"mysql:host=172.30.205.144;dbname=ck",
+				"ck","ck12345",
+			array(
+			PDO::ATTR_PERSISTENT => false
+			,PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION
+			,PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+			)
+			);
+		}
+		else {
+			$this->pdo = new PDO(
+				"mysql:host=localhost;dbname=ck;charset=UTF-8",
+				"ck","ck",
+			array(
+			PDO::ATTR_PERSISTENT => false
+			,PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION
+			,PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+			)
+			);
+		}
+//@>
+		return $this;
+	}
+	public function pdoAppfog(){
+//<@
+		return new PDO(
+				"mysql:host=10.0.62.24;dbname=d1ec12429fcb944449c14a2c7046bc182",
+				"uH9WPgqP9Ipvs","pW70KqGXgdLf5",
+			array(
+			PDO::ATTR_PERSISTENT => false
+			,PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION
+			,PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+			)
+		);
+//@>
+	}
+}

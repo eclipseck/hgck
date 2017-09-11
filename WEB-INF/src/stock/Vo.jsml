@@ -1,0 +1,24 @@
+<?php
+class stock_Vo{
+	public function _con($str,$strEx){
+		$this->strField=$str;
+		$strFull=$str;
+		if($strEx!="") $strFull=$str.",".$strEx;
+		$arr=explode("," ,$strFull);
+		$this->countField=count($arr);
+		foreach($arr as $i=>$val){
+			$field=trim($val);
+			//<@ eval('$this.'.$field.'='.$i.";");
+			eval('$this->'.$field.'='.$i.";");
+			//@>
+		}
+		$this->newRow();
+		return $this;
+	}
+	public function newRow(){
+		$this->row=array();
+		for($i=0;$i<$this->countField;$i++){
+			$this->row[$i]=null;
+		}
+	}
+}

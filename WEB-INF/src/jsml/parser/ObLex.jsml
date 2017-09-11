@@ -1,0 +1,729 @@
+<?php
+import("jsml_parser_VoLex");
+class jsml_parser_ObLex{
+	protected static $obj;
+	public static function get(){if(self::$obj == null){self::$obj = new self();self::$obj->con();} return self::$obj;}
+	
+	public function con(){
+		$this->vo = new jsml_parser_VoLex();
+		$this->parser = jsml_parser_ObParser::get();
+		return $this;
+	}
+	public $CONTEXT_HTML = "CONTEXT_HTML";
+	public $CONTEXT_STRING = "CONTEXT_STRING";
+	public $CONTEXT_CODE = "CONTEXT_CODE";
+	public $CONTEXT_CODE_INNER = "CONTEXT_CODE_INNER";
+	public $CONTEXT_CODE_COMMENT = "CONTEXT_CODE_COMMENT";
+	public $CONTEXT_WRITE = "CONTEXT_WRITE";
+	public $CONTEXT_TAG = "CONTEXT_TAG";
+	public $CONTEXT_CLASS = "CONTEXT_CLASS";
+	public $CONTEXT_COMMENT = "CONTEXT_COMMENT";
+
+	public $contextArray;
+	public $tokenArray;
+	public $source;
+	public $p1;
+	public $p2;
+	public $curlyClassCount;
+	public $curlyFuncCount;
+	public function open($source){
+		$this->source = $source;
+		$this->source = str_replace("\r\n", "\n", $this->source);
+		$this->source = str_replace("\r", "\n", $this->source);
+		if(substr($this->source,0,2)!="<"."?") $this->source="<"."? ?".">".$this->source;
+		$this->p1 = 0;
+		$this->p2 = -1;
+		$this->curlyClassCount = 0;
+		$this->curlyFuncCount = 0;
+		$this->contextArray = array();
+		$this->tokenArray = array();
+	}
+
+	protected function accept($retract, $type, $name=null){ 
+		$token = array(
+		"string" => substr($this->source,$this->p1,$this->p2 + $retract - $this->p1 + 1),
+		"type" => $type,
+		"name" => $name
+		);
+		$this->p1 = $this->p2 + $retract + 1;
+		return $token;
+	}
+
+	protected $keyword;
+	protected $len;
+	protected function checkKeyword($keywordArray, $isOperator = false){
+		for($i=0; $i< count($keywordArray); $i++){
+			$this->keyword = $keywordArray[$i];
+			$this->len = strlen($this->keyword);
+			if($this->keyword == substr($this->source, $this->p2, $this->len) ){
+				if($isOperator == true)return true;
+				if( $this->checkAlnum(-1) || $this->checkAlnum($this->len) ) return false;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected function checkAlnum($index){
+		$ch = substr($this->source, $this->p2 + $index, 1);
+		//<@
+		if($ch == "_" || $ch == "$" || preg_match('/[a-zA-Z0-9]/', $ch)) return true;
+		//@>
+		//@ if($ch == "_" || $ch == "$" || /[a-zA-Z0-9]/->test($ch)) return true;
+		return false;
+	}
+	protected function checkDigit($index){
+		$ch = substr($this->source, $this->p2 + $index, 1);
+		//<@
+		if(preg_match('/[0-9]/', $ch)) return true;
+		//@>
+		//@ if(/[0-9]/->test($ch)) return true;
+		return false;
+	}
+
+	public function nextToken(){
+		$vo = $this->vo;
+		if(count($this->tokenArray)>0){
+			return array_shift($this->tokenArray);
+		}
+		while(1){
+			$this->p2 ++;
+			if($this->p2 == strlen($this->source)+1){
+				array_push($this->tokenArray, array(
+				"string" => "",
+				"type" => $vo->TYPE_CODE_FINAL,
+				"name" => null
+				));
+				return $this->accept(-1, $vo->TYPE_TEXT);
+			}
+			if($this->p2 == strlen($this->source)+2){
+				return null;
+			}
+			if($this->p1 >= $this->p2) $this->p2 = $this->p1;
+			$ch = $this->source[$this->p2];
+			if($this->p2 == strlen($this->source)){
+				//return $this->accept(-1, $vo->TYPE_TEXT);
+			}
+			if(count($this->contextArray) == 0){
+				if($ch == '<'){
+					if(substr($this->source,$this->p2,2) == '<'.'?'){
+						array_push($this->contextArray,array('name'=>$this->CONTEXT_CODE, 'state'=>20000));
+						$this->p2 += 2;
+						$this->accept(0, $vo->TYPE_KEYWORD);
+					}
+				}
+				continue;
+			}
+
+			$context = &$this->contextArray[count($this->contextArray) - 1];
+			if($context['name'] == $this->CONTEXT_CODE){
+				if($ch == '"' || $ch == "'"){
+					array_push($this->contextArray, array('name'=>$this->CONTEXT_STRING, 'state'=>40000));
+				}
+			}
+
+			$context = &$this->contextArray[count($this->contextArray) - 1];
+			if($context['name']==$this->CONTEXT_STRING){
+				switch($context['state']){
+					case 40000:
+						if($ch=='"'){
+							$context['state'] = 40001;
+							$token = $this->accept(-1, $vo->TYPE_TEXT);
+							return $token;
+						}
+						else if($ch=="'"){
+							$context['state'] = 40002;
+							$token = $this->accept(-1, $vo->TYPE_TEXT);
+							return $token;
+						}
+						break;
+					case 40001:
+						if($ch=='"'){
+							array_pop($this->contextArray);
+							$token = $this->accept(0, $vo->TYPE_STRING);
+							return $token;
+						}
+						break;
+					case 40002:
+						if($ch=="'"){
+							array_pop($this->contextArray);
+							$token = $this->accept(0, $vo->TYPE_STRING);
+							return $token;
+						}
+						break;
+				}
+				continue;
+			}
+
+			$context = &$this->contextArray[count($this->contextArray) - 1];
+			if($context['name'] == $this->CONTEXT_CODE){
+				if($ch=='?'){
+					if(substr($this->source,$this->p2,2) == '?'.'>'){
+						array_push($this->contextArray, array('name'=>$this->CONTEXT_TAG, 'state'=>10000));
+					}
+				}
+			}
+
+			$context = &$this->contextArray[count($this->contextArray) - 1];
+			if($context['name'] == $this->CONTEXT_TAG){
+				switch($context['state']){
+					case 10000:
+						if($ch=='?') $context['state'] = 10001;
+						break;
+					case 10001:
+						if($ch=='>'){
+							///$context['state'] = 10002;
+							$context['state'] = 10003;
+							$token = $this->accept(-2, $vo->TYPE_TEXT);
+							$context0 = &$this->contextArray[count($this->contextArray) - 2];
+							if($context0['sub'] == $this->CONTEXT_WRITE){
+								array_push($this->tokenArray, $this->accept(-2, $vo->TYPE_WRITE_CLOSE) );
+							}
+							array_push($this->tokenArray, $this->accept(0, $vo->TYPE_CODE_CLOSE) );
+							return $token;
+						}
+						break;
+					/*
+					case 10002:
+						$context['state'] = 10003;
+						$token = $this->accept(-1, $vo->TYPE_CODE_CLOSE);
+						return $token;
+						break;
+					*/
+					case 10003:
+						if($ch=='<') $context['state'] = 10004;
+						break;
+					case 10004:
+						if($ch=='?'){
+							$context['state'] = 10005;
+							$token = $this->accept(-2, $vo->TYPE_TEXT);
+							return $token;
+						}
+						break;
+					case 10005:
+						if($ch=='='){
+							array_pop($this->contextArray);
+							$token = $this->accept(-1, $vo->TYPE_CODE_OPEN);
+							$context0 = &$this->contextArray[count($this->contextArray) - 1];
+							$context0['sub'] = $this->CONTEXT_WRITE;
+							array_push($this->tokenArray, $this->accept(0, $vo->TYPE_WRITE_OPEN) );
+							return $token;
+						}
+						else{
+							array_pop($this->contextArray);
+							$context0 = &$this->contextArray[count($this->contextArray) - 1];
+							///unset($context0['sub']);
+							$context0['sub']=null;
+							$token = $this->accept(-1, $vo->TYPE_CODE_OPEN);
+							return $token;
+						}
+						break;
+				}
+				continue;
+			}
+
+			$context = &$this->contextArray[count($this->contextArray) - 1];
+			if($context['name'] == $this->CONTEXT_CODE){
+				if($context['sub'] == $this->CONTEXT_CODE_COMMENT){
+					if($ch=="\n"){
+						array_pop($this->contextArray);
+						$token = $this->accept(0, $vo->TYPE_TEXT);
+						return $token;
+					}
+				}
+				else if($ch=='/'){
+					if(substr($this->source,$this->p2,2) == '/*' || substr($this->source,$this->p2,2) == '/@' ||
+					substr($this->source,$this->p2,2) == '//' || substr($this->source,$this->p2,4) == '//<@'){
+						array_push($this->contextArray, array('name'=>$this->CONTEXT_COMMENT, 'state'=>30000));
+					}
+				}
+				else if($ch=='@'){
+					if(substr($this->source,$this->p2,4) == '@>*/'){
+						array_push($this->contextArray, array('name'=>$this->CONTEXT_COMMENT, 'state'=>30000));
+					}
+				}
+			}
+
+			$context = &$this->contextArray[count($this->contextArray) - 1];
+			if($context['name'] == $this->CONTEXT_COMMENT){
+				switch($context['state']){
+					case 30000:
+						if($ch=='/'){
+							if($this->checkKeyword(array('/*<@'), true)){
+								$context['state'] = 30001;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								return $token;
+							}else if($this->checkKeyword(array('//<@'), true)){
+								$context['state'] = 30003;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_COMMENT));
+								array_push($this->contextArray, array('name'=>$this->CONTEXT_CODE, 'state'=>20008, 'sub'=>$this->CONTEXT_CODE_COMMENT));
+								return $token;
+							}else if($this->checkKeyword(array('//@'), true)){
+								$context['state'] = 30004;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_COMMENT));
+								array_push($this->contextArray, array('name'=>$this->CONTEXT_CODE, 'state'=>20008, 'sub'=>$this->CONTEXT_CODE_COMMENT));
+								return $token;
+							}
+							else if($this->checkKeyword(array('//'), true)){
+								$context['state'] = 30001;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								return $token;
+							}
+							else if($this->checkKeyword(array('/*', '/@'), true)){
+								$context['state'] = 30002;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								return $token;
+							}
+						}
+						if($ch=="@"){
+							if($this->checkKeyword(array('@>*/'), true)){
+								$context['state'] = 30001;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								return $token;
+							}
+						}
+					case 30001:
+						if($ch=="\n"){
+							array_pop($this->contextArray);
+							$token = $this->accept(0, $vo->TYPE_COMMENT);
+							return $token;
+						}
+						break;
+					case 30002:
+						if($ch=='*'){
+							if($this->checkKeyword(array('*/'), true)){
+								array_pop($this->contextArray);
+								$token = $this->accept($this->len -1, $vo->TYPE_COMMENT);
+								return $token;
+							}
+						} else if($ch=='@'){
+							if($this->checkKeyword(array('@/'), true)){
+								array_pop($this->contextArray);
+								$token = $this->accept($this->len -1, $vo->TYPE_COMMENT);
+								return $token;
+							}
+						}
+						break;
+					case 30003:
+						if($ch=='/'){
+							if($this->checkKeyword(array('//@>'), true)){
+								array_pop($this->contextArray);
+								$token = $this->accept($this->len -1, $vo->TYPE_COMMENT);
+								return $token;
+							}
+						}
+						break;
+					case 30004:
+						//if($ch=="\n"){
+							array_pop($this->contextArray);
+							$token = $this->accept(0, $vo->TYPE_COMMENT);
+							return $token;
+						//}
+						break;
+				}
+				continue;
+			}
+
+			$context = &$this->contextArray[count($this->contextArray) - 1];
+			if($context['name'] == $this->CONTEXT_CODE){
+				$this->keyword = 0;
+				$this->len = 0;
+				if($ch=='-'){
+					if($this->checkKeyword(array('->'), true)){
+						$token = $this->accept(-1, $vo->TYPE_TEXT);
+						array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+						return $token;
+					}
+				} else if($ch==':'){
+					if($this->checkKeyword(array('::'), true)){
+						$token = $this->accept(-1, $vo->TYPE_TEXT);
+						array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+						return $token;
+					}
+				}  else if($ch=='&'){
+					if($this->checkKeyword(array('&$'), true)){
+						$token = $this->accept(-1, $vo->TYPE_TEXT);
+						array_push($this->tokenArray, $this->accept($this->len -2, $vo->TYPE_KEYWORD) );
+						return $token;
+					}
+				} else if($ch=='='){
+					if($this->checkKeyword(array('=>'), true)){
+						$token = $this->accept(-1, $vo->TYPE_TEXT);
+						array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+						return $token;
+					}
+				}
+				else if($ch=='.'){
+					if($this->checkKeyword(array('.'), true) && !$this->checkDigit(1)){
+						$token = $this->accept(-1, $vo->TYPE_TEXT);
+						array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+						return $token;
+					}
+				}
+				else if($ch=='E'){
+					if($this->checkKeyword(array('Exception'))){
+						$token = $this->accept(-1, $vo->TYPE_TEXT);
+						array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+						return $token;
+					}
+				} else if($ch=='a'){
+					if($this->checkKeyword(array('array'))){
+						array_push($this->contextArray, array('name'=>$this->CONTEXT_CODE, 'state'=>50000, 'sub'=>$this->CONTEXT_CODE_INNER));
+					}
+				}
+			}
+
+			$context = &$this->contextArray[count($this->contextArray) - 1];
+			if($context['name'] == $this->CONTEXT_CODE && $context['sub']==$this->CONTEXT_CODE_INNER){
+				$this->keyword = 0;
+				$this->len = 0;
+				switch($context['state']){
+					case 50000:
+						if($ch=='a'){
+							if($this->checkKeyword(array('array'))){
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD_OPEN) );
+								return $token;
+							}
+						} else if($ch=="("){
+							$context['state'] = 50001;
+							$context['()array'] = 1;
+						}
+						break;
+					case 50001:
+						if($ch=="("){
+							$context['()array'] ++;
+						} else if($ch==")"){
+							$context['()array'] --;
+							if($context['()array']==0){
+								array_pop($this->contextArray);
+								$token = $this->accept(0, $vo->TYPE_KEYWORD_CLOSE);
+								return $token;
+							}
+						}
+						break;
+				}
+				continue;
+			}
+
+			$context = &$this->contextArray[count($this->contextArray) - 1];
+			if($context['name'] == $this->CONTEXT_CODE){
+				$this->keyword = 0;
+				$this->len = 0;
+				switch($context['state']){
+					case 20000:
+						if($ch=='a'){
+							if($this->checkKeyword(array('abstract'))){
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+								return $token;
+							}
+						}
+						else if($ch=='r'){
+							if($this->checkKeyword(array('require_once', 'require', 'import'))){
+								$context['state'] = 20001;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+								return $token;
+							}
+						}
+						else if($ch=='i'){
+							if($this->checkKeyword(array('import'))){
+								$context['state'] = 20001;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD_OPEN) );
+								return $token;
+							}
+							else if($this->checkKeyword(array('interface'))){
+								$context['state'] = 20011;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+								return $token;
+							}
+						}
+						else if($ch=='c'){
+							if($this->checkKeyword(array('class'))){
+								$context['state'] = 20002;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+								return $token;
+							}
+						}
+						break;
+					case 20001:
+						if($ch == ';'){
+							$context['state'] = 20000;
+							return $this->accept(0, $vo->TYPE_KEYWORD_CLOSE);
+						}
+						break;
+					case 20002:
+						if($ch == '{'){
+							$context['state'] = 20003;
+							$this->curlyClassCount=0;
+							$token = $this->accept(-1, $vo->TYPE_TEXT);
+							array_push($this->tokenArray, $this->accept(0, $vo->TYPE_CLASS_OPEN));
+							return $token;
+						}
+						else if($ch=='e'){
+							if($this->checkKeyword(array('extends'))){
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+								return $token;
+							}
+						}
+						else if($ch=='i'){
+							if($this->checkKeyword(array('extends','implements'))){
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+								return $token;
+							}
+						}
+						break;
+					case 20003:
+						if($ch == '{'){
+							$this->curlyClassCount ++;
+							//$token = $this->accept($vo->TYPE_TEXT,-1);
+							//array_push($this->tokenArray, $this->accept($vo->TYPE_CSSCLASS_OPEN));
+							//return $token;
+						}
+						else if($ch == '}'){
+							if($this->curlyClassCount==0){
+								$context['state'] = 20000;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept(0, $vo->TYPE_CLASS_CLOSE));
+								return $token;
+							}
+							else{
+								$this->curlyClassCount --;
+								//$token = $this->accept($vo->TYPE_TEXT,-1);
+								//array_push($this->tokenArray, $this->accept($vo->TYPE_CSSCLASS_CLOSE));
+								//return $token;
+							}
+						}
+						else if($ch=='a'){
+							if($this->checkKeyword(array('abstract'))){
+								$context['state'] = 20013;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+								return $token;
+							}
+						}
+						else if($ch=='p'){
+							if($this->checkKeyword(array('public','private','protected'))){
+								$context['state'] = 20004;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+								return $token;
+							}
+						}
+						else if($ch=='s'){
+							if($this->checkKeyword(array('static'))){
+								$context['state'] = 20007;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+								return $token;
+							}
+						}
+						break;
+					case 20004:
+						if($ch == ';'){
+							$context['state'] = 20003;
+							return $this->accept(0, $vo->TYPE_KEYWORD, "property");
+						}
+						else if($ch=='s'){
+							if($this->checkKeyword(array('static'))){
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+								return $token;
+							}
+						}
+						else if($ch=='f'){
+							if($this->checkKeyword(array('function'))){
+								$context['state'] = 20005;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+								return $token;
+							}
+						}
+						break;
+					case 20005:
+						if($ch == '('){
+							$context['state'] = 20006;
+							$token = $this->accept(-1, $vo->TYPE_TEXT);
+							array_push($this->tokenArray, $this->accept(0, $vo->TYPE_FUNC_PARAM_OPEN));
+							return $token;
+						}
+						break;
+					case 20006:
+						if($ch == ')'){
+							$context['state'] = 20007;
+							$token = $this->accept(-1, $vo->TYPE_TEXT);
+							array_push($this->tokenArray, $this->accept(0, $vo->TYPE_FUNC_PARAM_CLOSE));
+							return $token;
+						} else if($ch=='$'){
+							$context['state'] = 20015;
+							$token = $this->accept(-1, $vo->TYPE_TEXT);
+							return $token;
+						}
+						break;
+					case 20007:
+						if($ch == '{'){
+							$context['state'] = 20008;
+							$this->curlyFuncCount=0;
+							$token = $this->accept(-1, $vo->TYPE_TEXT);
+							array_push($this->tokenArray, $this->accept(0, $vo->TYPE_FUNC_OPEN));
+							return $token;
+						}
+						break;
+					case 20008:
+						if($ch == '{'){
+							$this->curlyFuncCount ++;
+						}
+						else if($ch == '}'){
+							if($this->curlyFuncCount==0){
+								$context['state'] = 20003;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept(0, $vo->TYPE_FUNC_CLOSE));
+								return $token;
+							}
+							$this->curlyFuncCount --;
+						}
+						else if($ch=='r'){
+							if($this->checkKeyword(array('require_once', 'require'))){
+								$context['state'] = 20009;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+								return $token;
+							}
+						}
+						else if($ch=='i'){
+							if($this->checkKeyword(array('include_once', 'include'))){
+								$context['state'] = 20009;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+								return $token;
+							}
+						}
+						else if($ch=='p'){
+							if($this->checkKeyword(array('parent'))){
+								$context['state'] = 20010;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD_OPEN) );
+								return $token;
+							}
+						}
+						else if($ch=='s'){
+							if($this->checkKeyword(array('self'))){
+								//$context['state'] = 20010;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+								return $token;
+							}
+						}
+						else if($ch=='f'){
+							if($this->checkKeyword(array('foreach'))){
+								$context['state'] = 20016;
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD_OPEN) );
+								return $token;
+							}
+						}
+						else if($ch=='$'){
+							$context['state'] = 20014;
+							$token = $this->accept(-1, $vo->TYPE_TEXT);
+							return $token;
+						}
+						break;
+					case 20009:
+						if($ch == ';'){
+							$context['state'] = 20008;
+							return $this->accept(0, $vo->TYPE_TEXT);
+						}
+						break;
+					case 20010:
+						if($ch == ';'){
+							$context['state'] = 20008;
+							return $this->accept(0, $vo->TYPE_KEYWORD_CLOSE);
+						}
+						break;
+					case 20011:
+						if($ch == '{'){
+							$context['state'] = 20012;
+							$this->curlyClassCount = 0;
+							$token = $this->accept(-1, $vo->TYPE_TEXT);
+							return $token;
+						}
+						else if($ch=='e'){
+							if($this->checkKeyword(array('extends'))){
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+								return $token;
+							}
+						}
+						break;
+					case 20012:
+						if($ch == '{'){
+							$this->curlyClassCount ++;
+						}
+						else if($ch == '}'){
+							if($this->curlyClassCount==0){
+								$context['state'] = 20000;
+								return $this->accept(0, $vo->TYPE_INTERFACE);
+							}
+							$this->curlyClassCount --;
+						}
+						break;
+					case 20013:
+						if($ch == ';'){
+							$context['state'] = 20003;
+							return $this->accept(0, $vo->TYPE_FUNC_ABSTRACT);
+						}
+						break;
+
+					case 20014:
+						if(!$this->checkAlnum(1)){
+							$context['state'] = 20008;
+							$token = $this->accept(0, $vo->TYPE_VAR);
+							return $token;
+						}
+						break;
+					case 20015:
+						if(!$this->checkAlnum(1)){
+							$context['state'] = 20006;
+							$token = $this->accept(0, $vo->TYPE_PARAM_VAR);
+							return $token;
+						}
+						break;
+
+					case 20016:
+						if($ch=="("){
+							$context['state'] = 20017;
+							$context['()foreach'] = 1;
+						}
+						break;
+					case 20017:
+						if($ch=="("){
+							$context['()foreach'] ++;
+						} else if($ch==")"){
+							$context['()foreach'] --;
+							if($context['()foreach']==0){
+								$context['state'] = 20008;
+								$token = $this->accept(0, $vo->TYPE_KEYWORD_CLOSE);
+								return $token;
+							}
+						} else if($ch=='a'){
+							if($this->checkKeyword(array('as'))){
+								$token = $this->accept(-1, $vo->TYPE_TEXT);
+								array_push($this->tokenArray, $this->accept($this->len -1, $vo->TYPE_KEYWORD) );
+								return $token;
+							}
+						}
+						break;
+				}
+			}
+		}
+		return null;
+	}
+}

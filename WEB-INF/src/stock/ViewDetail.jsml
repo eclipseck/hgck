@@ -1,0 +1,722 @@
+<?php
+import("stock_Ao");
+import("stock_ViewStock");
+import("stock_ObJfile");
+import("stock_ViewChart");
+class stock_ViewDetail{
+	public function con(){
+		$this->ao=stock_Ao::get();
+		$this->viewStock=$this->ao->bean("stock_ViewStock/con");
+		$this->viewPrice=$this->ao->bean("stock_ViewPrice/con");
+		$this->viewChart=$this->ao->bean("stock_ViewChart/con");
+		$this->obJfile=$this->ao->bean("stock_ObJfile/con");
+		$this->voPrice2=$this->ao->bean("stock_VoPrice/con2");
+		$this->voPrice1=$this->ao->bean("stock_VoPrice/con1");
+		$this->voPrice=$this->ao->bean("stock_VoPrice/con");
+		
+		$this->rowPriceArrMap=array(
+		);
+		$this->isRun=1;
+		return $this;
+	}
+	public function view(){
+		if($this->jque!=null) return $this;
+		$h1=75;
+		$w1=105;
+?><!--$html-->
+<div>
+<table>
+<tr>
+	
+	<td valign="top">
+		<div id="divChart"></div>
+		
+		<div style="text-align:right; width:<?= $this->viewChart->width ?>px;">
+			
+			<button id='buttonLink' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;display:">Link</button>
+			<button id='buttonOverview' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;display:">View</button>
+			<button id='buttonCap' style="display:none;font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Cap</button>
+			<button id='buttonBack' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Back</button>
+			<select id='selectStock' style='width: 200px;height: 40px;display:none'>
+				<option selected>VN30INDEX</option>
+				<option >VNINDEX</option>
+			</select>
+			<input id='textStock' type='text' size='7' style='width: <?=$w1?>px;height: <?=$h1-4?>px'></input>
+			<button id='buttonList' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">List</button>
+			<button id='buttonCand1' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Ca2</button>
+			<button id='buttonCand' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Ca</button>
+			<button id='buttonHA'   style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;display:none">HA</button>
+			<button id='buttonVN'   style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">VN</button>
+		</div>
+		<div id="divTrade"></div>
+		<div id="divConf" style="text-align:right;">
+			<br/>
+			
+			<button id='buttonClear' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Clear</button>
+			<button id='buttonConf' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;display:">Conf</button>
+			<button id='buttonClean' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Clean</button>
+			<button id='buttonMstock' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Mstk</button>
+			<button id='buttonRun' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;color:Blue">Run</button>
+			<br/>
+		</div>
+		<div>
+			<textarea id="textConf" style="width:<?= $this->viewChart->width-0*700 ?>px;height:400px;"></textarea>
+			<br/>
+			<textarea id="textTrade" style="width:<?= 200 ?>px;height:400px;"></textarea>
+			<br/>
+			<textarea id="textMstock" style="width:<?= $this->viewChart->width ?>px;height:200px;display:none"></textarea>
+		</div>
+	</td>
+	<td><div id="divStock" style='position:relative'></div>
+	</td>
+</tr>
+</table>
+</div>
+<!--/$html--><?
+		$this->jque=que($html);
+		
+		//@ $this->divChart=$this->jque->find("#divChart")->bind("click", function($event){ $this->onclickDivChart($event); });
+		$this->viewChart->view()->jque->appendTo($this->divChart);
+		//@ $this->divStock=$this->jque->find("#divStock")->bind("click", function($event){ $this->onclickDivStock($event); });
+		//@ $this->divTrade=$this->jque->find("#divTrade")->bind("click", function($event){ $this->onclickDivTrade($event); });
+		
+		//@ $this->buttonCand=$this->jque->find("#buttonCand")->bind("click", function($event){ $this->onclickButtonCand($event); });
+		//@ $this->buttonCand1=$this->jque->find("#buttonCand1")->bind("click", function($event){ $this->onclickButtonCand1($event); });
+		//@ $this->buttonCap=$this->jque->find("#buttonCap")->bind("click", function($event){ $this->onclickButtonCap($event); });
+		//@ $this->buttonClean=$this->jque->find("#buttonClean")->bind("click", function($event){ $this->onclickButtonClean($event); });
+		//@ $this->buttonClear=$this->jque->find("#buttonClear")->bind("click", function($event){ $this->onclickButtonClear($event); });
+		//@ $this->buttonMstock=$this->jque->find("#buttonMstock")->bind("click", function($event){ $this->onclickButtonMstock($event); });
+		//@ $this->buttonBack=$this->jque->find("#buttonBack")->bind("click", function($event){ $this->onclickButtonBack($event); });
+		//@ $this->buttonList=$this->jque->find("#buttonList")->bind("click", function($event){ $this->onclickButtonList($event); });
+		//@ $this->textStock=$this->jque->find("#textStock")->bind("click", function($event){ $this->onclickTextStock($event); });
+		//@ $this->textStock->bind("blur", function($event){ $this->onblurTextStock($event); });
+		//@ $this->buttonHA=$this->jque->find("#buttonHA")->bind("click", function($event){ $this->onclickButtonHA($event); });
+		//@ $this->buttonRun=$this->jque->find("#buttonRun")->bind("click", function($event){ $this->onclickButtonRun($event); });
+		//@ $this->buttonVN=$this->jque->find("#buttonVN")->bind("click", function($event){ $this->onclickButtonVN($event); });
+		//@ $this->selectStock=$this->jque->find("#selectStock")->bind("change", function($event){ $this->onchangeSelectStock($event); });
+		
+		$this->textConf=$this->jque->find("#textConf");
+		$this->textTrade=$this->jque->find("#textTrade");
+		$this->textMstock=$this->jque->find("#textMstock");
+		$this->buttonConf=$this->jque->find("#buttonConf");
+		$this->buttonLink=$this->jque->find("#buttonLink");
+		$this->buttonOverview=$this->jque->find("#buttonOverview");
+		
+		//@ que($this)->bind("rpc.rpcBuyTrade", function($event, $result){ $this->onrpcBuyTrade($event, $result); });
+		//@ que($this)->bind("rpc.rpcSellTrade", function($event, $result){ $this->onrpcSellTrade($event, $result); });
+		//@ que($this)->bind("rpc.rpcDetail", function($event, $result){ $this->onrpcDetail($event, $result); });
+
+		//@ que($__doc)->bind("keydown", function ($event){ return $this->onkeydown($event); });
+		
+		return $this;
+	}
+	public function conPaint(){
+		return $this;
+	}
+	public function viewPaint(){
+		$this->viewChart->conPaint()->viewPaint();		
+		$this->conTrade()->viewTrade();
+		//$this->highlight();
+		return $this;
+	}
+	
+	public function conTrade(){
+		$vo=$this->viewStock->voStock;
+		$this->stockMap=$this->viewStock->stockMap;
+		if($this->stockMap[$this->symbol]==null) return $this;
+		$this->trade=$this->stockMap[$this->symbol][$vo->trade];
+		$this->live=$this->stockMap[$this->symbol][$vo->live];
+		return $this;
+	}
+	public function viewTrade(){
+		$trade=$this->trade;
+		if($trade==null) return;
+		$live=$this->live;
+		$symbol=$this->symbol;
+		$tradeKey=$symbol.$trade["date"].$trade["price"].$trade["volume"].$trade["market"];
+		if($this->tradeKey==$tradeKey) return;
+		$this->tradeKey=$tradeKey;
+		$dateArr=explode(",",$trade["date"]);
+		$priceArr=explode(",",$trade["price"]);
+		$volumeArr=explode(",",$trade["volume"]);
+		$marketArr=explode(",",$trade["market"]);
+		$buyPrice=$this->viewStock->getPrice("sellPrice1",$live);
+		if($buyPrice!=0) $buy=100*ceil($this->viewStock->buyValue/(100*$buyPrice));
+		else $buy=null;
+		$h1=75-4;
+		$w1=100;
+?><!--$html-->
+<table border="0" style="margin-left:auto;margin-right:0">
+	<tr style="display:none">
+		<td>Symbol</td>
+		<td>Date</td>
+		<td>Volume</td>
+		<td>Price</td>
+		<td>Market</td>
+		<td>&nbsp;</td>
+	</tr>
+<? for($i=0;$i<count($dateArr)-1;$i++){
+		$date=$dateArr[$i];
+		$tp=$this->ao->getTplus($date);
+		$price=$priceArr[$i];
+		$volume=$volumeArr[$i];
+		$value=round($price*$volume);
+		$valueNow=round($live["close"]*$volume);
+		$profit=$valueNow-$value;
+		$per=round(100*($live["close"]-$price)/$price,1);
+?>
+	<tr index="<?=$i?>">
+		<td><input _tag="symbol" type="text" value="<?=$symbol?>" style="width:<?=$w1*1.5?>px; height: <?=$h1?>px
+		;"/></td>
+		<td><input _tag="date" type="text" value="<?=$dateArr[$i]?>" style="width:<?=$w1*1.55?>px; height: <?=$h1?>px;"/></td>
+		<td><input _tag="volume" type="text" value="<?=$volumeArr[$i]?>" style="width:<?=$w1?>px; height: <?=$h1?>px;"/></td>
+		<td><input _tag="price" type="text" value="<?=$priceArr[$i]?>" style="width:<?=$w1?>px; height: <?=$h1?>px;"/></td>
+		<td><input _tag="market" type="text" value="<?=$marketArr[$i].$tp?>" style="width:<?=$w1?>px; height: <?=$h1?>px;"/></td>
+		<td><button _tag="buttonSell" style="font-weight: bold; width:<?=$w1*1.5?>px; height: <?=$h1+4?>px;display:">Sell</button></td>
+	</tr>
+<?
+} ?>
+	<tr>
+		<td><input _tag="symbol" type="text" value="<?=$symbol?>" style="width:<?=$w1*1.55?>px; height: <?=$h1?>px;"/></td>
+		<td><input _tag="date" type="text" value="<?=date("Y-m-d")?>" style="width:<?=$w1*1.5?>px; height: <?=$h1?>px;"/></td>
+		<td><input _tag="volume" type="text" value="<?=$buy?>" style="width:<?=$w1?>px; height: <?=$h1?>px;"/></td>
+		<td><input _tag="price" type="text" value="<?=$buyPrice?>" style="width:<?=$w1?>px; height: <?=$h1?>px;"/></td>
+		<td><input _tag="market" type="text" value="" style="width:<?=$w1?>px; height: <?=$h1?>px;"/></td>
+		<td><button _tag="buttonBuy" style="font-weight: bold; width:<?=$w1*1.5?>px; height: <?=$h1+4?>px;display:">Buy</button></td>
+	</tr>
+</table>
+<!--/$html--><?
+		$this->divTrade->html($html);
+		return $this;
+	}
+	
+	public function unload(){
+		//if($this->win!=null) $this->win->close();
+	}
+	public function rpcClear(){
+//<@ $this->json();
+		$tradeMap=$this->obJfile->load("stock_ViewStock/tradeMap");
+		foreach($tradeMap as $symbol=>$trade){
+			if($trade["market"]==","||$trade["market"]==""){
+				unset($tradeMap[$symbol]);
+			}
+		}
+		$this->obJfile->save("stock_ViewStock/tradeMap",$tradeMap);
+		//$this->obJfile->delete("stock_ViewPrice/rowPriceLiveMap");
+		//$this->obJfile->delete("stock_ViewPrice/refMap");
+		if($this->ao->canSaveAppfog()){
+			$url="http://cophieu.ap01.aws.af.cm/j.php?s=stock_ViewDetail/rpcClear";
+			$client = new Zend_Http_Client($url);
+			$paramArray=array();
+			$client->setParameterPost('paramArray', json_encode($paramArray));
+			$client->request("POST")->getBody();
+		}
+//@>
+	}
+	public function rpcMstock($strMstock){
+//<@ $this->json($strMstock);
+		$arrM=explode("\n",$strMstock);
+		foreach($arrM as $i=>$str){
+			if(strpos($str,"TICKER")>0) continue;
+			$arr=explode(",",$str);
+			print_p( $arr );break;
+		}
+//@>
+	}
+	public function rpcClean(){
+//<@ $this->json();
+		$this->obJfile->delete("stock_ViewPrice/rowPriceLiveMap");
+		//$this->obJfile->delete("stock_ViewPrice/rowFuturePriceLiveMap");
+		$this->obJfile->delete("stock_ViewPrice/refMap");
+//@>
+	}
+	public function onclickDivStock($event){
+		$target = que($event->target);
+		if($target->attr("_tag2")=="symbolLeft" || $target->attr("_tag2")=="symbolRight"){
+			$symbol=trim($target->attr("_value"));
+			$this->symbol=$symbol;
+			$this->highlight();
+			
+			if($symbol=="&nbsp;") $symbol="";
+			$selectStock = $this->selectStock;
+			//@ $selectStock->children()->each(function($i, $element){
+				if($element->value == $symbol) $selectStock->prop("selectedIndex", $i);
+			//@ });
+			$this->textStock->prop("value", "");
+			$this->buttonList->click();
+		}
+	}
+	public function onclickButtonCap($event){
+		$strConf=$this->textConf->prop("value");
+		if(confirm("Make trade Cap")){
+			$this->viewStock->rpcTradeCap($strConf);
+		}
+	}
+	public function onclickButtonClear($event){
+		if(confirm("Clear")){
+			$this->rpcClear();
+		}
+	}
+	public function onclickButtonMstock($event){
+		$str=$this->textMstock->prop("value");
+		if($this->isRun==1) $this->buttonRun->click();
+		if(confirm("Import: ".$str)){
+			$this->viewPrice->jsonOption(array("type"=>"POST"));
+			$this->viewPrice->rpcMstock($str);
+		}
+	}
+	public function onclickButtonClean($event){
+		if(confirm("Clean")){
+			$this->rpcClean();
+		}
+	}
+	public function onclickButtonBack($event){
+		$selectedIndex = $this->selectStock->prop("selectedIndex");
+		$length = $this->selectStock->prop("length");
+		$selectedIndex--;
+		if($selectedIndex==-1) $selectedIndex = $length-1;
+		else if($selectedIndex==$length) $selectedIndex = 0;
+		$this->selectStock->prop("selectedIndex", $selectedIndex);
+		$this->textStock->prop("value","");
+		$this->buttonList->click();
+	}
+	public function onclickDivChart($event){
+		$selectedIndex = $this->selectStock->prop("selectedIndex");
+		$length = $this->selectStock->prop("length");
+		$selectedIndex++;
+		if($selectedIndex==-1) $selectedIndex = $length-1;
+		else if($selectedIndex==$length) $selectedIndex = 0;
+		$this->selectStock->prop("selectedIndex", $selectedIndex);
+		$this->textStock->prop("value","");
+		$this->buttonList->click();
+	}
+	public function onclickButtonVN($event){
+		$this->textStock->prop("value","");
+		$this->divStock->find("[_tag='symbol'][_value='VN30INDEX']")->click();
+	}
+	public function onclickButtonHA($event){
+		$this->textStock->prop("value","");
+		$this->divStock->find("[_tag2='symbolRight'][_value='HAINDEX']")->click();
+	}
+	public function onclickButtonRun($event){
+		if($this->isRun==1) $this->isRun=0;
+		else $this->isRun=1;
+		if($this->isRun==1){
+			$this->buttonRun->text("Run");
+			$this->buttonRun->css("color","blue");
+			
+			$this->viewStock->restartStockMap();
+		} else {
+			$this->buttonRun->text("Stop");
+			$this->buttonRun->css("color","red");
+		}
+	}
+	public function onclickButtonCand($event){
+		if($this->ao->conf["combineDay"]==8) $this->ao->conf["combineDay"]=1;
+		else $this->ao->conf["combineDay"]=8;
+		$this->conPaint()->viewPaint();
+		$this->buttonCand->text("Ca".$this->ao->conf["combineDay"]);
+		return;
+	
+		$strConf=$this->textConf->prop("value");
+		if( strpos($strConf,'["combineDay"]=1')>0 ) { $strConf=str_replace('["combineDay"]=1','["combineDay"]=2',$strConf); $day=2; }
+		else if( strpos($strConf,'["combineDay"]=2')>0 ) { $strConf=str_replace('["combineDay"]=2','["combineDay"]=8',$strConf); $day=8; }
+		else if( strpos($strConf,'["combineDay"]=8')>0 ) { $strConf=str_replace('["combineDay"]=8','["combineDay"]=2',$strConf); $day=2; }
+		//else if( strpos($strConf,'["combineDay"]=2')>0 ) { $strConf=str_replace('["combineDay"]=2','["combineDay"]=3',$strConf); $day=3; }
+		//else if( strpos($strConf,'["combineDay"]=3')>0 ) { $strConf=str_replace('["combineDay"]=3','["combineDay"]=1',$strConf); $day=1; }
+		$this->textConf->prop("value",$strConf);
+		
+		$this->viewStock->rpcConf( $strConf );
+		
+		$this->buttonCand->text("Ca".$day);
+	}
+	public function onclickButtonCand1($event){
+		$this->ao->conf["combineDay"]=2;
+		$this->conPaint()->viewPaint();
+		$this->buttonCand->text("Ca".$this->ao->conf["combineDay"]);
+		return;
+		
+		$strConf=$this->textConf->prop("value");
+		if( strpos($strConf,'["combineDay"]=1')>0 ) { $strConf=str_replace('["combineDay"]=1','["combineDay"]=1',$strConf); $day=1; }
+		else if( strpos($strConf,'["combineDay"]=2')>0 ) { $strConf=str_replace('["combineDay"]=2','["combineDay"]=1',$strConf); $day=1; }
+		else if( strpos($strConf,'["combineDay"]=8')>0 ) { $strConf=str_replace('["combineDay"]=8','["combineDay"]=1',$strConf); $day=1; }
+		//else if( strpos($strConf,'["combineDay"]=2')>0 ) { $strConf=str_replace('["combineDay"]=2','["combineDay"]=3',$strConf); $day=3; }
+		//else if( strpos($strConf,'["combineDay"]=3')>0 ) { $strConf=str_replace('["combineDay"]=3','["combineDay"]=1',$strConf); $day=1; }
+		$this->textConf->prop("value",$strConf);
+		
+		$this->viewStock->rpcConf( $strConf );
+		
+		$this->buttonCand->text("Ca".$day);
+	}
+	public function onclickTextStock($event){
+		$this->textStock->prop("value","");
+	}
+	public function onblurTextStock($event){
+		$this->buttonList->click();
+	}
+	public function onchangeSelectStock($event){
+		$this->textStock->prop("value","");
+		$this->buttonList->click();
+	}
+	public function onclickButtonList($event){
+		$symbol = $this->textStock->prop("value")->trim()->toUpperCase();
+		if($symbol!=""){
+			//@ $this->selectStock->children()->each(function($i, $element){
+				if($element->value == $symbol) $this->selectStock->prop("selectedIndex", $i);
+			//@ });
+		}
+		
+		$this->textStock->prop("value", $symbol);
+		if($symbol=="") $symbol = $this->selectStock->prop("value");
+		if($symbol!="") $this->symbol = $symbol;
+	
+		if($symbol!=""){
+			if($this->rowPriceArrMap[$symbol]==null) {
+				$this->rowPriceArrMap[$symbol]=array();
+				$this->rpcDetail($symbol,"getAll");
+			}
+			else {
+				$live=$this->viewStock->getLivePrice($symbol);
+				if($live==null) {
+					$this->rpcDetail($symbol,"get1");
+				} else {
+					$this->symbol = $symbol;
+					$this->preloadDetail($this->symbol);
+					if(count($this->rowPriceArrMap[$symbol])>0){
+						$this->rowPriceArrMap[$symbol][0][$this->voPrice1->open]=$live[$this->voPrice2->open];
+						$this->rowPriceArrMap[$symbol][0][$this->voPrice1->high]=$live[$this->voPrice2->high];
+						$this->rowPriceArrMap[$symbol][0][$this->voPrice1->low]=$live[$this->voPrice2->low];
+						$this->rowPriceArrMap[$symbol][0][$this->voPrice1->close]=$live[$this->voPrice2->close];
+						$this->rowPriceArrMap[$symbol][0][$this->voPrice1->volume]=$live[$this->voPrice2->volume];
+						$this->conPaint()->viewPaint();
+					} else $this->rowPriceArrMap[$symbol] = null;
+				}
+			}
+		}
+		$this->highlight();
+	}
+	public function preloadDetail($symbol){
+		if($this->viewStock->stockMap!=null) {
+			$preKey=null;
+			$preKey2=null;
+			$preKey3=null;
+			foreach($this->viewStock->stockMap as $key=>$value){
+				if($preKey3==$symbol){
+					if($this->rowPriceArrMap[$preKey2]==null) {
+						$this->rowPriceArrMap[$preKey2]=array();
+						$this->rpcDetail($preKey2,"preload");
+					}
+					if($this->rowPriceArrMap[$preKey]==null) {
+						$this->rowPriceArrMap[$preKey]=array();
+						$this->rpcDetail($preKey,"preload");
+					}
+					if($this->rowPriceArrMap[$key]==null) {
+						$this->rowPriceArrMap[$key]=array();
+						$this->rpcDetail($key,"preload");
+					}
+				}
+				$preKey3=$preKey2;
+				$preKey2=$preKey;
+				$preKey=$key;
+			}
+		}
+	}
+	public function highlight(){
+		$fnum = 3;
+		//$jSymbol=$this->divStock->find("[_tag='symbol'],[_tag='symbolLeft'],[_tag='symbolRight'],[_tag='symbolLeft0'],[_tag='symbolRight0']");
+		$jSymbol=$this->divStock->find("[_tag2='symbolLeft'],[_tag2='symbolRight'],[_tag2='symbolLeft0'],[_tag2='symbolRight0']");
+		//@ $jSymbol->each(function( $i, $obj ) {
+			$jque = que($obj);
+			
+			$jque->css("backgroundColor","white");
+			$jque->css("color","black");
+			
+			if($jque->attr("_value") == $this->symbol){
+				$jque->css("backgroundColor","blue");
+				$jque->css("color","white");
+			}
+		//@ });
+		//@ $this->divStock->find("[_tag='symbol']")->each(function( $i, $obj ) {
+			$jque = que($obj);
+			if($jque->attr("_value") == $this->symbol){
+				$h=33;//33
+				$display = 20;//24;
+				//$h=16;//16;//16;//18;
+				//$display = 26;
+				$height = $h*$display;
+				$num = floor($i/$display);
+				$top = 0 - $num * $height;
+				if($num!=0) $top += $h*$fnum;
+				$this->divStock->css("top",$top);
+			}
+		//@ });
+	}
+	
+	public function onclickDivTrade($event){
+		$target = que($event->target);
+		if($target->attr("_tag")=="buttonBuy"){
+			$tr=$target->closest("tr");
+			$trade=array(
+			);
+			$trade["symbol"]=trim($tr->find('[_tag="symbol"]')->prop("value"));
+			$trade["date"]=trim($tr->find('[_tag="date"]')->prop("value"));
+			$trade["price"]=floatval(trim($tr->find('[_tag="price"]')->prop("value")));
+			$trade["volume"]=intval(trim($tr->find('[_tag="volume"]')->prop("value")));
+			$trade["market"]=trim($tr->find('[_tag="market"]')->prop("value"));
+			if(confirm("BUY ".JSON::stringify($trade))){
+				$this->rpcBuyTrade($trade);
+			}
+		}
+		else if($target->attr("_tag")=="buttonSell"){
+			$tr=$target->closest("tr");
+			$index=intval($tr->attr("index"));
+			$trade=array(
+			);
+			$trade["symbol"]=trim($tr->find('[_tag="symbol"]')->prop("value"));
+			$trade["date"]=trim($tr->find('[_tag="date"]')->prop("value"));
+			$trade["price"]=floatval(trim($tr->find('[_tag="price"]')->prop("value")));
+			$trade["volume"]=intval(trim($tr->find('[_tag="volume"]')->prop("value")));
+			$trade["market"]=trim($tr->find('[_tag="market"]')->prop("value"));
+			if(confirm("SELL ".JSON::stringify($trade))){
+				$this->rpcSellTrade($trade ,$index);
+			}
+		}
+	}
+	public function onrpcBuyTrade($event,$result){
+		$this->viewTrade($result);
+		$this->divChart->click();
+	}
+	public function rpcBuyTrade($buyTrade){
+//<@ $this->json($buyTrade);
+		$tradeMap=$this->obJfile->load("stock_ViewStock/tradeMap");
+		$symbol=$buyTrade["symbol"];
+		$trade=$this->ao->mapNoNull($tradeMap[$symbol]);
+		if($trade["market"]=="," || $trade["market"]==null){
+			$trade=array(
+			);
+		} else{
+			if($buyTrade["market"]=="") return $trade;
+		}
+		$trade["symbol"]=$symbol;
+		$trade["date"].=$buyTrade["date"].",";
+		$trade["price"].=$buyTrade["price"].",";
+		$trade["volume"].=$buyTrade["volume"].",";
+		$trade["market"].=$buyTrade["market"].",";
+		$tradeMap[$symbol]=$trade;
+		$this->obJfile->save("stock_ViewStock/tradeMap" ,$tradeMap);
+		if($this->ao->canSaveAppfog()){
+			$url="http://cophieu.ap01.aws.af.cm/j.php?s=stock_ViewDetail/rpcBuyTrade";
+			$client = new Zend_Http_Client($url);
+			$paramArray=array($buyTrade);
+			$client->setParameterPost('paramArray', json_encode($paramArray));
+			$client->request("POST")->getBody();
+		}
+		return $trade;
+//@>
+	}
+	public function onrpcSellTrade($event,$result){
+		$this->viewTrade($result);
+		$this->divChart->click();
+	}
+	public function rpcSellTrade($sellTrade,$index){
+//<@ $this->json($sellTrade,$index);
+		$tradeMap=$this->obJfile->load("stock_ViewStock/tradeMap");
+		$symbol=$sellTrade["symbol"];
+		$trade=$tradeMap[$symbol];
+		
+		$trade["symbol"]=$symbol;
+		
+		$arr=explode(",",$trade["date"]);
+		array_splice($arr,$index,1);
+		$trade["date"]=implode(",",$arr);
+		
+		$arr=explode(",",$trade["price"]);
+		array_splice($arr,$index,1);
+		$trade["price"]=implode(",",$arr);
+		
+		$arr=explode(",",$trade["volume"]);
+		array_splice($arr,$index,1);
+		$trade["volume"]=implode(",",$arr);
+		
+		$arr=explode(",",$trade["market"]);
+		array_splice($arr,$index,1);
+		$trade["market"]=implode(",",$arr);
+		
+		$tradeMap[$symbol]=$trade;
+		if(trim($trade["date"])=="" || trim($trade["date"])==",") unset($tradeMap[$symbol]);
+		$this->obJfile->save("stock_ViewStock/tradeMap" ,$tradeMap);
+		if($this->ao->canSaveAppfog()){
+			$url="http://cophieu.ap01.aws.af.cm/j.php?s=stock_ViewDetail/rpcSellTrade";
+			$client = new Zend_Http_Client($url);
+			$paramArray=array($sellTrade,$index);
+			$client->setParameterPost('paramArray', json_encode($paramArray));
+			$client->request("POST")->getBody();
+		}
+		return $trade;
+//@>
+	}
+	
+	public function onkeydown($event){
+		
+		$target = que($event->target);
+		
+		//@ $charCode = ($event->which) ? $event->which : event->keyCode
+		
+		$ch = strtoupper(chr($charCode));
+		if($charCode==13){//enter
+			//$this->buttonList->click();
+			$this->textStock->blur();
+		}
+		
+		if($event->target->tagName != "BODY") return;
+		if($ch == "N" || $charCode==39){
+			$this->divChart->click();
+			return false;
+		} else if($ch == "B" || $charCode==37){
+			$this->buttonBack->click();
+			return false;
+		} else if($ch == "1"){
+			$this->buttonVN->click();
+		} else if($ch == "2"){
+			$this->buttonHA->click();
+		} else if($ch == "3"){
+			$this->buttonHA->click();
+		} else if($ch == "4"){
+			$this->getQue("buttonALL")->click();
+		} else if($ch == "5"){
+			$this->getQue("buttonList")->click();
+		} else if($ch == "C"){
+			$this->buttonCand->click();
+		} else if($ch == "T"){
+			$this->getQue("buttonT")->click();
+		} else if($ch == "Y"){
+			$this->getQue("buttonY")->click();
+		} else if($ch == "X"){
+			if($this->enablePlus==false){
+				$this->enablePlus = true;
+				$this->getQue("divXPlus")->css("visibility", "visible");
+				$this->getQue("divYPlus")->css("visibility", "visible");
+				//$this->getQue("divYPlus")->css("width", "1000px");
+			} else{
+				$this->enablePlus = false;
+				$this->getQue("divXPlus")->css("visibility", "hidden");
+				$this->getQue("divYPlus")->css("visibility", "hidden");
+				//$this->getQue("divYPlus")->css("width", "0px");
+			}
+			if($this->enablePlus==true){
+				$this->mousemoveDivViewChart($event);
+			}
+		} else if($ch == "A" || $ch == "F"){
+			$this->divTrade->find("[_tag='buttonBuy']")->click();
+		} else if($ch == "S"){
+		} else if($ch == "D" || $ch == "H"){
+			$this->divTrade->find("[_tag='buttonSell']")->click();
+		} else if($ch == "L"){
+			$this->buttonLink->click();
+		} else if($ch == "V"){
+			$this->buttonOverview->click();
+		} else {
+			
+		}
+		
+		return true;
+	}
+	
+	public function onrpcDetail($event ,$result){
+		//$this->rowPriceArr=$result["rowPriceArr"];
+		$mode=$event["paramArr"][1];
+		if($mode=="preload") {
+			$symbol=$event["paramArr"][0];
+			$this->rowPriceArrMap[$symbol] = $result["rowPriceArr"]; 
+			return;
+		}
+		$this->symbol=$event["paramArr"][0];
+		$this->preloadDetail($this->symbol);
+		if($mode=="get1"){
+			if(count($result["rowPriceArr"])>0) $this->rowPriceArrMap[$this->symbol][0]=$result["rowPriceArr"][0];
+		} else if($mode=="getAll") $this->rowPriceArrMap[$this->symbol] = $result["rowPriceArr"]; 
+		$this->conPaint()->viewPaint();
+	}
+	public function rpcDetail($symbol,$mode){
+//<@ $this->json($symbol,$mode);
+///////////////////////////////////////////////
+		$vo=$this->voPrice1;
+		if($mode=="get1") $rowPriceArr=$this->viewStock->getRowPriceArr($vo,$symbol,1);//450
+		else if($mode=="getAll" || $mode=="preload") $rowPriceArr=$this->viewStock->getRowPriceArr($vo,$symbol,390);// 736
+		
+		$len=count($rowPriceArr);
+		for($i=0; $i<$len; $i++){
+			$rowPriceArr[$i][$vo->open] = (double)$rowPriceArr[$i][$vo->open];
+			$rowPriceArr[$i][$vo->high] = (double)$rowPriceArr[$i][$vo->high];
+			$rowPriceArr[$i][$vo->low] = (double)$rowPriceArr[$i][$vo->low];
+			$rowPriceArr[$i][$vo->close] = (double)$rowPriceArr[$i][$vo->close];
+			$rowPriceArr[$i][$vo->volume] = (int)$rowPriceArr[$i][$vo->volume];
+		}
+		$detail=array(
+			"rowPriceArr"=>$rowPriceArr
+			//,"rowPriceArrEx"=>$rowPriceArrEx
+		);
+		return $detail;
+		
+		$combineDay=$this->ao->conf["combineDay"];
+		if($this->ao->conf["combineDay"]==8) $combineDay=2;
+		$vo=$this->voPrice1;
+		if($combineDay<=2) $rowPriceArr=$this->viewStock->getRowPriceArr($vo,$symbol,540);//390
+		if($combineDay>2) $rowPriceArr=$this->viewStock->getRowPriceArr($vo,$symbol,580);//450
+		//$rowPriceExArr=$this->viewStock->makeRowPriceArr($rowPriceArr,count($rowPriceArr));
+		//$this->viewStock->indexArr=$this->obJfile->load("stock_ViewStock/indexArr");
+		
+		
+		
+		//$statMap=$this->viewStock->loadStatMap();
+		$rowPriceArrEx=array();
+		$j=0;
+		if($this->ao->conf["combineDay"]==8){
+			$row=array_shift($rowPriceArr);
+			$row[$vo->open] = (double)$row[$vo->open];
+			$row[$vo->high] = (double)$row[$vo->high];
+			$row[$vo->low] = (double)$row[$vo->low];
+			$row[$vo->close] = (double)$row[$vo->close];
+			$row[$vo->volume] = (int)$row[$vo->volume];
+		}
+		foreach($rowPriceArr as $i=>$rowPrice){
+			$rowPriceArr[$i][$vo->open] = (double)$rowPriceArr[$i][$vo->open];
+			$rowPriceArr[$i][$vo->high] = (double)$rowPriceArr[$i][$vo->high];
+			$rowPriceArr[$i][$vo->low] = (double)$rowPriceArr[$i][$vo->low];
+			$rowPriceArr[$i][$vo->close] = (double)$rowPriceArr[$i][$vo->close];
+			$rowPriceArr[$i][$vo->volume] = (int)$rowPriceArr[$i][$vo->volume];
+			
+			$mod=$i%$combineDay;
+			if($mod==0){
+				$j=$i/$combineDay;
+				$rowPriceArrEx[$j][$vo->open] = $rowPriceArr[$i][$vo->open];
+				$rowPriceArrEx[$j][$vo->high] = $rowPriceArr[$i][$vo->high];
+				$rowPriceArrEx[$j][$vo->low] = $rowPriceArr[$i][$vo->low];
+				$rowPriceArrEx[$j][$vo->close] = $rowPriceArr[$i][$vo->close];
+				$rowPriceArrEx[$j][$vo->volume] = $rowPriceArr[$i][$vo->volume];
+			} else {
+				if($rowPriceArrEx[$j][$vo->high] < $rowPriceArr[$i][$vo->high]) $rowPriceArrEx[$j][$vo->high]=$rowPriceArr[$i][$vo->high];
+				if($rowPriceArrEx[$j][$vo->low] > $rowPriceArr[$i][$vo->low]) $rowPriceArrEx[$j][$vo->low]=$rowPriceArr[$i][$vo->low];
+				$rowPriceArrEx[$j][$vo->open] = $rowPriceArr[$i][$vo->open];
+				//$rowPriceArrEx[$j][$vo->close] = $rowPriceArr[$i][$vo->close];
+				$rowPriceArrEx[$j][$vo->volume] += $rowPriceArr[$i][$vo->volume];
+			}
+			
+			//$codeFull=$rowPriceExArr[$i]["codeFull"];//$this->viewStock->getCodeFull($rowPriceArr,$i);
+			//$rowPriceArr[$i][$vo->codeFull]=$codeFull;
+			//$rowPriceArr[$i][$vo->avg]=$statMap[$codeFull]["avg"];
+			//$rowPriceArr[$i][$vo->prop]=$statMap[$codeFull]["prop"];
+			//$rowPriceArr[$i][$vo->count]=$statMap[$codeFull]["count"];
+		}
+		if($this->ao->conf["combineDay"]==8){
+			array_unshift($rowPriceArrEx,$row);
+		}
+		//fb($rowPriceArr);
+		$detail=array(
+			"rowPriceArr"=>$rowPriceArrEx
+			//,"rowPriceArrEx"=>$rowPriceArrEx
+		);
+		return $detail;
+//@>
+	}
+}

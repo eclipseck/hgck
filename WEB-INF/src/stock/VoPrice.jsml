@@ -1,0 +1,95 @@
+<?php
+import("stock_Vo");
+class stock_VoPrice extends stock_Vo{
+	/*
+	public function _con($str,$strEx){
+		$this->strField=$str;
+		$strFull=$str;
+		if($strEx!="") $strFull=$str.",".$strEx;
+		$arr=explode("," ,$strFull);
+		foreach($arr as $i=>$val){
+			$field=trim($val);
+			//<@ eval('$this.'.$field.'='.$i.";");
+			eval('$this->'.$field.'='.$i.";");
+			//@>
+		}
+		return $this;
+	}
+	*/
+	public function con(){
+		return $this->_con("symbol,stockDate,open,high,low,close,volume,ref","");
+	}
+	public function con1(){
+		//return $this->_con("symbol,stockDate,open,high,low,close,volume,ref","codeFull,avg,prop,count");
+		return $this->_con("open,high,low,close,volume","");
+	}
+	public function con2(){
+		//return $this->_con("symbol,stockDate,open,high,low,close,volume,ref,market,volume0,ceil,floor,buyPrice3,buyVolume3,buyPrice2,buyVolume2,buyPrice1,buyVolume1,sellPrice1,sellVolume1,sellPrice2,sellVolume2,sellPrice3,sellVolume3,buyVolumeP,sellVolumeP,average,buyVolumeF,sellVolumeF","");
+		return $this->_con("open,high,low,close,volume,ref,market,volume0,buyPrice1,buyVolume1,sellPrice1,sellVolume1","");
+	}
+	public function con3(){
+		return $this->_con("close,volume","");
+	}
+	/*
+	public $symbol=0;
+	public $stockDate=1;
+	public $open=2;
+	public $high=3;
+	public $low=4;
+	public $close=5;
+	public $volume=6;
+	public $ref=7;
+	
+	public $market=8;
+	public $volume0=9;
+	public $ceil=10;
+	public $floor=11;
+	public $buyPrice3=12;
+	public $buyVolume3=13;
+	public $buyPrice2=14;
+	public $buyVolume2=15;
+	public $buyPrice1=16;
+	public $buyVolume1=17;
+	public $sellPrice1=18;
+	public $sellVolume1=19;
+	public $sellPrice2=20;
+	public $sellVolume2=21;
+	public $sellPrice3=22;
+	public $sellVolume3=23;
+	public $buyVolumeP=24;
+	public $sellVolumeP=25;
+	public $average=26;
+	public $buyVolumeF=27;
+	public $sellVolumeF=28;
+	*/	
+	public $row = array();//array(null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null);
+	
+	public function getValue(){
+		return $this->row["volume"]*$this->row["close"];
+	}
+	public function getLiveValue(){
+		
+		if( ($this->row["sellVolume1"] == null || trim($this->row["sellVolume1"]) == "" )&& 
+			$this->row["buyVolume1"] != null && trim($this->row["buyVolume1"]) != ""
+		) {
+			return $this->row["volume"]*$this->row["close"] + $this->row["buyVolume1"]*$this->row["buyPrice1"];
+		}
+		
+		return $this->row["volume"]*$this->row["close"];
+	}
+	public function getVal(){
+		if($this->row["volume0"]==null) return 0;
+		return $this->row["volume0"]*$this->row["close"];
+	}
+	public function getClosePer(){
+		if($this->row["ref"] == 0) return 0;
+		return 100 * ( $this->getSellPrice() - $this->row["ref"] ) / $this->row["ref"];
+	}
+	public function getSellPrice(){
+		if($this->row["sellPrice1"] == null) return $this->row["close"];
+		return $this->row["sellPrice1"];
+	}
+	public function getLiveVolume(){
+		return 1.0*$this->row["volume"];
+	}
+}

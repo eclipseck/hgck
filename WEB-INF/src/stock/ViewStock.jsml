@@ -1,0 +1,2271 @@
+<?php
+import("stock_Ao");
+import("stock_ObJfile");
+import("stock_ViewPrice");
+import("stock_ViewDetail");
+import("stock_ViewTrade");
+import("stock_VoPrice");
+class stock_ViewStock{
+	public function con(){
+		$this->ao=stock_Ao::get();
+		$this->obJfile=$this->ao->bean("stock_ObJfile/con");
+		$this->viewPrice=$this->ao->bean("stock_ViewPrice/con");
+		$this->viewDetail=$this->ao->bean("stock_ViewDetail/con");
+		$this->viewChart=$this->ao->bean("stock_ViewChart/con");
+		$this->viewTrade=$this->ao->bean("stock_ViewTrade/con");
+		$this->voPrice=$this->ao->bean("stock_VoPrice/con");
+		$this->voPrice2=$this->ao->bean("stock_VoPrice/con2");
+		$this->voPrice3=$this->ao->bean("stock_VoPrice/con3");
+		$this->voStock=get(new stock_Vo())->_con("rate,value2,trade,live,perHigh,minC1,maxC1","");//7
+		
+		$this->voRowPriceArr=get(new stock_Vo())->_con("value2,code,minC1,maxC1,minC2,maxC2,perHigh,maPerC1,maPerC2,maC1,maC2,maC3,maC4,dev,status,status0,min,imin,max,imax,delta,minMax","");
+		$this->voStat=get(new stock_Vo())->_con("total,avg","");
+		
+		
+		$this->capital=1000000000;
+		$this->fnum=30;
+		$this->countMax=10;
+		$this->incTest=20;
+		$this->minTradeChart=0.5;
+		$this->maxTradeChart=2.5;
+		$this->buyValue=$this->capital/($this->fnum*1000);
+		$this->dayback=0*180;
+		
+		$this->firstRun=true;
+		
+		//$this->intervalArr = array(10,30,60,60);
+		//$this->intervalArr = array(5,15,60,60);
+		//$this->intervalArr = array(8,15,26,40);
+		$this->intervalArr = array(8,21,34,55);//5 8 13 21 34 55 89
+		//$this->percentArr = array(30,70,100,100);
+		$this->percentArr = array(20,50,80,100);
+		$this->valueOff=500000;
+		$this->stockMap=array(
+		);
+		$this->_stockMap=array(
+		);
+		$this->indexArr=array();
+		$this->hrefMap=array(
+		);
+//<@	
+		$this->makeConf($this->loadConf());
+//@>		
+		return $this;
+	}
+	public function view(){
+		if($this->jque!=null) return $this;
+?><!--$html-->
+<div>
+<div id="divNav" style="display:none;">
+	<button value="stock">Stock</button>
+	<button value="detail">Detail</button><br/>
+</div>
+<div id="divStock" style="display:none;">
+</div>
+<div id="divDetail" style="display:;">
+</div>
+<!--/$html--><?
+		$this->jque=que($html)->appendTo("body");
+		$this->divStock=$this->jque->find("#divStock");
+		
+		$this->divDetail=$this->jque->find("#divDetail");
+		$this->viewDetail->view()->jque->appendTo($this->divDetail);
+		
+		$this->divNav=$this->jque->find("#divNav");
+		
+		//@ $this->divStock->bind("click", function($event){ $this->onclickDivStock($event); });
+		//@ $this->divNav->bind("click", function($event){ $this->onclickDivNav($event); });
+		//@ que($this)->bind("rpc.rpcStockMap", function($event, $result){ $this->onrpcStockMap($event, $result); });
+		//@ que($this)->bind("rpc.rpcTradeCap", function($event, $result){ $this->onrpcTradeCap($event, $result); });
+		//@ que($this)->bind("rpc.rpcCon", function($event, $result){ $this->onrpcCon($event, $result); });
+		$this->rpcStockMap();
+		$this->rpcCon();
+		$this->viewDetail->buttonList->click();
+		//@ que($this)->bind("rpc.rpcConf", function($event, $result){ $this->onrpcConf($event, $result); });
+		//@ que($this)->bind("rpc.rpcTradeCap2", function($event, $result){ $this->onrpcTradeCap2($event, $result); });
+		//@ $this->viewDetail->buttonConf->bind("click", function($event){ $this->onclickButtonConf($event); });
+		//@ $this->viewDetail->buttonLink->bind("click", function($event){ $this->onclickButtonLink($event); });
+		//@ $this->viewDetail->buttonOverview->bind("click", function($event){ $this->onclickButtonOverview($event); });
+
+		//@ setInterval(function(){
+			if($this->viewDetail->isRun==0) return;
+			if($this->stockMapTime!=null){
+				$time=round((new Date() - $this->stockMapTime)/1000 ,0);
+				$__doc->title = $time."+".$this->stockMapTitle;
+				if($time>=25) {
+					$__doc->title="Reload";
+					//$this->stockMapTime=null;
+					//$this->xhrStockMap->abort();
+					//$this->rpcStockMap();
+					$this->restartStockMap();
+				}
+				
+				$str="<span style='background-color:blue;color:white;'>".$time."</span>";
+				$this->divStock->find("[_tag='volume0']")->html($str);
+				$this->viewDetail->divStock->find("[_tag='volume0']")->html($str);
+			}
+		//@ },1000);
+		return $this;
+	}
+	
+	public function rpcCon(){
+//<@ $this->json();
+		$re["strConf"]=$this->loadConf();
+		$re["tradeMap"]=$this->obJfile->loadStr("stock_ViewStock/tradeMap");
+		/*$re["tradeFullMap"]=array(
+			"capMap"=>$this->obJfile->load("stock_ViewTrade/capMap")
+			,"indexArr"=>$this->obJfile->load("stock_ViewTrade/indexArr")
+		);*/
+		$re["hrefMap"]=$this->obJfile->load("stock_ViewStock/hrefMap");
+		return $re;
+//@>
+	}
+	public function onrpcCon($event,$result){
+		$strConf=$result["strConf"];
+		$this->viewDetail->textConf->prop("value",$strConf);
+		$this->makeConf($strConf);
+		
+		$this->viewDetail->textTrade->prop("value",$result["tradeMap"]);
+		
+		//$this->tradeFullMap=$result["tradeFullMap"];
+		$this->hrefMap=$result["hrefMap"];
+	}
+	
+	public function onclickButtonOverview($event){
+		$symbol=$this->viewDetail->symbol;
+		if($this->ao->isNullEmpty($symbol)) return;
+		$href = $this->hrefMap[$symbol];
+		if($href == null) $href = "http://cafef.vn";
+		$this->winOverview = $__window->open($href,"__aOverview");
+	}
+	public function onclickButtonLink($event){
+		$symbol=$this->viewDetail->symbol;
+		if($this->ao->isNullEmpty($symbol)) return;
+		if($this->winOverview == null) return;
+		setTimeout(function () {
+			if(confirm("Link:".$symbol . "|".$this->winOverview->location->href)){
+				$this->rpcHrefSave($symbol, $this->winOverview->location->href);
+				$this->hrefMap[$symbol] = $this->winOverview->location->href;
+			};
+		}, 0);
+	}
+	public function rpcHrefSave($symbol, $href){
+//<@ $this->json($symbol, $href);
+		$hrefMap = $this->obJfile->load("stock_ViewStock/hrefMap");
+		$hrefMap[$symbol] = $href;
+		$this->obJfile->save("stock_ViewStock/hrefMap", $hrefMap);
+		if($this->ao->canSaveAppfog()){
+			$url="http://cophieu.ap01.aws.af.cm/j.php?s=stock_ViewStock/rpcHrefSave";
+			$client = new Zend_Http_Client($url);
+			$paramArray=array($symbol, $href);
+			$client->setParameterPost('paramArray', json_encode($paramArray));
+			$body=$client->request("POST")->getBody();
+		}
+//@>
+	}
+	public function makeConf($strConf){
+		//$strConf=$this->viewDetail->textConf->prop("value");
+		if($strConf==null||$strConf==""){
+			return;
+		}
+		$conf=array(
+		);
+		eval($strConf);
+		$this->conf=$conf;
+		
+		$this->capital=$this->conf["capital"];
+		$this->fnum=$this->conf["fnum"];
+		//$this->countMax=$this->conf["countMax"];
+		//$this->incTest=$this->conf["incTest"];
+		//$this->minTradeChart=$this->conf["minTradeChart"];
+		//$this->maxTradeChart=$this->conf["maxTradeChart"];
+		$this->buyValue=$this->capital/($this->fnum*1000);
+		$this->dayback=$this->conf["dayback"];
+		$this->viewChart->w=$this->conf["w"];
+		
+		$this->ao->conf=$this->conf;
+		
+	}
+	
+	public function onclickButtonConf($event){
+		$strConf=$this->viewDetail->textConf->prop("value");
+		$strTradeMap=$this->viewDetail->textTrade->prop("value");
+		$map=array(
+			"strConf"=>$strConf,
+			"strTradeMap"=>$strTradeMap
+		);
+		if(confirm("SAVE: ".$strConf)){
+			$this->rpcConf( $map );
+		}
+	}
+	public function rpcConf( $map ){
+//<@ $this->json($map);
+		$strConf=$map["strConf"];
+		$strTradeMap=$map["strTradeMap"];
+		$this->obJfile->save("stock_ViewDetail/strConf",$strConf);
+		$this->obJfile->saveStr("stock_ViewStock/tradeMap",$strTradeMap);
+		$this->makeConf($this->loadConf());
+		if($this->ao->canSaveAppfog()){
+			$url="http://cophieu.ap01.aws.af.cm/j.php?s=stock_ViewStock/rpcConf";
+			//$url='http://127.0.0.1/stock/j.php?s=stock_ViewStock/rpcTradeCapAppfog';
+			$client = new Zend_Http_Client($url);
+			$paramArray=array($strConf);
+			$client->setParameterPost('paramArray', json_encode($paramArray));
+			$body=$client->request("POST")->getBody();
+		}
+		return $strConf;
+//@>
+	}
+	public function onrpcConf($event ,$result){
+		$strConf=$result;
+		$this->viewDetail->textConf->prop("value",$strConf);
+		$this->makeConf($strConf);
+		$this->viewDetail->buttonList->click();
+	}
+	public function loadConf(){
+		$strConf=$this->obJfile->load("stock_ViewDetail/strConf");
+		return $strConf;
+	}
+	
+	public function onclickDivStock($event){
+		$target = que($event->target);
+		if($target->attr("_tag2")=="symbolLeft" || $target->attr("_tag2")=="symbolRight"){
+			$this->viewDetail->onclickDivStock($event);
+			$this->divNav->find("[value='detail']")->click();
+		}
+	}
+	public function onclickDivNav($event){
+		$target = que($event->target);
+		$value=$target->val();
+		if($value=="stock"){
+			$this->divDetail->css("display","none");
+			$this->divStock->css("display","");
+		}
+		else if($value=="detail"){
+			$this->divDetail->css("display","");
+			$this->divStock->css("display","none");
+			que("body,html")->scrollLeft(-999990);
+			que("body,html")->scrollTop(0);
+		}
+	}
+	
+	public function getRowSymbolArr(){
+//<@
+		$sql = "SELECT DISTINCT symbol FROM stock_price
+		";
+		$stm = $this->ao->pdo->prepare($sql);
+		$stm->execute();
+		$rowSymbolArr = $stm->fetchAll(PDO::FETCH_NUM);
+		return $rowSymbolArr;
+//@>
+	}
+	public function getRowSymbolArrByValue(){
+//<@
+		$sql = "SELECT p2.symbol FROM stock_price p2 
+			WHERE p2.stockDate>=DATE_SUB(NOW(), INTERVAL 14 DAY) 
+			GROUP BY p2.symbol 
+			HAVING AVG(1*p2.close*p2.volume) > ".$this->valueOff."
+		";
+		//HAVING AVG(1*p2.close*p2.volume) > ".$this->valueOff." OR SYMBOL IN (".$this->ao->conf["future"].")
+		//echo $sql;
+		$stm = $this->ao->pdo->prepare($sql);
+		$stm->execute();
+		$rowSymbolArr = $stm->fetchAll(PDO::FETCH_NUM);
+		return $rowSymbolArr;
+//@>
+	}
+			
+	public function getRowPriceArr($vo, $symbol,$day=null){
+//<@	
+		if($day!=null){
+			if($this->dayback!=0) $str="AND stockDate <= DATE_SUB(NOW(), INTERVAL ".$this->dayback." DAY)";
+			else $str="";
+			$sql = "SELECT ".$vo->strField." FROM stock_price 
+			WHERE symbol = :symbol AND stockDate >= DATE_SUB(NOW(), INTERVAL ( ".$day."+".$this->dayback.") DAY)".$str."ORDER BY stockDate DESC
+			";
+		} else {
+			$sql = "SELECT ".$vo->strField." FROM stock_price 
+			WHERE symbol = :symbol AND stockDate >= '2009-01-01'
+			ORDER BY stockDate DESC
+			";
+		}
+		$stm = $this->ao->pdo->prepare($sql);
+		$stm->execute(array("symbol"=>$symbol));
+		$rowPriceArr = $stm->fetchAll(PDO::FETCH_NUM);
+		return $rowPriceArr;
+//@>
+	}
+	public function getRowPriceArrS($vo, $symbol,$day=null){
+//<@
+		if($day!=null){
+			if($this->dayback!=0) $str="AND stockDate <= DATE_SUB(NOW(), INTERVAL ".$this->dayback." DAY)";
+			else $str="";
+			$sql = "SELECT ".$vo->strField." FROM stock_price 
+			WHERE symbol = :symbol AND stockDate >= DATE_SUB(NOW(), INTERVAL ( ".$day."+".$this->dayback.") DAY)".$str."ORDER BY stockDate DESC
+			";
+		} else {
+			$sql = "SELECT ".$vo->strField." FROM stock_price 
+			WHERE symbol = :symbol AND stockDate >= '2010-01-01'
+			ORDER BY stockDate DESC
+			";
+		}
+		$stm = $this->ao->pdo->prepare($sql);
+		$stm->execute(array("symbol"=>$symbol));
+		$rowPriceArr = $stm->fetchAll(PDO::FETCH_NUM);
+		return $rowPriceArr;
+//@>
+	}
+	
+	public function makeRowPriceArr($vo, $rowPriceArr ,$limit=null){
+		//$vo=$this->voPrice;
+		$re=array();
+		$len=count($rowPriceArr);
+		for($i=0 ; $i < $len ;$i++){
+			$re[$i]=array(
+			);
+		}
+		$intervalLen=count($this->intervalArr);
+		if($limit==null) $len2=$len;
+		else $len2=$limit;
+		
+		$maGreatCount=0;
+		//for($i=0 ; $i < $len2 ;$i++){
+		for($i=$len2-1 ; $i >=0 ;$i--){
+			$re[$i]["less"]=-1;
+			if($len-$i-1<$this->intervalArr[$intervalLen-1]) continue;
+			if($this->isNull0($rowPriceArr[$i][$vo->close])) continue;
+
+			$value2=0;
+			$delta=0;
+			
+			$less=0;
+					
+			$min=999999999;$max=0;
+			$isDivide=false;
+			$codeFull="";
+			$imin=null;$imax=null;
+			$maClose=0;
+			$maCloseVol=0;
+			$maMap=array(
+			);
+			$perMap=array(
+			);
+			$gain=0; $loss=0;
+			$maGreatCount++;
+			///////$re[$i]["maGreat"]=$maGreatCount;
+			$re[$i]["maGreat"]=0;
+			for($j=$i+1; $j-$i <= $this->intervalArr[$intervalLen-1] - 1 ;$j++){
+				if($rowPriceArr[$j][$vo->close]==0) break;
+				if($rowPriceArr[$j+1][$vo->close]==0) break;
+				/*
+				if($rowPriceArr[$j][$vo->close]<$min){
+					$min=$rowPriceArr[$j][$vo->close];
+					$imin=$j;
+				}
+				if($rowPriceArr[$j][$vo->close]>$max){
+					$max=$rowPriceArr[$j][$vo->close];
+					$imax=$j;
+				}
+				*/
+				//$maClose+=$rowPriceArr[$j][$vo->close]*$rowPriceArr[$j][$vo->volume];
+				//$maCloseVol+=$rowPriceArr[$j][$vo->volume];
+				$maClose+=$rowPriceArr[$j][$vo->close];
+				$maCloseVol+=1;
+				$interval= $j - $i + 1;
+				//if($interval==1) continue;
+
+				if($interval<=$this->intervalArr[1]) {
+					$value2 += $rowPriceArr[$j][$vo->close]*$rowPriceArr[$j][$vo->volume];
+					if($interval==$this->intervalArr[1]){
+						$re[$i]["value2"]=round($value2/$interval,0);
+						if($re[$i]["value2"]<$this->valueOff) break;
+					}
+				}
+				
+				if($interval>=2 && $interval<=6){
+					if($rowPriceArr[$i][$vo->close]<=$rowPriceArr[$j][$vo->close]) $less++;
+					if($interval==6){
+						$re[$i]["less"]=$less;
+					}
+				}
+				/*
+				if($interval==40){
+					$re[$i]["minMax2"]=round(100*($max-$min)/$min,1);
+					$re[$i]["maxClose2"]=round(100*($max-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close],1);
+					$re[$i]["minClose2"]=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min,1);
+				}
+				if($interval==20){
+					$re[$i]["minMax1"]=round(100*($max-$min)/$min,1);
+					$re[$i]["maxClose1"]=round(100*($max-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close],1);
+					$re[$i]["minClose1"]=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min,1);
+				
+				*/
+				if($interval==10){
+					$re[$i]["maxClose0"]=round(100*($max-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close],1);
+					$re[$i]["minClose0"]=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min,1);
+				}
+				/*RSI
+				$per=100*($rowPriceArr[$j][$vo->close]-$rowPriceArr[$j+1][$vo->close])/$rowPriceArr[$j+1][$vo->close];
+				$abs=abs( $per );
+				if($abs>=15) {
+					$isDivide=true;
+					break;
+				}
+				if($per>=0){
+					$gain+=$abs;
+				} else {
+					$loss+=$abs;
+				}
+				*/
+				if($interval==$this->intervalArr[0]||$interval==$this->intervalArr[1]||$interval==$this->intervalArr[2]||$interval==$this->intervalArr[3]){
+					$maAvg=$maClose/$maCloseVol;//$interval;
+					$re[$i]["ma".$interval]=$maAvg;
+					
+					$d=($rowPriceArr[$i][$vo->close]-$maAvg)/$maAvg;
+					//if($d<0 && $interval!=$this->intervalArr[0] && $interval!=$this->intervalArr[0]) {
+					if($d>=0 && ($interval==$this->intervalArr[2] || $interval==$this->intervalArr[3]) ) {
+						////$maGreatCount=0;
+						////$re[$i]["maGreat"]=$maGreatCount;
+						$re[$i]["maGreat"]++;
+					}
+					$re[$i]["maPer".$interval]=round(100*$d,2);
+					
+					////if($loss!=0) $rsi=100-100/(1+$gain/$loss);
+					////else $rsi=100;
+					////$re[$i]["rsi".$interval]=$rsi;
+				}
+			}
+		}
+		return $re;
+	}
+	
+	public function makeRowPriceArrzzzz($vo, $rowPriceArr ,$limit=null){
+		//$vo=$this->voPrice;
+		$re=array();
+		$len=count($rowPriceArr);
+		for($i=0 ; $i < $len ;$i++){
+			$re[$i]=array(
+			);
+		}
+		$intervalLen=count($this->intervalArr);
+		if($limit==null) $len2=$len;
+		else $len2=$limit;
+		
+		$maGreatCount=0;
+		//for($i=0 ; $i < $len2 ;$i++){
+		for($i=$len2-1 ; $i >=0 ;$i--){
+			$re[$i]["less"]=-1;
+			if($len-$i-1<$this->intervalArr[$intervalLen-1]) continue;
+			if($this->isNull0($rowPriceArr[$i][$vo->close])) continue;
+
+			$value2=0;
+			$delta=0;
+			
+			$less=0;
+					
+			$min=999999999;$max=0;
+			$isDivide=false;
+			$codeFull="";
+			$imin=null;$imax=null;
+			$maClose=0;
+			$maCloseVol=0;
+			$maMap=array(
+			);
+			$perMap=array(
+			);
+			$gain=0; $loss=0;
+			$maGreatCount++;
+			///////$re[$i]["maGreat"]=$maGreatCount;
+			$re[$i]["maGreat"]=0;
+			for($j=$i+1; $j-$i <= $this->intervalArr[$intervalLen-1] - 1 ;$j++){
+				if($rowPriceArr[$j][$vo->close]==0) break;
+				if($rowPriceArr[$j+1][$vo->close]==0) break;
+				/*
+				if($rowPriceArr[$j][$vo->close]<$min){
+					$min=$rowPriceArr[$j][$vo->close];
+					$imin=$j;
+				}
+				if($rowPriceArr[$j][$vo->close]>$max){
+					$max=$rowPriceArr[$j][$vo->close];
+					$imax=$j;
+				}
+				*/
+				//$maClose+=$rowPriceArr[$j][$vo->close]*$rowPriceArr[$j][$vo->volume];
+				//$maCloseVol+=$rowPriceArr[$j][$vo->volume];
+				$maClose+=$rowPriceArr[$j][$vo->close];
+				$maCloseVol+=1;
+				$interval= $j - $i + 1;
+				//if($interval==1) continue;
+
+				if($interval<=$this->intervalArr[1]) {
+					$value2 += $rowPriceArr[$j][$vo->close]*$rowPriceArr[$j][$vo->volume];
+					if($interval==$this->intervalArr[1]){
+						$re[$i]["value2"]=round($value2/$interval,0);
+						if($re[$i]["value2"]<$this->valueOff) break;
+					}
+				}
+				
+				if($interval>=2 && $interval<=6){
+					if($rowPriceArr[$i][$vo->close]<=$rowPriceArr[$j][$vo->close]) $less++;
+					if($interval==6){
+						$re[$i]["less"]=$less;
+					}
+				}
+				/*
+				if($interval==40){
+					$re[$i]["minMax2"]=round(100*($max-$min)/$min,1);
+					$re[$i]["maxClose2"]=round(100*($max-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close],1);
+					$re[$i]["minClose2"]=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min,1);
+				}
+				if($interval==20){
+					$re[$i]["minMax1"]=round(100*($max-$min)/$min,1);
+					$re[$i]["maxClose1"]=round(100*($max-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close],1);
+					$re[$i]["minClose1"]=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min,1);
+				}
+				if($interval==10){
+					$re[$i]["minMax0"]=round(100*($max-$min)/$min,1);
+					$re[$i]["maxClose0"]=round(100*($max-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close],1);
+					$re[$i]["minClose0"]=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min,1);
+				}
+				*/
+				/*RSI
+				$per=100*($rowPriceArr[$j][$vo->close]-$rowPriceArr[$j+1][$vo->close])/$rowPriceArr[$j+1][$vo->close];
+				$abs=abs( $per );
+				if($abs>=15) {
+					$isDivide=true;
+					break;
+				}
+				if($per>=0){
+					$gain+=$abs;
+				} else {
+					$loss+=$abs;
+				}
+				*/
+				if($interval==$this->intervalArr[0]||$interval==$this->intervalArr[1]||$interval==$this->intervalArr[2]||$interval==$this->intervalArr[3]){
+					$maAvg=$maClose/$maCloseVol;//$interval;
+					$re[$i]["ma".$interval]=$maAvg;
+					
+					$d=($rowPriceArr[$i][$vo->close]-$maAvg)/$maAvg;
+					//if($d<0 && $interval!=$this->intervalArr[0] && $interval!=$this->intervalArr[0]) {
+					if($d>=0 && ($interval==$this->intervalArr[2] || $interval==$this->intervalArr[3]) ) {
+						////$maGreatCount=0;
+						////$re[$i]["maGreat"]=$maGreatCount;
+						$re[$i]["maGreat"]++;
+					}
+					$re[$i]["maPer".$interval]=round(100*$d,2);
+					
+					////if($loss!=0) $rsi=100-100/(1+$gain/$loss);
+					////else $rsi=100;
+					////$re[$i]["rsi".$interval]=$rsi;
+				}
+			}
+		}
+		return $re;
+	}
+	
+	public function makeRowPriceArr2($vo, $rowPriceArr ,$limit=null){
+		//$vo=$this->voPrice;
+		$re=array();
+		$voRe=$this->voRowPriceArr;
+		$len=count($rowPriceArr);
+		for($i=0 ; $i < $len ;$i++){
+			$re[$i]=array();
+		}
+
+		if($limit==null) $len2=$len;
+		else $len2=$limit;
+//<@
+		for($i=$len2-1 ; $i >=0 ;$i--){
+			//if($i >= $len - $this->intervalArr[3]) continue;
+			if($this->isNull0($rowPriceArr[$i][$vo->close])) continue;
+			
+			$min=999999;$max=-999999;$imin=null;$imax=null;$max0=-999999;
+			if($i==0){
+				for($j=0 ; $j < 60 ; $j++){
+					$x=$i+$j;
+					if($x>=$len) break;
+					if($this->isNull0($rowPriceArr[$x][$vo->close])) break;
+					
+					if($rowPriceArr[$x][$vo->close]<$min){
+						$min=$rowPriceArr[$x][$vo->close];
+						$imin=$x;
+					}
+					if($rowPriceArr[$x][$vo->close]>$max){
+						$max=$rowPriceArr[$x][$vo->close];
+						$imax=$x;
+					}
+					if($j<4 && $rowPriceArr[$x][$vo->high]!=null && $rowPriceArr[$x][$vo->high]>$max0){
+						$max0=$rowPriceArr[$x][$vo->high];
+					}
+					if($max>$max0) $max0=$max;
+				}
+				$re[$i][$voRe->min]=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min);
+				$re[$i][$voRe->imin]=$imin;
+				$re[$i][$voRe->max]=round(100*($max-$min)/$min);
+				$re[$i][$voRe->imax]=$imax;
+				$re[$i][$voRe->minMax]=round(100*($max-$min)/$min);
+			}
+			
+			$min=999999;$max=-999999;$imin=null;$imax=null;$maxc=0;$max0=-999999;
+			$value2=0;
+			$code="";
+			$maC=0;
+			$isCode=true;
+			$minC2=9999999;
+			$maxC2=0;
+			$delta=0;
+			$re[$i][$voRe->status]="less";
+			if($i==0) {
+				$re[$i][$voRe->status0]="less";
+				$re[$i][$voRe->code]="up";
+			}
+			for($j=0 ; $j < $this->intervalArr[3] ; $j++){
+				$x=$i+$j;
+				if($this->isNull0($rowPriceArr[$x][$vo->close])) break;
+				if($this->isNull0($rowPriceArr[$x+1][$vo->close])) break;
+				
+				if($rowPriceArr[$x][$vo->close]<$min){
+					$min=$rowPriceArr[$x][$vo->close];
+					$imin=$x;
+				}
+				if($rowPriceArr[$x][$vo->close]>$maxc){
+					$maxc=$rowPriceArr[$x][$vo->close];
+				}
+				if($rowPriceArr[$x][$vo->close]>$max){
+					$max=$rowPriceArr[$x][$vo->close];
+					$imax=$x;
+				}
+				if($j<4 && $rowPriceArr[$x][$vo->high]!=null && $rowPriceArr[$x][$vo->high]>$max0){
+					$max0=$rowPriceArr[$x][$vo->high];
+				}
+				if($max>$max0) $max0=$max;
+				
+				if($j<10) {
+					$value2 += $rowPriceArr[$j][$vo->close]*$rowPriceArr[$j][$vo->volume];
+					if($j==10-1){
+						$re[$i][$voRe->value2]=round($value2/($j+1),0);
+						if($re[$i][$voRe->value2]<$this->valueOff) break;
+					}
+				}
+
+				$per = 100*($rowPriceArr[$x][$vo->close] - $rowPriceArr[$x+1][$vo->close])/$rowPriceArr[$x+1][$vo->close];
+				if(abs($per) <= 10 )$delta += abs($per);
+				
+				$maC+=$rowPriceArr[$x+1][$vo->close];
+				
+				if($i<=1000 && $j==$this->intervalArr[0]-1){
+					$close=1.00*$rowPriceArr[$i][$vo->close];
+					
+					
+					if($close >= $maxc){
+						$re[$i][$voRe->status]="great";
+					}
+					////if($i==0) 
+					///////////$close=1.04*$rowPriceArr[$i][$vo->close];
+					if($re[$i+1][$voRe->status]!="greatF" && $re[$i+1][$voRe->status]!="great" && $re[$i][$voRe->status]=="great" && $close >= $maxc){
+						$re[$i][$voRe->status]="greatF";
+					}
+					
+					if($i==0) {
+						$close=1.03*$rowPriceArr[$i][$vo->close];///1.04
+						if($close >= $maxc){
+							$re[$i][$voRe->status0]="great";
+						}
+						////if($i==0) 
+						///////////$close=1.04*$rowPriceArr[$i][$vo->close];
+						if($re[$i+1][$voRe->status]!="greatF" && $re[$i+1][$voRe->status]!="great" && $re[$i][$voRe->status0]=="great" && $close >= $maxc){
+							$re[$i][$voRe->status0]="greatF";
+						}
+					}
+				}
+				
+				if($i<=1000){
+					if($j==$this->intervalArr[0]-1 || $j==$this->intervalArr[1]-1 || $j==$this->intervalArr[2]-1 || $j==$this->intervalArr[3]-1){
+						$close=1.00*$rowPriceArr[$i][$vo->close];
+						
+						$maC0=$maC/($j+1);
+						$maC0=round(100*($close-$maC0)/$maC0);
+						if($maC0<0) {
+							if($re[$i][$voRe->status]=="greatF")$re[$i][$voRe->status]="great";
+						}
+						
+						if($i==0) {
+							$close=1.03*$rowPriceArr[$i][$vo->close];///1.04
+							$maC0=$maC/($j+1);
+							$maC0=round(100*($close-$maC0)/$maC0);
+							if($maC0<0) {
+								if($re[$i][$voRe->status0]=="greatF")$re[$i][$voRe->status0]="great";
+							}
+						}
+						
+						if($i==0) {
+							$close=1.02*$rowPriceArr[$i][$vo->close];///1.04
+							$maC0=$maC/($j+1);
+							$maC0=round(100*($close-$maC0)/$maC0);
+							if($maC0<0) {
+								$re[$i][$voRe->code]="down";
+							}
+						}
+					}
+				}
+				
+				if($i==0 && $j==7-1){ //$j==$this->intervalArr[0]-1
+					$re[$i][$voRe->perHigh]=round(100*($max0-$rowPriceArr[$i][$vo->close])/$max0);
+				}
+				if($i==0 && $j==10-1){ //$j==$this->intervalArr[0]-1
+					//$minC=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min);
+					if($max-$min!=0) $minC=round(100*($rowPriceArr[$i][$vo->close]-$min)/($max-$min));
+					else $minC=-100;
+					//$maxC=round(100*($max-$rowPriceArr[$i][$vo->close])/$min);
+					$maxC=round(100*($max-$min)/$min);
+					$re[$i][$voRe->minC1]=$minC;
+					$re[$i][$voRe->maxC1]=$maxC;
+					
+					$re[$i][$voRe->maPerC1]=$maC/($j+1);
+					$re[$i][$voRe->maPerC1]=round(100*($rowPriceArr[$i][$vo->close]-$re[$i][$voRe->maPerC1])/$re[$i][$voRe->maPerC1]);
+				}
+				if($i==0 && $j==20-1){ //$this->intervalArr[3]
+					//$minC=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min);
+					if($max-$min!=0) $minC=round(100*($rowPriceArr[$i][$vo->close]-$min)/($max-$min));
+					else $minC=-100;
+					//$maxC=round(100*($max-$rowPriceArr[$i][$vo->close])/$min);
+					$maxC=round(100*($max-$min)/$min);
+					$re[$i][$voRe->minC2]=$minC;
+					$re[$i][$voRe->maxC2]=$maxC;
+					
+					///////$delta=$delta/($j+1);
+					////////$re[$i][$voRe->delta]=$delta;
+					
+					$re[$i][$voRe->maPerC2]=$maC/($j+1);
+					$re[$i][$voRe->maPerC2]=round(100*($rowPriceArr[$i][$vo->close]-$re[$i][$voRe->maPerC2])/$re[$i][$voRe->maPerC2]);
+				}
+				
+				if($i==0 && $j==$this->intervalArr[3]-1){ //$this->intervalArr[3]
+					$delta=$delta/($j+1);
+					$re[$i][$voRe->delta]=$delta;
+				}
+			}
+		}
+//@>
+/*<@
+		if($this->ao->conf["combineDay"]==1){
+			$ma0=8
+			$ma1=21
+			$ma2=34
+			$ma3=55
+		} else if($this->ao->conf["combineDay"]==2 || $this->ao->conf["combineDay"]==8){
+		/// 1 1 2 3 5 8 13 21 34 55 89
+			$ma0=5;
+			$ma1=13;
+			$ma2=21;
+			$ma3=34;
+			
+			//$ma0=4;
+			//$ma1=11;
+			//$ma2=17;//23
+			//$ma3=55;
+		} else {
+		/// 1 1 2 3 5 8 13 21 34
+			$ma0=8;
+			$ma1=21;
+			$ma2=21;
+			$ma3=34;
+		}
+		
+		for($i=$len-1 ; $i >=0 ;$i--){
+			//if($i >= $len - $ma3) continue;
+			if($this->isNull0($rowPriceArr[$i][$vo->close])) continue;
+			
+			$maC=0;
+			for($j=0 ; $j < $ma3 ; $j++){
+				$x=$i+$j;
+				if($this->isNull0($rowPriceArr[$x][$vo->close])) break;
+				if($rowPriceArr[$x+1]==null || $this->isNull0($rowPriceArr[$x+1][$vo->close])) break;
+
+				$maC+=$rowPriceArr[$x+1][$vo->close];
+				//$maC+=($rowPriceArr[$x+1][$vo->low]+$rowPriceArr[$x+1][$vo->high])/2;
+				if($j==$ma0-1 || $j==$ma1-1 || $j==$ma2-1 || $j==$ma3-1){
+					if($j==$ma0-1) $re[$i][$voRe->maC1]=$maC/($j+1);
+					if($j==$ma1-1) $re[$i][$voRe->maC2]=$maC/($j+1);
+					if($j==$ma2-1) $re[$i][$voRe->maC3]=$maC/($j+1);
+					if($j==$ma3-1) {
+						$re[$i][$voRe->maC4]=$maC/($j+1);
+						$dev=0;
+						for($k=0 ; $k < $ma3 ; $k++){
+							$y=$i+$k;
+							$close=$rowPriceArr[$y+1][$vo->close];
+							$dev+=pow($close-$re[$i][$voRe->maC4],2);
+							if($k==$ma3-1) {
+								$dev=round(sqrt($dev/($k+1)),2);
+								$re[$i][$voRe->dev]=$dev;
+							}
+						}
+					}
+				}
+
+			}
+		}
+@>*/
+		return $re;
+	}
+	
+	public function formatVolume3($volume , $name ,$dt ,$_dt){
+		$vo=$this->voPrice2;
+		$price=$dt[$name];
+		if($price==null) return "";
+		$style="";
+		
+		$color="red";
+		//if($price == $dt[$vo->ceil]) $color="magenta";
+		//else if($price == $dt[$vo->floor]) $color="limegreen";
+		if($price == $dt[$vo->ceil]) $color="magenta";
+		else if($price == $dt[$vo->floor]) $color="limegreen";
+		else if($price > $dt[$vo->ref]) $color="blue";
+		else if($price <= $dt[$vo->ref]) $color="red";
+		//else if($price == $dt[$vo->ref]) $color="darkorchid";
+		
+		if($volume==null || $volume==0) return null;
+		//return number_format($volume,0,".","");
+		$volume = $volume/1000;
+		if($volume >= 999.9) return number_format($volume/1000,0,",",",") . "k";
+		if($volume>=9.9) return number_format($volume,0,",","");
+
+		return "<span style='color:".$color.";".$style."'>".number_format($volume,1,".","")."</span>";
+	}
+	
+	public function formatVolume2($volume){
+		if($volume==null || $volume==0) return null;
+		//return number_format($volume,0,".","");
+		$volume = $volume/1000;
+		if($volume >= 999.9) return number_format($volume/1000,0,",",",") . "k";
+		if($volume>=9.9) return number_format($volume,0,",","");
+		return number_format($volume,1,".","");
+	}
+	public function formatVolume($volume){
+		//return $this->formatVolume2($volume);
+		if($volume==null || $volume==0) return null;
+		//return number_format($volume,0,".","");
+		$volume = $volume/1000;
+		
+		$volume=round(10*$volume);
+		if($volume>=100000) $volume=90000;
+		
+		if($volume >= 10000) return floor($volume/10000) . "n";
+		if($volume >= 1000) return floor($volume/1000) . "t";
+		if($volume>=100) return floor($volume/100) . "c";
+		return $volume;
+	}
+	public function formatVolume0($volume,$dt,$_dt,$symbol){
+		$vo=$this->voPrice2;
+		if($dt && $this->isMarket($symbol)){
+			return "<div _tag='volume0' style='background-color:blue;color:white;text-align:center;'></div>";
+		}
+		if($volume==null || $volume==0) return "";
+		$volume=$volume/1000;
+		$volume=round($volume);
+		if($volume>=100) $volume=99;
+		//$volume=$volume*1000;
+		//$volume=$this->formatVolume($volume);
+		
+		$style="";
+		if($_dt!=null && $dt[$vo->volume]>$_dt[$vo->volume]){
+			if(!$this->isMarket($symbol)){
+				$style="background-color:blue;color:white";
+			}
+		}
+		return "<div style='".$style."'>".$volume."</div>";
+	}
+	public function formatVolume1($name ,$dt ,$_dt,$symbol){
+		$vo=$this->voPrice2;
+		$volume=$dt[$name];
+		$volume=$this->formatVolume($volume);
+		if($volume==null) return "";
+		$style="";
+		if($name==$vo->sellVolume1) $name2=$vo->sellPrice1;
+		if($name==$vo->buyVolume1) $name2=$vo->buyPrice1;
+		
+		if($_dt!=null && $dt[$vo->volume]>$_dt[$vo->volume]){
+			if($dt[$name2]==$dt[$vo->close] && !$this->isMarket($symbol)){
+				$style="background-color:blue;color:white";
+			}
+		}
+
+		return "<div style='".$style."'>".$volume."</div>";
+	}
+	/*
+	public function formatValue($value){
+		if($value==null) return "";
+		$value = $value/1000000;
+		//if($value>=5) $color="darkorchid";
+		//if($value>=1) $color="blue";
+		//else $color="red";
+		if($value >= 999.9) $value=number_format($value/1000,0,",",",") . "";
+		else if($value >= 9.9) $value=number_format($value,0,",","");
+		else $value=number_format($value,1,".",",");
+		return "<span style='color:".$color.";".$style."'>".$value."</span>";
+	}*/
+	public function formatValue($value){
+		if($value==null) return "";
+		$value = $value/1000000;
+		//if($value>=5) $color="darkorchid";
+		if($value>=3) $color="black";
+		else $color="black";
+		if($value >= 999.9) $value=number_format($value/1000,0,",",",") . "";
+		else if($value >= 9.9) $value=number_format($value,0,",","");
+		else $value=number_format($value,1,".",",");
+		return "<span style='color:".$color.";".$style."'>".$value."</span>";
+	}
+	public function formatValue2($value){
+		if($value==null) return "";
+		$value = $value/1000000;
+		//if($value>=5) $color="darkorchid";
+		if($value>=3) $color="blue";
+		else $color="red";
+		$color="black";
+		if($value >= 999.9) $value=number_format($value/1000,0,",",",") . "";
+		else if($value >= 9.9) $value=number_format($value,0,",","");
+		else $value=number_format($value,0,".",",");
+		if($value>=100) $value=99;
+		return "<span style='color:".$color.";".$style."'>".$value."</span>";
+	}
+	public function formatValueTrade($value){
+		if($value==null) return "";
+		if($value<0)$value=-$value;
+		$value = $value/1000;
+		if($value >= 9.9) return number_format($value,0,",","");
+		return number_format($value,1,".",",");
+	}
+	
+	public function formatPrice($name ,$dt ,$_dt){
+		$vo=$this->voPrice2;
+		$price=$dt[$name];
+		if($price==null) return "";
+		$style="";
+		
+		$color="red";
+		//if($price == $dt[$vo->ceil]) $color="magenta";
+		//else if($price == $dt[$vo->floor]) $color="limegreen";
+		if($price == $dt[$vo->ceil]) $color="magenta";
+		else if($price == $dt[$vo->floor]) $color="limegreen";
+		else if($price > $dt[$vo->ref]) $color="blue";
+		else if($price <= $dt[$vo->ref]) $color="red";
+		//else if($price == $dt[$vo->ref]) $color="darkorchid";
+		
+		if($price <0 ) $price = "".number_format(-100*$price,0)."";
+		else $price = number_format(100*$price,0,",","");
+		
+		if($price >=100000) $price=substr($price,1,4);
+		else $price=substr($price,0,4);
+
+		return "<span style='color:".$color.";".$style."'>".$price."</span>";
+	}
+	public function formatPer($value,$dt,$symbol){
+		$vo=$this->voPrice2;
+		
+		if($dt && $this->isMarket($symbol)){
+			return "<div _tag='volume0' style='background-color:blue;color:white;text-align:center;'></div>";
+		}
+		
+		if($value==null) return "";
+		if($value>6) $color="magenta";
+		else if($value>0)$color="blue";
+		else if($value==0)$color="blue";
+		else if($value<-6)$color="limegreen";
+		else if($value<0)$color="red";
+		
+		if($value<=0)$color="red";
+		else $color="blue";
+		
+		$f=10;
+		if($value>=10)$value=9.9;
+		if($value<=-10)$value=-9.9;
+		
+		if($value <0 ) $value = "".number_format(-$f*$value,0)."";
+		else $value = number_format($f*$value,0,",","");
+		
+		return "<span style='color:".$color."'>".$value."</span>";
+	}
+	
+	public function formatPercentScale($value, $maPer){
+		if($value==null) return "";
+		if($value>=40) $color="blue";
+		else $color="red";
+		//if($maPer>=0) $color="blue";
+		//else $color="red";
+		if($value>=100) $value=99;
+		if($value<0) $color="limegreen";
+		
+		if($value <0 ) $value = "".number_format(-1*$value,0)."";
+		else $value = number_format(1*$value,0,",","");
+		$value=substr($value,0,3);
+
+		return "<span style='color:".$color."'>".$value."</span>";
+	}
+	public function formatPercentValue($value){
+		if($value==null) return "";
+		if($value>=40) $color="blue";
+		else $color="red";
+		if($value<0) $color="limegreen";
+		
+		$value=$value/10;
+		if($value>=100)$value=99;
+		if($value <0 ) $value = "".number_format(-1*$value,0)."";
+		else $value = number_format(1*$value,0,",","");
+		$value=substr($value,0,3);
+
+		return "<span style='color:".$color."'>".$value."</span>";
+	}
+	
+	public function formatPercent($value){
+		if($value==null) return "";
+		if($value<=3) $color="blue";
+		else $color="red";
+		if($value<0) $color="limegreen";
+		
+		if($value <0 ) $value = "".number_format(-10*$value,0)."";
+		else $value = number_format(10*$value,0,",","");
+		$value=substr($value,0,3);
+
+		return "<span style='color:".$color."'>".$value."</span>";
+	}
+	public function formatPercentRev($value){
+		if($value==null) return "";
+		if($value<3.5) $color="blue";
+		else $color="red";
+		if($value<0) $color="limegreen";
+		
+		if($value <0 ) $value = "".number_format(-1*$value,0)."";
+		else $value = number_format(1*$value,0,",","");
+		$value=substr($value,0,3);
+
+		return "<span style='color:".$color."'>".$value."</span>";
+	}
+	public function formatStatus($str,$str0){
+		if($str==null) $value="N";
+		if($str=="less") $value="L";
+		if($str=="great") $value="G";
+		if($str=="greatF") $value="F";
+		
+		if($str0==null) $value.="N";
+		if($str0=="less") $value.="L";
+		if($str0=="great") $value.="G";
+		if($str0=="greatF") $value.="F";
+		
+		$color="black";
+		return "<span style='color:".$color."'>".$value."</span>";
+	}
+	
+	public function formatPercentNone($value){
+		if($value==null) return "";
+		if($value>=8) $color="black";
+		else $color="black";
+		if($value<0) $color="limegreen";
+		
+		if($value <0 ) $value = "".number_format(-10*$value,0)."";
+		else $value = number_format(10*$value,0,",","");
+		$value=substr($value,0,3);
+
+		return "<span style='color:".$color."'>".$value."</span>";
+	}
+	public function formatMarket($value){
+		//return $value;
+		if($value==null) return "";
+		if($value=="vn") $color="blue";
+		else $color="red";
+		$color="black";
+		if($value=="vn") $value="v";
+		if($value=="ha") $value="h";
+		if($value=="uc") $value="u";
+		return "<span style='color:".$color."'>".$value."</span>";
+	}
+	public function formatMarketTrade($value,$canSell,$tp){
+		if($tp==0)$tp="a";
+		if($tp==1)$tp="b";
+		if($tp==2)$tp="c";
+		if($tp==3)$tp="d";
+		if($canSell) return "<span style='font-weight:bold'>".$value."</span>";
+		else return "";//"<span style='font-weight:bold'>".$tp."</span>";
+		//else return "<span style='font-weight:bold;text-decoration:;'><i>".$value."</i></span>";
+		
+		
+		return;
+		if($canSell) $color="blue";
+		else $color="red";
+		return "<span style='color:".$color."'>".$value."</span>";
+	}
+	public function formatKelly($value){
+		//return $value;
+		if($value==null) return "";
+		//$value=round(100*$value,2);
+		if($value>0) $color="blue";
+		else $color="red";
+		//if($value<0) $color="limegreen";
+		
+		if($value <0 ) $value = "".number_format(-10*$value,0)."";
+		else $value = number_format(10*$value,0,",","");
+		return $value;
+		return "<span style='color:".$color."'>".$value."</span>";
+	}
+	public function formatBet($value){
+		if($value==null) return "";
+		return number_format($value,1,".",",");
+	}
+	
+	public function formatSymbol($symbol){
+		if($symbol==null) return "";
+		if($this->isMarket($symbol)) return substr($symbol,0,3);
+		return substr($symbol,-3);
+	}
+	
+	public function getPrice($name ,$dt){
+		$vo=$this->voPrice2;
+		if($dt==null) return null;
+		$price=$dt[$name];
+		if($price==null) $price=$dt[$vo->close];
+		if($name==$vo->sellPrice1 && $price<$dt[$vo->close]) $price=$dt[$vo->close];
+		if($name==$vo->buyPrice1 && $price>$dt[$vo->close]) $price=$dt[$vo->close];
+		return $price;
+	}
+	public function getPricePer($name ,$dt){
+		$vo=$this->voPrice2;
+		$price=$this->getPrice($name,$dt);
+		if($dt[$vo->ref]!=0) $per=round(100*($price-$dt[$vo->ref])/$dt[$vo->ref],1);
+		if($name==$vo->low){
+			if($price!=0) $per=round(100*($dt[$vo->close]-$price)/$price,1);
+		}
+		if($name==$vo->high){
+			if($price<$dt[$vo->ref]) $price=$dt[$vo->ref];
+			if($price<$dt[$vo->close]) $price=$dt[$vo->close];
+			//$priceRef=$this->getPrice($vo->buyPrice1,$dt);
+			$priceRef=$dt[$vo->close];
+			if($priceRef==null || $priceRef==0) $priceRef=$dt[$vo->close];
+			if($price!=0) $per=round(100*($priceRef-$price)/$price,1);
+		}
+		/*
+		if($name==$vo->high){
+			$low=$this->getPrice($vo->low,$dt);
+			if($price!=0) $per=round(100*($price-$low)/$low,1);
+		}*/
+		return $per;
+	}
+	public function getPriceColor($price, $dt){
+		//$per = 100*($price - $dt["ref"])/$dt["ref"];
+		//if($per >= 3 ) return "#FF00FF";
+		//if($per <= -3 ) return "#66CCFF";
+		/*
+		if($price == $dt["ceil"]) return "#E100E1";
+		if($price == $dt["floor"]) return "#66CCFF";
+		//if($price == $dt["ref"]) return "#F7FF31";
+		if($price > $dt["ref"]) return "lime";
+		if($price <= $dt["ref"]) return "red";
+		*/
+		if($price==null) $price = $dt["close"];
+		
+		if($price == $dt["ceil"]) return "orchid";
+		if($price == $dt["floor"]) return "limegreen";
+		if($price > $dt["ref"]) return "blue";
+		if($price <= $dt["ref"]) return "red";
+		return "#F7FF31";
+	}
+	public function getPerColor($per){
+		if($per > 2 ) return "lime";
+		return "red";
+	}
+	public function format2Digit($num,$index){
+		$num=round($num);
+		$str=$num."";
+		if($num<10) $str="0".$num;
+		if($num>=100) $str="99";
+		if($num<=0) $str="T".(-$num);
+		$color="black";
+		if($index==1 || $index==3){
+			if($num<=10 && $index==1) $color="red";
+			else if($num<=10 && $index==3) $color="red";
+			else $color="blue";
+		}
+		return "<b style='color:".$color."'>".$str."</b>";
+	}
+	public function formatDelta($value){
+		if($value>2) $color="blue";
+		else $color="red";
+		return "<span style='color:".$color."'>".$value."</span>";
+	}
+	public function formatProp($value){
+		if($value==null) return "";
+		
+		if($value>20) $color="blue";
+		else $color="red";
+		
+		return "<span style='color:".$color."'>".$value."</span>";
+	}
+	public function formatAvg($value){
+		if($value==null) return "";
+		if($value>=1) {
+			$value=$value-1;
+			$color="blue";
+		}
+		else {
+			$value=1-$value;
+			$color="red";
+		}
+		$value=round(10000*$value);
+		return "<span style='font:inherit;color:".$color."'>".$value."</span>";
+	}
+	public function formatInc($value){
+		if($value==null) return "";
+		if($value>50) {
+			$color="blue";
+		}
+		else {
+			$color="red";
+		}
+		return "<span style='font:inherit;color:".$color."'>".$value."</span>";
+	}
+	public function formatCount($value){
+		if($value>1000) $color="blue";
+		else $color="red";
+		return "<span style='color:".$color."'>".$value."</span>";
+	}
+	public function formatMinMax($value){
+		if($value==null) return "";
+		if($value>50) $color="blue";
+		else $color="red";
+		return "<span style='color:".$color."'>".$value."</span>";
+	}
+	public function formatCodeFull($value){
+		if($value==null) return "";
+		$arr=$value->split("");
+		$str="";
+		for($i=0 ;$i<count($arr) ;$i++){
+			$ch=$arr[$i];
+			if($ch=="[" || $ch=="]") {
+				$str.=$ch;
+				continue;
+			}
+			if($ch=="V"||$ch=="A"){
+				$color="black";
+				$num=$ch;
+			} else if($ch=="H"){
+				$num=$ch;
+				$color="blue";
+			} else if($ch=="L"){
+				$num=$ch;
+				$color="red";
+			} else {
+				$num=parseInt($ch);
+				if($num==0 || $num==1) $color="limegreen";
+				else if($num==9 || $num==8) $color="orchid";
+				else if($num>=1&&$num<=4) $color="blue";
+				else if($num>=5&&$num<=8) $color="red";
+			}
+			$str.="<span style='color:".$color."'>".$num."</span>";
+		}
+		return $str;
+	}
+	public function shortString($str){
+		$arr=explode(",",$str);
+		if(count($arr)>=3){
+			$str="<u>".$arr[0]."</u>";
+		} else $str="".$arr[0]."";
+		//$str = substr($str,0,2);
+		return $str;
+	}
+	
+	public function onrpcTradeCap($event,$result){
+		$this->tradeFullMap=$result;
+		$this->viewDetail->buttonList->click();
+		$this->rpcTradeCap2();
+	}
+	public function rpcTradeCap($strConf){
+//<@ $this->json($strConf);
+		$this->rpcConf($strConf);
+		$this->viewTrade->rpcCap();
+		$re=array(
+			"capMap"=>$this->obJfile->load("stock_ViewTrade/capMap")
+			,"indexArr"=>$this->obJfile->load("stock_ViewTrade/indexArr")
+		);
+		return $re;
+//@>
+	}
+	public function onrpcTradeCap2($event,$result){
+		alert("Finished");
+	}
+	public function rpcTradeCap2(){
+//<@ $this->json();
+		if($this->ao->canSaveAppfog()){
+			$tradeFullMap=array(
+				"capMap"=>$this->obJfile->load("stock_ViewTrade/capMap")
+				,"indexArr"=>$this->obJfile->load("stock_ViewTrade/indexArr")
+			);
+			$rowPriceLiveMap=$this->obJfile->load("stock_ViewPrice/rowPriceLiveMap");
+			$url="http://cophieu.ap01.aws.af.cm/j.php?s=stock_ViewStock/rpcTradeCapAppfog";
+			$client = new Zend_Http_Client($url);
+			$paramArray=array($tradeFullMap,$rowPriceLiveMap);
+			$client->setParameterPost('paramArray', json_encode($paramArray));
+			$body=$client->request("POST")->getBody();
+		}
+//@>
+	}
+	public function rpcTradeCapAppfog($tradeFullMap,$rowPriceLiveMap){
+//<@ $this->json($tradeFullMap,$rowPriceLiveMap);
+		$this->obJfile->save("stock_ViewTrade/capMap",$tradeFullMap["capMap"]);
+		$this->obJfile->save("stock_ViewTrade/indexArr",$tradeFullMap["indexArr"]);
+		
+		$this->viewPrice->saveRowPriceLiveMap($rowPriceLiveMap);
+		return 1111;
+//@>
+	}
+	
+	public function getLivePrice($symbol){
+		$voStock=$this->voStock;
+		if($this->stockMap==null || $this->stockMap[$symbol]==null) return null;
+		return $this->stockMap[$symbol][$voStock->live];
+	}
+	public function onrpcStockMap($event ,$result){
+		$vo=$this->voPrice2;
+		$voStock=$this->voStock;
+		$this->_stockMap=$this->stockMap;
+		$this->stockMap=$result;
+		
+		if($this->firstRun){
+			$this->viewDetail->preloadDetail($this->viewDetail->symbol);
+			$this->firstRun=false;
+		}
+?>
+<!--$html2-->
+<table border="0" style="border-color:red;border-spacing:0px 0px;">
+	<tr style="display:none">
+		
+		<td>m</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		
+		<td>pb</td>
+		<td>&nbsp;</td>
+		
+		<td>hi</td>
+		<td>&nbsp;</td>
+		
+		<td>pS</td>
+		<td>&nbsp;</td>
+		<td>pL</td>
+		<td>&nbsp;</td>
+		
+		<td>pV</td>
+		<td>&nbsp;</td>
+		
+		
+	</tr>
+<!--/$html2-->
+<?
+	$count=0;
+	$valueT=0;
+	$valueNowT=0;
+	$profitT=0;
+	$valueTfake=0;
+	$valueNowTfake=0;
+	$profitTfake=0;
+	$seperate=null;
+	$seperate2=null;
+	$seperate3=null;
+	$seperate4=null;
+	$seperate5=null;
+	foreach($this->stockMap as $symbol=>$stock){
+		if($this->_stockMap[$symbol]!=null) $_live=$this->_stockMap[$symbol][$voStock->live];
+		$buy=null;
+		$perSell=$this->getPricePer($vo->sellPrice1,$this->stockMap[$symbol][$voStock->live]);
+		$perBuy=$this->getPricePer($vo->buyPrice1,$this->stockMap[$symbol][$voStock->live]);
+				
+		if($stock[$voStock->live]==null) {
+			//alert($symbol);
+			continue;
+		}
+		if(!$this->isMarket($symbol)){
+			$buyPrice=$this->getPrice($vo->sellPrice1,$stock[$voStock->live]);
+			if($buyPrice!=0) $buy=100*ceil($this->buyValue/(100*$buyPrice));
+			else $buy=null;
+			
+		}
+		else {
+			$stock[$voStock->live][$vo->buyPrice1]=$stock[$voStock->live][$vo->close];
+			$buy=null;
+		}
+		
+		if(!$this->isMarket($symbol)) $symbolTrade=$symbol;
+		$count++;
+		if(count($this->stockMap[$symbol][$voStock->trade])!=0){
+			$trade=$this->stockMap[$symbol][$voStock->trade];
+			
+			if($trade["market"]==",") {
+				//$perBuy=null;
+				if($seperate==null) $seperate=$count;
+			} else {
+				
+			}
+			$dateArr=explode(",",$trade["date"]);
+			$priceArr=explode(",",$trade["price"]);
+			$volumeArr=explode(",",$trade["volume"]);
+			$marketArr=explode(",",$trade["market"]);
+			$live=$this->stockMap[$symbol][$voStock->live];
+			
+			$value=0;
+			$valueNow=0;
+			$profit=0;
+			$canSell=false;
+			for($i=0;$i<count($dateArr)-1;$i++){
+				$date=$dateArr[$i];
+				$tp=$this->ao->getTplus($date);
+				if($tp>=3) $canSell=true;
+				if($tp>=10)$tp=9;
+				$marketArr[$i]=$marketArr[$i];//.$tp;
+				$price=$priceArr[$i];
+				$volume=$volumeArr[$i];
+				$value+=$price*$volume;
+				$valueNow+=$this->getPrice($vo->buyPrice1,$live)*$volume;
+				$profit+=$valueNow-$value;
+				//$per=round(100*($live["close"]-$price)/$price,1);
+			}
+			$marketTrade=$this->formatMarketTrade(implode(",",$marketArr),$canSell,$tp);
+			if($trade["market"]!=","){
+				$valueT+=$value;
+				$valueNowT+=$valueNow;
+				$profitT+=$profit;
+			} else {
+				$valueTfake+=$value;
+				$valueNowTfake+=$valueNow;
+				$profitTfake+=$profit;
+			}
+			if($value!=0) $per=round(100*($valueNow-$value)/$value,1);
+			else $per=null;
+		} else {
+			$marketTrade=null;
+			$value=null;
+			$valueNow=null;
+			$profit=null;
+			$per=null;
+			if($seperate2==null && $this->stockMap[$symbol][$voStock->rate]<9000000000) $seperate2=$count;
+		}
+		/*
+		if($this->stockMap[$symbol][$voStock->status]!="greatF" && $seperate5==null && $seperate!=null && $seperate2==null) $seperate5=$count;
+		
+		if($this->stockMap[$symbol][$voStock->status]!="greatF" && $seperate4==null && $seperate2!=null) $seperate4=$count;
+		
+		if($this->stockMap[$symbol][$voStock->status0]!="greatF" && $seperate3==null && $seperate2!=null) $seperate3=$count;
+		*/
+		
+		if($this->stockMap[$symbol][$voStock->rate]<9000000 && $seperate3==null && $seperate2!=null) $seperate3=$count;
+		
+		if($seperate==$count || $seperate2==$count || $seperate3==$count || $seperate4==$count || $seperate5==$count) {
+			$trStyle="border-top:2px solid black;";
+		}
+		else $trStyle="";
+		
+		//alert($vo->buyPrice3." ".$stock[$voStock->live]." ".$this->formatPrice($vo->buyPrice3,$stock[$voStock->live],$_live)); return;
+		//<td><=?= $this->formatPer($stock[$voStock->avg]) ?=></td>
+		//<td><=?= $stock[$voStock->code] ?=></td>
+		
+		$perValue=0;
+		$value0=$stock[$voStock->live][$vo->close]*$stock[$voStock->live][$vo->volume];
+		if($stock[$voStock->value2]!=0 && $stock[$voStock->value2]!=null) $perValue=round(100*$value0/$stock[$voStock->value2]);
+		
+		if($stock[$voStock->perHigh]>=10) $stock[$voStock->perHigh]=9;
+		if($stock[$voStock->maxC1]>=100) $stock[$voStock->maxC1]=99;
+		//if($stock[$voStock->minMaxArr][3]>=100) $stock[$voStock->minMaxArr][3]=99;
+		
+?>
+<!--$htmlTr2-->
+	<tr>
+		
+		<td style="border-left:0px solid black;<?= $trStyle ?>"><?= $this->formatPer($perBuy,$stock[$voStock->live],$symbol) ?></td>
+		
+		<? if($count%2==1 || $count==-1) {?>
+		<td style="<?= $trStyle ?>"><a _tag2="symbolLeft" _tag="symbol" _value="<?=$symbol?>" href="#" onclick="return false;" style="text-decoration:none;color:black;background-color:white;"><?= $this->formatSymbol($symbol) ?></a></td>
+<? } else { ?>
+		<td _tag2="symbolLeft0" _tag="symbol" _value="<?=$symbol?>" style="font-weight:normal;<?= $trStyle ?>"><?= $this->formatSymbol($symbol) ?></td>
+<? } ?>
+		<td style="border-right:0px solid black;<?= $trStyle ?>"><?= $this->formatPer($perSell,$stock[$voStock->live],null) ?></td>
+		
+		
+		<td style="border-right:0px solid black;<?= $trStyle ?>"><?= $this->shortString($marketTrade) ?></td>
+		<td style="border-right:2px solid black;<?= $trStyle ?>"><?= $this->formatPercentRev( $stock[$voStock->perHigh] ) ?> </td>
+		
+		
+		<td style="border-right:0px solid black;<?= $trStyle ?>"> <?= $this->formatPercentScale( $stock[$voStock->minC1], null ) ?> </td>
+		<td style="border-right:0px solid black;<?= $trStyle ?>"> <?= $stock[$voStock->maxC1] ?> </td>
+		
+		<td style="<?= $trStyle ?>"><?=  $this->formatPercentValue( $perValue ) ?></td>
+		<td style="<?= $trStyle ?>;border-right:0px solid black;"><?= $this->formatValue2($stock[$voStock->value2]) ?></td>
+		
+		<td style="<?= $trStyle ?>"><?= $this->formatPrice($vo->buyPrice1,$stock[$voStock->live],$_live) ?></td>
+		<td style="border-right:0px solid black;<?= $trStyle ?>"><?= $this->formatVolume1($vo->buyVolume1,$stock[$voStock->live],$_live,$symbol) ?></td>
+		
+		<td style="border-left:0px solid black;<?= $trStyle ?>"><?= $this->formatPrice($vo->sellPrice1,$stock[$voStock->live],$_live) ?></td>
+		<td style="border-right:2px solid black;<?= $trStyle ?>"><?= $this->formatVolume1($vo->sellVolume1,$stock[$voStock->live],$_live,$symbol) ?></td>
+
+		<td style="color:black;border-right:0px solid black;<?= $trStyle ?>" ><?= $this->formatVolume2($buy,$vo->sellPrice1,$stock[$voStock->live],$_live) ?></td>
+		
+<? /*
+		<td style="border-right:0px solid black;<?= $trStyle ?>"> <?= $this->formatPercentScale( $stock[$voStock->minMaxArr][2], $stock[$voStock->minMaxArr][7] ) ?> </td>
+		<td style="border-right:1px solid black;<?= $trStyle ?>"> <?= $stock[$voStock->minMaxArr][3] ?> </td>
+		
+		
+		<td style="border-left:0px solid black;<?= $trStyle ?>"><?= $this->formatPrice($vo->buyPrice2,$stock[$voStock->live],$_live) ?></td>
+		<td style="<?= $trStyle ?>"><?= $this->formatVolume($stock[$voStock->live][$vo->buyVolume2]) ?></td>
+		
+		
+		<? if($count%2==0) {?>
+		<td style="<?= $trStyle ?>"><a _tag2="symbolRight" _value="<?=$symbol?>" href="#" onclick="return false;" style="text-decoration:none;color:black;background-color:white;"><?= $this->formatSymbol($symbol) ?></a></td>
+<? } else { ?>
+		<td _tag2="symbolRight0" _value="<?=$symbol?>" style="font-weight:normal;<?= $trStyle ?>"><?= $this->formatSymbol($symbol) ?></td>
+<? } ?>
+
+		<td style="<?= $trStyle ?>"><?= $this->formatMarket($stock[$voStock->live][$vo->market]) ?></td>
+
+		<td style="<?= $trStyle ?>"><?= $this->formatPrice($vo->sellPrice2,$stock[$voStock->live],$_live) ?></td>
+		<td style="border-right:1px solid black;<?= $trStyle ?>"><?= $this->formatVolume($stock[$voStock->live][$vo->sellVolume2]) ?></td>
+		
+		
+		<td style="border-right:0px solid black;<?= $trStyle ?>"> <?= $this->formatPercentScale( $stock[$voStock->minMaxArr][2], $stock[$voStock->minMaxArr][7] ) ?> </td>
+		<td style="border-right:1px solid black;<?= $trStyle ?>"> <?= $stock[$voStock->minMaxArr][3] ?> </td>
+		
+		<td style="border-left:1px solid black;<?= $trStyle ?>"><?= $this->formatPrice($vo->close,$stock[$voStock->live],$_live) ?></td>
+		<td style="border-right:1px solid black;<?= $trStyle ?>"><?= $this->formatVolume0($stock[$voStock->live][$vo->volume0],$stock[$voStock->live],$_live,$symbol) ?></td>
+		
+		<td _tag="valueNow" style="<?= $trStyle ?>"><?=$this->formatValueTrade($valueNow)?></td>
+		<td _tag="per" style="<?= $trStyle ?>"><?=$this->formatPer($per)?></td>
+		<td _tag="profit" style="border-right:0px solid black;<?= $trStyle ?>"><?=$this->formatValueTrade($profit)?></td>
+
+		<td>
+			<?= $stock[$voStock->minMaxArr][0] ?>|
+			<?= $stock[$voStock->minMaxArr][1] ?>|
+			<?= $stock[$voStock->minMaxArr][2] ?>|
+			<?= $stock[$voStock->minMaxArr][3] ?>|
+		</td>
+		<td style="border-right:0px solid black;<?= $trStyle ?>"><?= $this->formatStatus($stock[$voStock->status],$stock[$voStock->status0]) ?></td>
+		
+		$this->viewDetail->divStock->find("[_tag='volume0']")->html($str);
+*/ ?>
+	</tr>
+<!--/$htmlTr2-->
+<?
+		$html2.=$htmlTr2;
+	}
+		$html.="</table>";
+		$html2.="</table>";
+		$this->viewDetail->divStock->html($html2);
+		/*
+		if($valueT!=0) $perT=round(100*($valueNowT-$valueT)/$valueT,1);
+		if($valueTfake!=0) $perTfake=round(100*($valueNowTfake-$valueTfake)/$valueTfake,1);
+
+		//$this->divStock->html($html);
+
+		$tr=$this->divStock->find("[_tag='symbol'][_value='VNINDEX']")->closest("tr");
+		$tr=$tr->add($this->viewDetail->divStock->find("[_tag='symbol'][_value='VNINDEX']")->closest("tr"));
+		$tr->find("[_tag='value']")->html($this->formatValueTrade($valueT));
+		$tr->find("[_tag='valueNow']")->html($this->formatValueTrade($valueNowT));
+		$tr->find("[_tag='profit']")->html($this->formatValueTrade($profitT));
+		$tr->find("[_tag='per']")->html($this->formatPer($perT));
+		
+		$tr=$this->divStock->find("[_tag='symbol'][_value='HAINDEX']")->closest("tr");
+		$tr=$tr->add($this->viewDetail->divStock->find("[_tag='symbol'][_value='HAINDEX']")->closest("tr"));
+		$tr->find("[_tag='value']")->html($this->formatValueTrade($valueTfake));
+		$tr->find("[_tag='valueNow']")->html($this->formatValueTrade($valueNowTfake));
+		$tr->find("[_tag='profit']")->html($this->formatValueTrade($profitTfake));
+		$tr->find("[_tag='per']")->html($this->formatPer($perTfake));
+		*/
+		/////////////
+
+		$arrayStock_symbol = array();
+		foreach($this->stockMap as $symbol=>$stock){
+			array_push($arrayStock_symbol, $symbol);
+		}
+		
+		$selectStock = $this->viewDetail->selectStock;
+		$selectedSymbol = $selectStock->prop("value");
+		?>
+<!--$html-->
+<option></option>
+<? 
+		$selectedIndex = 0;
+		foreach($arrayStock_symbol as $i=>$value){ 
+			if($value == $selectedSymbol) $selectedIndex = 1*$i + 1;
+?>
+<option value="<?= $value ?>"><?= $value ?></option>
+		<? } ?>	
+<!--/$html-->
+		<?
+		$selectStock->html($html);
+		$selectStock->prop("selectedIndex", $selectedIndex);
+		
+		
+		$this->viewDetail->highlight();
+		//$this->viewDetail->buttonList->click();
+		
+		$this->viewChart->setOnePrice();
+		
+		$this->stockMapTime=new Date();
+		$this->stockMapTitle = date("H:i:s d/m/Y");
+		$__doc->title = $this->stockMapTitle;
+		$this->rpcStockMap();
+	}
+	public function isMarket($symbol){
+		if($symbol=="VNINDEX") return true;
+		if($symbol=="HAINDEX") return true;
+		if($symbol=="VN30INDEX") return true;
+		if($symbol=="HA30INDEX") return true;
+		if($symbol=="VNALLINDEX") return true;
+		return false;
+	}
+	public function isNull0($value){
+		if($value==null || $value==0) return true;
+		return false;
+	}
+	public function getCodeFull($rowPriceArr,$i){
+		$codeFull=$rowPriceArr[$i]["codeFull"];
+		return $codeFull;
+		if($codeFull==null||$this->indexArr[$i]==null||$this->indexArr[$i]["codePer"]==null){
+			return null;
+		} else{
+			return $codeFull=$codeFull.$this->indexArr[$i]["codePer"];
+		}
+	}
+	public function makeIndex(){
+		$len=count($this->indexArr);
+		for($i=0;$i<$len;$i++){
+			if($i+1+10>$len) break;
+			if($this->indexArr[$i]["count"]==0) break;
+			$perT=0;
+			$countT=0;
+			for($j=$i+1;$j<$i+1+10;$j++){
+				if($this->indexArr[$j]["count"]==0) break;
+				$perT+=$this->indexArr[$j]["per"];
+				$countT+=$this->indexArr[$j]["count"];
+				if($j-$i==10){
+					$perT=round($perT/$countT,2);
+					
+					if($perT<0) $this->indexArr[$i]["codePer"]="G".round(-100*$perT);
+					else $this->indexArr[$i]["codePer"]="T".round(100*$perT);
+				}
+			}
+			if($this->indexArr[$i]["codePer"]==null) break;
+			$this->indexArr[$i]["per"]=round($this->indexArr[$i]["per"]/$this->indexArr[$i]["count"],2);
+			if($this->indexArr[$i]["per"]<0) $this->indexArr[$i]["codePer"].="g".round(-100*$this->indexArr[$i]["per"]);
+			else $this->indexArr[$i]["codePer"].="t".round(100*$this->indexArr[$i]["per"]);
+		}
+	}
+	public function restartStockMap(){
+		$this->stockMapTime=null;
+		$this->xhrStockMap->abort();
+		$this->rpcStockMap();
+	}
+	public function stopStockMap(){
+		$this->stockMapTime=null;
+		$this->xhrStockMap->abort();
+	}
+	public function rpcStockMap(){
+//<@ if($this->viewDetail->isRun==0) {$this->stopStockMap();return;} $this->xhrStockMap = $this->json();
+		$voRe=$this->voRowPriceArr;
+		$vo=$this->voPrice;
+		$vo2=$this->voPrice2;
+		$voStock=$this->voStock;
+		$rowPriceLiveMap=$this->viewPrice->getRowPriceLiveMap();
+		$rowSymbolArrDb=$this->getRowSymbolArrByValue();
+		$tradeMap=$this->loadTradeMap();
+		
+		$rowSymbolArr=array();
+		for($k=0; $k<count($rowSymbolArrDb); $k++){
+			$symbol = $rowSymbolArrDb[$k][0];
+			array_push($rowSymbolArr,$symbol);
+		}
+		
+		foreach($tradeMap as $symbol => $value){
+			if( !in_array($symbol,$rowSymbolArr) ) array_push($rowSymbolArr,$symbol);
+		}
+		//print_p($tradeMap);return;
+		$stockMap=array(
+		);
+		$rowPriceArrMap=array(
+		);
+		
+		$voStat=$this->voStat;
+		$statMap=$this->obJfile->load("stock_ViewStock/statMap");
+		$futureArr=explode(",",$this->ao->conf["future"]);
+		$futureMap=array(
+		);
+		foreach($futureArr as $i=>$str){
+			$str=trim($str,"'");
+			$futureMap[$str]=$str;
+		}
+
+		for($k=0; $k<count($rowSymbolArr); $k++){
+			$symbol = $rowSymbolArr[$k];
+			if(strlen($symbol)<3) continue;
+			$rowPriceArr=$this->getRowPriceArr($vo,$symbol,90);////220
+			//$rowPriceExArr=$this->makeRowPriceArr($vo,$rowPriceArr,1);
+			//$reRowPriceArr=$this->makeRowPriceArr2($vo,$rowPriceArr,3);
+			$reRowPriceArr=$this->makeRowPriceArr2($vo,$rowPriceArr,1);
+			
+			//print_p($reRowPriceArr); break;
+			
+			//if($reRowPriceArr[0][$voRe->value2]<500000) continue;
+			
+			if($tradeMap[$symbol]==null) $tradeMap[$symbol]=array(
+			);
+			$stockMap[$symbol]=array(
+			);
+			
+			$len=count($rowPriceArr);
+			$intervalLen=count($this->intervalArr);
+			for($i=0 ;$i<1 ;$i++){
+				//$vo->row=$rowPriceArr[$i];
+				//if($this->isNull0($vo->row[$vo->close])) continue;
+				
+				$stockMap[$symbol][$voStock->rate]=0;
+				
+				$stockMap[$symbol][$voStock->trade]=$this->mapNoNull($tradeMap[$symbol]);
+				$stockMap[$symbol][$voStock->live]=$this->mapNoNull($rowPriceLiveMap[$symbol]);
+				$live=$stockMap[$symbol][$voStock->live];
+				
+				//$stockMap[$symbol][$voStock->close]=$vo->row[$vo->close];
+				$value0=$live[$vo2->close]*$live[$vo2->volume];
+				$stockMap[$symbol][$voStock->value2]=$reRowPriceArr[$i][$voRe->value2];
+				
+				$perValue=0;
+				if($stockMap[$symbol][$voStock->value2]!=0 && $stockMap[$symbol][$voStock->value2]!=null) $perValue=100*$value0/$stockMap[$symbol][$voStock->value2];
+				
+				//$stockMap[$symbol][$voStock->perBuy]=$this->getPricePer($vo2->buyPrice1,$stockMap[$symbol][$voStock->live]);
+				//$stockMap[$symbol][$voStock->perSell]=$this->getPricePer($vo2->sellPrice1,$stockMap[$symbol][$voStock->live]);
+				//$stockMap[$symbol][$voStock->minC1]=$reRowPriceArr[$i][$voRe->minC1];
+				//$stockMap[$symbol][$voStock->maxC1]=$reRowPriceArr[$i][$voRe->maxC1];
+				
+				$code=$reRowPriceArr[$i][$voRe->code];
+				//$stockMap[$symbol][$voStock->code]=$code;
+				//$stockMap[$symbol][$voStock->avg]=null;
+				//$stockMap[$symbol][$voStock->minMaxArr]=array(round($reRowPriceArr[$i][$voRe->min]),$reRowPriceArr[$i][$voRe->imin],round($reRowPriceArr[$i][$voRe->max]),$reRowPriceArr[$i][$voRe->imax]);
+				
+				$perLow=$this->getPricePer($vo2->low,$stockMap[$symbol][$voStock->live]);
+				//$perHigh= -$this->getPricePer($vo2->high,$stockMap[$symbol][$voStock->live]);
+				$perHigh=$reRowPriceArr[$i][$voRe->perHigh];
+				/*
+				$stockMap[$symbol][$voStock->minMaxArr]=array(
+					round($reRowPriceArr[$i][$voRe->minC1]),round($reRowPriceArr[$i][$voRe->maxC1]),
+					round($reRowPriceArr[$i][$voRe->minC2]),round($reRowPriceArr[$i][$voRe->delta]*10),//round($reRowPriceArr[$i][$voRe->maxC2]),
+					$perLow, $perHigh,
+					$reRowPriceArr[$i][$voRe->maPerC1],$reRowPriceArr[$i][$voRe->maPerC2]
+				);
+				*/
+				$stockMap[$symbol][$voStock->perHigh]=$perHigh;
+				$stockMap[$symbol][$voStock->minC1]=$reRowPriceArr[$i][$voRe->minC1];
+				$stockMap[$symbol][$voStock->maxC1]=$reRowPriceArr[$i][$voRe->maxC1];
+	
+				/////$stockMap[$symbol][$voStock->delta]=$reRowPriceArr[$i][$voRe->delta];
+				/////$stockMap[$symbol][$voStock->minMax]=$reRowPriceArr[$i][$voRe->minMax];
+				/////$stockMap[$symbol][$voStock->status]=$reRowPriceArr[$i][$voRe->status];
+				/////$stockMap[$symbol][$voStock->status0]=$reRowPriceArr[$i][$voRe->status0];
+				/*
+				$stat=$statMap[$code];
+				if($stat!=null){
+					$stockMap[$symbol][$voStock->avg]=$statMap[$code][$voStat->avg];
+				}
+				*/
+				$rate=0;
+				/////////if($stockMap[$symbol][$voStock->value2]>700000) $rate+=1000000000;
+				
+				$willunset=false;
+				if(count($stockMap[$symbol][$voStock->trade])!=0){
+					$trade=$stockMap[$symbol][$voStock->trade];
+					$dateArr=explode(",",$trade["date"]);
+					$priceArr=explode(",",$trade["price"]);
+					$volumeArr=explode(",",$trade["volume"]);
+					$marketArr=explode(",",$trade["market"]);
+					$live=$stockMap[$symbol][$voStock->live];
+					
+					$value=0;
+					$valueNow=0;
+					$profit=0;
+					$tp=0;
+					for($j=0;$j<count($dateArr)-1;$j++){
+						if($marketArr[$j]=="") continue;
+						$date=$dateArr[$j];
+						$tp0=$this->ao->getTplus($date);
+						if($tp0>$tp) $tp=$tp0;
+						$price=$priceArr[$j];
+						$volume=$volumeArr[$j];
+						$value+=$price*$volume;
+						$valueNow+=$this->getPrice($vo2->buyPrice1,$live)*$volume;
+						$profit+=$valueNow-$value;
+					}
+					if($value!=0){
+						$per=round(100*($valueNow-$value)/$value,2);
+						//////$rate-=1000*$per;
+					}
+					else {
+						$per=null;
+					}
+					$rate+=2000000000;
+					if($tp>=3) {
+						$rate+=2000000000;
+						
+						if(strpos($trade["market"], 'V') !== false){
+							$rate+=3000000000;
+						} else if(strpos($trade["market"], 'O') !== false || strpos($trade["market"], 'G') !== false  || strpos($trade["market"], 'S') !== false){
+							$rate+=2000000000;
+						} else if(strpos($trade["market"], 'W') !== false){
+							$rate+=1900000000;
+						}
+					}
+					if($stockMap[$symbol][$voStock->value2]>700000){
+						/////////////$rate-=1000000000;
+					}
+					if($trade["market"]==","){
+						if($stockMap[$symbol][$voStock->value2]>700000){
+							//$rate-=1000000000;
+							/////$rate+=10000000;
+						}
+						$rate-=100000000;
+						
+						//////////////////$rate+= 100*$reRowPriceArr[$i][$voRe->minC1];
+						$rate+=round($perValue*100);
+						//$rate-=100*$stockMap[$symbol][$voStock->perSell];
+						//$rate-=100*$stockMap[$symbol][$voStock->perSell];
+						/*
+						if( ($reRowPriceArr[$i][$voRe->status0]=="greatF" || $reRowPriceArr[$i+0][$voRe->status]=="greatF") && 
+						$reRowPriceArr[$i][$voRe->maxC2] > -1 && $reRowPriceArr[$i][$voRe->value2]>=1000000){
+							$rate+=9000000;
+							if($reRowPriceArr[$i+0][$voRe->status]=="greatF") $rate+=9000000;
+						}
+						*/
+					}
+					else{
+						
+						if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 5.5 && 
+					  ($reRowPriceArr[$i][$voRe->maxC1]*$reRowPriceArr[$i][$voRe->minC1]/100 < 12) && 
+					  $reRowPriceArr[$i][$voRe->minC1] > 30 && $reRowPriceArr[$i][$voRe->delta] >=0.9 &&
+					  ($reRowPriceArr[$i][$voRe->value2]>=500000 || $value0>=500000)) {
+							$rate+=9000000;
+							$rate+=round($perValue*100);
+							
+						}
+						else {
+							
+							$rate+= -100*$reRowPriceArr[$i][$voRe->minC1] + 10000*$perHigh;
+							//$rate+=round($perValue*100);
+						}
+						
+						
+					}
+				} else {
+					/*
+					if( ($reRowPriceArr[$i][$voRe->status0]=="greatF" || $reRowPriceArr[$i+0][$voRe->status]=="greatF") && 
+					$reRowPriceArr[$i][$voRe->maxC2] > -1 && $reRowPriceArr[$i][$voRe->value2]>=1000000){
+						$rate+=9000000;
+						if($reRowPriceArr[$i+0][$voRe->status]=="greatF" && $perValue>=40) $rate+=9000000;
+						///////$rate+=$reRowPriceArr[$i][$voRe->value2]/1000;
+						$rate+=round($perValue*100);
+						//////////$rate+= 100*$reRowPriceArr[$i][$voRe->minC1];
+					} else {
+						///////////$rate+=$reRowPriceArr[$i][$voRe->value2]/1000;
+						$rate+=round($perValue*100);
+					}
+					*/
+					if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 5.5 && 
+					  ($reRowPriceArr[$i][$voRe->maxC1]*$reRowPriceArr[$i][$voRe->minC1]/100 < 12) && 
+					  $reRowPriceArr[$i][$voRe->minC1] > 30 && $reRowPriceArr[$i][$voRe->delta] >=0.9 &&
+					  ($reRowPriceArr[$i][$voRe->value2]>=500000 || $value0>=500000)){
+						$rate+=9000000;
+						$rate+=round($perValue*100);
+					} else {
+						$rate+=round($perValue*100);
+						//$rate+= 100*$reRowPriceArr[$i][$voRe->maxC2];
+						if($reRowPriceArr[$i][$voRe->value2]<=1000000) $willunset=true;
+					}
+				}
+				if($rowPriceArr[$i][$vo->symbol]=="VN30INDEX") $rate=99000000000;
+				if($rowPriceArr[$i][$vo->symbol]=="VNINDEX") $rate=90000000000;
+				//if($rowPriceArr[$i][$vo->symbol]=="HAINDEX") $rate=89000000000;
+				//if($rowPriceArr[$i][$vo->symbol]=="HA30INDEX") $rate=87000000000;
+				//if($rowPriceArr[$i][$vo->symbol]=="VNALLINDEX") $rate=80000000000;
+				
+				//if(substr($rowPriceArr[$i][$vo->symbol], 0, 5) =="VN30F") $rate=79000000000;
+				/*
+				foreach($futureArr as $iii=> $fsymbol){
+					if($rowPriceArr[$i][$vo->symbol]==$fsymbol){
+						$rate=79000000000+$iii*1000000;
+						$willunset=false;
+						break;
+					}
+				}
+				*/
+				
+				//if(in_array($rowPriceArr[$i][$vo->symbol],$futureArr)) {
+				if($futureMap[ $rowPriceArr[$i][$vo->symbol] ] !=null) {
+					///$rate+=79000000000;//+round($reRowPriceArr[$i][$voRe->value2]/1000000);
+					$rate=79000000000+round($reRowPriceArr[$i][$voRe->value2]/1000000);
+					$willunset=false;
+				}
+				
+				$stockMap[$symbol][$voStock->rate]=$rate;
+				if($rowPriceArr[$i][$vo->symbol]=="VNALLINDEX") unset($stockMap[$symbol]);
+				if($rowPriceArr[$i][$vo->symbol]=="HA30INDEX") unset($stockMap[$symbol]);
+				if($rowPriceArr[$i][$vo->symbol]=="HAINDEX") unset($stockMap[$symbol]);
+				if($willunset) unset($stockMap[$symbol]);
+			}
+			
+			if(count($stockMap[$symbol][$voStock->trade])==0 && !$this->isMarket($symbol)){
+				//if($stockMap[$symbol][$voStock->stat]["count"]<50) unset($stockMap[$symbol]);
+				//if($stockMap[$symbol][$voStock->stat1]["count"]<50) unset($stockMap[$symbol]);
+			}
+		}
+		//stock_ViewStock::$rate=$voStock->rate;
+		function sortFunc($a, $b){
+			if($a[0] > $b[0]) return -1;//rate
+			if($a[0] < $b[0]) return 1;
+			return 0;
+		}
+		uasort($stockMap, "sortFunc");
+		//print_p($stockMap);
+		return $stockMap;
+//@>
+	}
+	public function mapNoNull(&$map){
+		if($map==null) return array(
+		);
+		return $map;
+	}
+	public function loadTradeMap(){
+		$tradeMap=$this->obJfile->load("stock_ViewStock/tradeMap");
+		return $tradeMap;
+	}
+	
+	public function loadStatMap(){
+		$statMap=$this->obJfile->load("stock_ViewStock/statMap");
+		return $statMap;
+	}
+	public function rpcMakeStatMapzzz(){
+//<@ $this->json();
+		$rowSymbolArr=$this->getRowSymbolArr();
+		
+		$rowPriceArrMap=array(
+		);
+		for($k=0; $k<count($rowSymbolArr); $k++){
+			$symbol = $rowSymbolArr[$k]["symbol"];
+			if(strlen($symbol)<3) continue;
+			if($this->isMarket($symbol)) continue;
+			
+			$rowPriceArr=$this->getRowPriceArrS($symbol);
+			$this->makeRowPriceArr($rowPriceArr);
+			$rowPriceArrMap[$symbol]=$rowPriceArr;
+		}
+		
+		$v=300000;
+		$f=1/30;
+
+		$no=0;
+		$tradeMap=array(
+		);
+		$vMap=array(
+		);
+		$len=count($rowPriceArrMap["VNINDEX"]);
+		for($i=$len-1;$i>=0;$i--){
+			$stockMap=array(
+			);
+			for($k=0; $k<count($rowSymbolArr); $k++){
+				$symbol = $rowSymbolArr[$k]["symbol"];
+				if(strlen($symbol)<3) continue;
+				if($this->viewStock->isMarket($symbol)) continue;
+				
+				if($rowPriceArrMap[$symbol][$i]==null || $rowPriceArrMap[$symbol][$i]["codeFull"]==null) continue;
+				$stockMap[$symbol]=array(
+				);
+			}
+			
+			foreach($tradeMap as $symbol2=>$trade){
+				$symbol=$tradeMap[$symbol2]["symbol"];
+				$codeFull=$tradeMap[$symbol2]["codeFull"];
+				$profit=$rowPriceArrMap[$symbol][$i]["close"]/$tradeMap[$symbol2]["close"];
+				$vSell=$tradeMap[$symbol2]["vBuy"]*$profit;
+				$vBuf[$codeFull]+=(1-0.005)*$vSell;
+			}
+			
+			foreach($stockMap as $symbol=>$stock){
+				$codeFull=$rowPriceArrMap[$symbol][$i]["codeFull"];
+				$symbol2=$symbol.$i;
+				$tradeMap[$symbol2]=array(
+				);
+				$tradeMap[$symbol2]["symbol"]=$symbol;
+				$tradeMap[$symbol2]["codeFull"]=$codeFull;
+				$tradeMap[$symbol2]["i"]=$i;
+				$tradeMap[$symbol2]["close"]=$rowPriceArrMap[$symbol][$i]["close"];
+				$tradeMap[$symbol2]["vBuy"]=$f*$vBuf;
+				$no++;
+				$vBuy=$tradeMap[$symbol2]["vBuy"];
+				$vBuyT+=(1+0.005)*$vBuy;
+				
+				if($v[$codeFull]==null){
+					$v[$codeFull]=10000;
+				}
+				$v[$codeFull]+=(1+0.005)*$vBuy;
+			}
+			
+			foreach($tradeMap as $symbol2=>$trade){
+				$symbol=$tradeMap[$symbol2]["symbol"];
+				if($i==($tradeMap[$symbol2]["i"]-4)){
+					$codeFull=$tradeMap[$symbol2]["codeFull"];
+					$profit=$rowPriceArrMap[$symbol][$i]["close"]/$tradeMap[$symbol2]["close"];
+					$vSell=$tradeMap[$symbol2]["vBuy"]*$profit;
+
+					$v[$codeFull]+=(1-0.005)*$vSell;					
+					unset($tradeMap[$symbol2]);
+				}
+			}
+			//print_p($i." ".$vBuf);
+		}
+		//print_p($vBuf);
+//@>
+	}
+	public function rpcMakeStatMapAppfog($statMap){
+//<@ $this->json($statMap);
+		$this->obJfile->save("stock_ViewStock/statMap",$statMap);
+		return 1111;
+//@>
+	}
+	public function rpcMakeStatMap(){
+//<@ $this->json();
+		$vo=$this->voPrice3;
+		//$vo=get(new stock_Vo())->_con("close,volume","");
+		$voRe=$this->voRowPriceArr;
+		$rowSymbolArr=$this->getRowSymbolArr();
+		$len=count($rowSymbolArr);
+		
+		$voStat=$this->voStat;
+		
+		
+		$this->obJfile->delete("stock_ViewStock/statMap");
+		$statMap=$this->obJfile->load("stock_ViewStock/statMap");
+		if($statMap==null){
+			$statMap=array(
+			);
+			for($k=0; $k<$len; $k++){
+	//if($k==10) break;
+				$symbol = $rowSymbolArr[$k][0];
+				if(strlen($symbol)!=3) continue;
+				$rowPriceArr=$this->getRowPriceArrS($vo,$symbol);			
+				$reRowPriceArr=$this->makeRowPriceArr2($vo,$rowPriceArr);
+				$len2=count($rowPriceArr);
+				for($i=5;$i<$len2;$i++){
+					$code=$reRowPriceArr[$i][$voRe->code];
+					if($code==null) continue;
+					
+					if($statMap[$code]==null){
+						$statMap[$code]=array();
+						$statMap[$code][$voStat->total]=0;
+						//$statMap[$code][$voStat->inc]=0;
+						$statMap[$code][$voStat->avg]=0;
+					}
+
+					$per=0;
+					for($j=1;$j<=100;$j++){
+						$x=$i-$j;
+						if($x<0) break;
+						$per=100*($rowPriceArr[$x][$vo->close]-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close];
+						if($reRowPriceArr[$x][$voRe->status]=="lessF") {
+							break;
+						}
+					}
+					if($per>=13){
+						$statMap[$code][$voStat->avg]+=$per;
+						$statMap[$code][$voStat->total]+=1;
+					}
+				}
+			}
+			
+			foreach($statMap as $code=>$stat){
+				//$statMap[$code][$voStat->prop]=round(100*$statMap[$code][$voStat->inc]/$statMap[$code][$voStat->total],2);
+				if($statMap[$code][$voStat->total]!=0) $statMap[$code][$voStat->avg]=round($statMap[$code][$voStat->avg]/$statMap[$code][$voStat->total],2);
+			}
+		}
+		foreach($statMap as $code=>$stat){
+			if($statMap[$code][$voStat->total]<=100) unset($statMap[$code]);
+		}
+		
+		function sortFunc($a, $b){
+			if($a[1] > $b[1]) return -1;
+			if($a[1] < $b[1]) return 1;
+			return 0;
+		}	
+		uasort($statMap, "sortFunc");
+			
+		$this->obJfile->save("stock_ViewStock/statMap",$statMap);
+		
+		$str="stt\tcode\ttotal\tavg\n";
+		$i=0;
+		$totalAll=0;
+		$str0="";
+		foreach($statMap as $code=>$stat){
+			$str.=($i+1)."\t".$code."\t".$statMap[$code][$voStat->total]."\t".$statMap[$code][$voStat->avg]."\n";
+			
+			$totalAll+=$statMap[$code][$voStat->total];
+			
+			$i++;
+		}
+		$str0="tAll\t".$totalAll;
+		print_p($str0);
+		print_p($str);
+		//print_p($statMap);
+//@>
+	}
+	
+	
+	public function rpcMakeStatMapzz(){
+//<@ $this->json();
+		$this->voStat=get(new stock_Vo())->_con("codeFull,count,avg,avgInc,avgDec,prop,num","");
+		$vo=$this->voPrice3;
+		$rowSymbolArr=$this->getRowSymbolArr();
+		$statMap = array(
+		);
+		$rowPriceArrMap=array(
+		);
+		for($k=0; $k<count($rowSymbolArr); $k++){
+//if($k==5) break;
+			$symbol = $rowSymbolArr[$k][0];
+			if(strlen($symbol)<3) continue;
+			
+			$rowPriceArr=$this->getRowPriceArrS($vo,$symbol);
+			$rowPriceExArr=$this->makeRowPriceArr($vo,$rowPriceArr);
+			//$rowPriceArrMap[$symbol]=$rowPriceArr;
+		//}
+		//$this->makeIndex();
+		//foreach($rowPriceArrMap as $symbol=>&$rowPriceArr){
+			$len=count($rowPriceArr);
+			$intervalLen=count($this->intervalArr);
+			for($i=0 ;$i<$len ;$i++){
+				if($len-$i-1<$this->intervalArr[$intervalLen-1]) break;//-$i-1
+				if($this->isNull0($rowPriceArr[$i][$vo->close])) continue;
+				$codeFull=$rowPriceExArr[$i]["codeFull"];
+				//print_p($codeFull);
+				if($codeFull==null) continue;
+				
+				if($i<3) continue;
+				$profit=0;
+				for($j=$i-3; $i-$j<=30; $j--){
+					if($j<0) break;
+					if($this->isNull0($rowPriceArr[$j][$vo->close]) || $this->isNull0($rowPriceArr[$j+1][$vo->close])) continue;
+					$profit=($rowPriceArr[$j][$vo->close]-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close];
+					$per=($rowPriceArr[$j][$vo->close]-$rowPriceArr[$j+1][$vo->close])/$rowPriceArr[$j+1][$vo->close];
+					if($profit>=0 && $per>=0.02){
+					} else{
+						break;
+					}
+				}
+				/*
+				if($i<20) continue;
+				$count=0;
+				$close=0;
+				for($j=$i-3; $j>=$i-20; $j--){
+					if($this->isNull0($rowPriceArr[$j]["close"])) continue;
+					$close += $rowPriceArr[$j]["close"];
+					$count++;
+				}
+				if($count!=0) $close = $close/$count;
+				$profit = $close/$rowPriceArr[$i]["close"];
+				*/
+				$rowPriceExArr[$i]["profit"]=$profit;
+				if($statMap[$codeFull]==null) $statMap[$codeFull]=array(
+					"codeFull"=>$codeFull
+					,"total"=>0
+					,"count"=>0
+					,"totalInc"=>0
+					,"countInc"=>0
+					,"totalDec"=>0
+					,"countDec"=>0
+				);
+				
+				$statMap[$codeFull]["total"]+=$profit;
+				$statMap[$codeFull]["count"]++;
+				if($profit>0){
+					$statMap[$codeFull]["totalInc"]+=$profit;
+					$statMap[$codeFull]["countInc"]++;
+				} else {
+					$statMap[$codeFull]["totalDec"]+=$profit;
+					$statMap[$codeFull]["countDec"]++;
+				}
+			}
+		}
+		$str="";
+		foreach($statMap as $key=>$stat){
+			if($statMap[$key]["count"]!=0) $statMap[$key]["avg"]=round(1+$statMap[$key]["total"]/$statMap[$key]["count"],4);
+			if($statMap[$key]["countInc"]!=0) $statMap[$key]["avgInc"]=round(1+$statMap[$key]["totalInc"]/$statMap[$key]["countInc"],4);
+			if($statMap[$key]["countDec"]!=0) $statMap[$key]["avgDec"]=round(1+$statMap[$key]["totalDec"]/$statMap[$key]["countDec"],4);
+			if($statMap[$key]["count"]!=0) $statMap[$key]["prop"]=round($statMap[$key]["countInc"]/$statMap[$key]["count"],4);
+			//if($statMap[$key]["avgDec"]!=0) $statMap[$key]["bet"]=abs(round($statMap[$key]["avgInc"]/$statMap[$key]["avgDec"],2));
+			if(1==0&&$statMap[$key]["prop"]!=null){
+				$a = 1-$statMap[$key]["avgDec"];
+				$b = $statMap[$key]["avgInc"]-1;
+				$p = $statMap[$key]["prop"];
+				$q = 1 - $p;
+				//if($a!=0&&$b!=0) $statMap[$key]["kelly"] = round( ($b*$p - $a*$q)/$b ,2);
+				if($a!=0&&$b!=0) $statMap[$key]["kelly"] = $p/$a - $q/$b;
+			}
+			unset($statMap[$key]["total"]);
+			unset($statMap[$key]["totalInc"]);
+			unset($statMap[$key]["countInc"]);
+			unset($statMap[$key]["totalDec"]);
+			unset($statMap[$key]["countDec"]);
+		}
+		function sortFunc($a, $b){
+			if($a["count"] > $b["count"]) return -1;
+			if($a["count"] < $b["count"]) return 1;
+			return 0;
+		}
+		uasort($statMap, "sortFunc");
+		$num=0;
+		foreach($statMap as $key=>$stat){
+			$num++;
+			$statMap[$key]["num"]=$num;
+		}
+		foreach($statMap as $key=>$stat){
+			if($statMap[$key]["kelly"]==null) continue;
+			foreach($stat as $key2=>$value){
+				$str.=$key2."\t";
+			}
+			$str.="\n";
+			break;
+		}
+		foreach($statMap as $key=>$stat){
+			foreach($stat as $key2=>$value){
+				$str.=$value."\t";
+			}
+			$str.="\n";
+		}
+		print_p($str);
+		$this->obJfile->save("stock_ViewStock/statMap",$statMap);
+		
+		if($this->ao->canSaveAppfog()){
+			$url="http://cophieu.ap01.aws.af.cm/j.php?s=stock_ViewStock/rpcMakeStatMapAppfog";
+			//$url='http://127.0.0.1/stock/j.php?s=stock_ViewStock/rpcTradeCapAppfog';
+			$client = new Zend_Http_Client($url);
+			$paramArray=array($statMap);
+			$client->setParameterPost('paramArray', json_encode($paramArray));
+			$client->request("POST")->getBody();
+		}
+//@>
+	}
+	
+	
+	
+	public static function main(){
+		//@ que($__doc)->ready(function(){
+			stock_Ao::get()->bean("stock_ViewStock/con")->view();
+		//@ }); 
+	}
+}

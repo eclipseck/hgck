@@ -1,0 +1,77 @@
+<?php
+import("stock_Ao");
+class stock_ObJfile{
+//<@
+	public function con(){
+		$this->ao=stock_Ao::get();
+		return $this;
+	}
+	public function save($name, $obj){
+		$sql = "REPLACE INTO stock_jfile SET
+		name = :name,
+		value = :value,
+		jdate = NOW()
+		";
+		$stm = $this->ao->pdo->prepare($sql);
+		$stm->execute(array(
+			"name"=>$name,
+			"value"=>json_encode($obj)
+		));
+	}
+	
+	public function load($name){
+		$sql = "SELECT * FROM stock_jfile WHERE name = :name";
+		$stm = $this->ao->pdo->prepare($sql);
+		$stm->execute(array(
+			"name"=>$name
+		));
+		$row = $stm->fetch(PDO::FETCH_ASSOC);
+		if($row!=null) return json_decode($row["value"], TRUE);
+		
+		if(substr($name, -3, 3) == "Map") return array(
+		);
+		if(substr($name, -3, 3) == "Arr") return array();
+		if(substr($name, -3, 3) == "Str") return "";
+		return null;
+	}
+	
+	public function saveStr($name, $str){
+		$sql = "REPLACE INTO stock_jfile SET
+		name = :name,
+		value = :value,
+		jdate = NOW()
+		";
+		$stm = $this->ao->pdo->prepare($sql);
+		$stm->execute(array(
+			"name"=>$name,
+			"value"=>$str
+		));
+	}
+	
+	public function loadStr($name){
+		$sql = "SELECT * FROM stock_jfile WHERE name = :name";
+		$stm = $this->ao->pdo->prepare($sql);
+		$stm->execute(array(
+			"name"=>$name
+		));
+		$row = $stm->fetch(PDO::FETCH_ASSOC);
+		return $row["value"];
+	}
+	
+	public function delete($name){
+		$sql = "DELETE FROM stock_jfile WHERE name = :name";
+		$stm = $this->ao->pdo->prepare($sql);
+		$stm->execute(array(
+			"name"=>$name
+		));
+	}
+	/*
+	public function clean(){
+		$sql = "DELETE FROM stock_jfile WHERE (name like '%_stock/rowTableMap%' OR name like '%_rateMap%' ) AND jdate < DATE_SUB(NOW(), INTERVAL 7 DAY)";
+		$stm = $this->ao->pdo->prepare($sql);
+		$stm->execute(array(
+		));
+	}
+	*/
+//@>
+}

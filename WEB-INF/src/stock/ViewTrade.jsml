@@ -1,0 +1,642 @@
+<?php
+import("stock_VoPrice");
+import("stock_ViewStock");
+import("stock_ViewDetail");
+import("stock_ObJfile");
+import("stock_ObDs");
+class stock_ViewTrade{
+	public function con(){
+		$this->ao=stock_Ao::get();
+		$this->stock_ObDs=$this->ao->bean("stock_ObDs/con");
+		$this->viewStock=$this->ao->bean("stock_ViewStock/con");
+		$this->viewDetail=$this->ao->bean("stock_ViewDetail/con");
+		$this->obJfile=$this->ao->bean("stock_ObJfile/con");
+		$this->voPrice3=$this->ao->bean("stock_VoPrice/con3");
+		$this->w = 3;
+		$this->padX = 10;
+		$this->ox=0;
+		$this->oy=0;
+		$this->padY = 0;
+		$this->minMaxPadFactor = 2.5;
+		$this->minMaxPadFactorWeb = $this->minMaxPadFactor;
+	
+		$this->width = 1200;//900;//1025;
+		$this->height = 560;
+		
+		$this->rowPriceArrMap=array(
+		);
+		return $this;
+	}
+
+	public $jque;
+	public function view(){
+		if($this->jque!=null) return $this->jque;
+		$this->jque = que("<div></div>");
+		$this->divCanvasText = que("<div style='position:relative'></div>")->appendTo($this->jque);
+		$this->canvas = que("<canvas></canvas>")->appendTo($this->jque)->css(array(
+			"background-color" => "white",
+			"height" => $this->height,
+			"width" => $this->width, "border"=>"solid 0px"));
+		$this->canvas->attr(array("width"=>$this->width, "height"=>$this->height));
+
+		$canvas = $this->canvas->get(0);
+		/*<@ if (typeof G_vmlCanvasManager != 'undefined') G_vmlCanvasManager->initElement($canvas); @>*/
+		$this->context = $canvas->getContext('2d');
+		
+		//@ que($this)->bind("rpc.rpcCap", function($event, $result){ $this->onrpcCap($event, $result); });
+		
+		return $this;
+	}
+	
+	public static $startDate2  = "2011-08-16";
+	
+	public static $startDate = "2011-09-13";
+	
+	public static $startDate3 = "2011-07-29";
+	
+	public static $startDate4 = "2011-06-14";
+
+	public $w=5;
+	public $padX = 10;
+	public $valueShift = 0;
+	public $ox=0;
+	public $oy=40;
+	public $minMaxPadFactor = 1.93;
+
+	public $stickY = 11;
+
+	public $padY = 10;
+	public $ma1 = 5;
+	public $ma2 = 15;
+	public $ma3 = 35;
+	public $ma4 = 60;
+	public $ma5 = 90;
+	public $ma6 = 120;
+
+	public $minStockDataX;
+	public $maxStockDataX;
+	public $rangeX;
+	public $scaleX;
+
+	public $minStockDataY = 30;
+	public $maxStockDataY = 80;
+	public $rangeY;
+	public $scaleY;
+
+	public $minStockDataY2 = 0;
+	public $maxStockDataY2 = 3000000000;
+	public $rangeY2;
+	public $scaleY2;
+
+	public $minStockDataY3 = 0;
+	public $maxStockDataY3 = 100;
+	public $rangeY3;
+	public $scaleY3;
+
+	public $rowPriceArr = array();
+	public $candIMap = array(
+	);
+	public $canvas;
+	public $context;
+	public $divCanvasText;
+	
+	public $width;
+	public $height;
+	
+	public function conPaint(){
+		$this->symbol = $this->viewDetail->symbol;
+		$this->rowPriceArrMap=array(
+		);
+		$this->rowPriceArrMap[$this->symbol]=$this->viewDetail->rowPriceArr;
+		return $this;
+	}
+	public function viewPaint(){
+		$this->context->clearRect(0, 0, $this->width, $this->height);
+		$this->divCanvasText->html("");
+		$this->paint();
+	}
+
+	public function getX($i){
+		return ($this->width - $this->ox - $this->padX) - ($this->w+1)*$i;
+	}
+	public function getI($x){
+		return round( (($this->width - $this->ox - $this->padX) - $x)/($this->w+1) );
+	}
+	public function saveScale(){
+		//$this->rangeX = $this->maxStockDataX - $this->minStockDataX;
+		//$this->scaleX = ($this->width - $this->ox - $this->padX) / $this->rangeX;
+
+		$this->rangeY = $this->maxStockDataY - $this->minStockDataY;
+		$this->scaleY = ($this->height - $this->oy - $this->padY) / $this->rangeY;
+
+		$this->rangeY2 = $this->maxStockDataY2 - $this->minStockDataY2;
+		$this->scaleY2 = ($this->height - $this->oy) / $this->rangeY2;
+
+		$this->rangeY3 = $this->maxStockDataY3 - $this->minStockDataY3;
+		$this->scaleY3 = ($this->height - $this->oy) / $this->rangeY3;
+	}
+	public function getY($y){
+		return ($this->height - $this->oy - $this->padY) - ($y- $this->minStockDataY) * $this->scaleY;
+	}
+	public function getY2($y){
+		return ($this->height - $this->oy - $this->padY) - ($y- $this->minStockDataY2) * $this->scaleY2;
+	}
+	public function getY3($y){
+		return ($this->height - $this->oy - $this->padY) - ($y- $this->minStockDataY3) * $this->scaleY3;
+	}
+
+	public function saveDtParams(){
+		/*
+		$vo = new stock_VoPrice();
+		$minStockDataY = 9999999;
+		$iMin=0;
+		$DAY_BREAK = 100;
+		$length = count($this->capMap);
+		for($i=0; $i<$length; $i++){
+			$x = $this->getX($i);
+			if($x<0) break;
+			
+			if($this->capMap[$i] == 0) continue;
+			if($this->capMap[$i] < $minStockDataY){
+				$minStockDataY = $this->capMap[$i];
+				$iMin = $i;
+			}
+		}
+			
+		$maxStockDataY = 0;
+		$length = count($this->capMap);
+		for($i=0; $i<$length; $i++){
+			if($i > $iMin) break;
+			$x = $this->getX($i);
+			if($x<0) break;
+			
+			if($this->capMap[$i] == 0 ) continue;
+			if($this->capMap[$i] > $maxStockDataY) {
+				$maxStockDataY = $this->capMap[$i];
+			}
+		}
+		*/
+		$this->minStockDataY = 0.5*$this->viewStock->capital/1000;
+		$this->maxStockDataY = 3.0*$this->viewStock->capital/1000;
+		$this->saveScale();
+	}
+
+	public function paintText($text, $left, $top, $color){
+		if($color==null) $color='black';
+		return que(implode("", array("<div style='font-size:10px;'>",$text,"</div>")))->css(array("position"=>"absolute", "left"=>$left, "top"=>$top, "color"=>$color))->appendTo($this->divCanvasText);
+	}
+
+	public function paint(){
+		$this->paintField();
+		if($this->symbol == "MARKET") {
+			return;
+		}
+	
+		$this->interval = 1;
+		$this->padX1 = 1*550+0*171;
+		if(1==0 && $this->symbol != "HAINDEX"){
+			$this->rowPriceArr = $this->rowPriceArrMap["HAINDEX"];
+			$this->isIndex = true;
+			
+			//$this->con3();
+			$this->padX = 100;//$this->padX1;
+			$this->w = 3;
+			$this->saveDtParams();
+			$this->paintClose();
+		}
+		
+		$this->rowPriceArr = $this->rowPriceArrMap[$this->symbol];
+		$this->isIndex = false;
+		
+		//$this->con();
+		$this->padX = 60;
+		$this->w = 3;
+		$this->padY = 0;
+		//$this->minMaxPadFactor=1.5;
+		$this->saveDtParams();
+		
+		$this->makeMa();
+		//$this->makeFirst();
+		//$this->paintTable();
+		$this->paintValue();
+		$this->paintMa();
+		$this->paintCandleStick();
+		//$this->paintClose();
+		$this->paintStat();
+	}
+	public function paintStat(){
+		$flag=1;
+		for($i=0; $i<$this->rowPriceArr->length; $i++){
+			$x = $this->getX($i) - 0*50;
+			if($x<0) break;
+			$value = $this->rowPriceArr[$i]->close;
+			if($value==null || $value == 0) continue;
+			$y = $this->getY($value);
+
+			if($i%10==0 || $i%10==1) {
+				$x1=$this->getX($i+5);
+				$y1=$this->getY($this->rowPriceArr[$i]->low);
+				if($flag==0){
+					$this->paintText($this->rowPriceArr[$i]["codeFull"] ,$x1+5,$y1-100-100);
+					$this->paintText($this->rowPriceArr[$i]["count"] ,$x1+5,$y1-80-100);
+					$this->paintText(round(10000*($this->rowPriceArr[$i]["avg"]-1)) ,$x1+5,$y1-60-100);
+					$flag=1;
+				} else {
+					$this->paintText(round(10000*($this->rowPriceArr[$i]["avg"]-1)) ,$x1+5,$y1-100);
+					$this->paintText($this->rowPriceArr[$i]["count"] ,$x1+5,$y1-80);
+					$this->paintText($this->rowPriceArr[$i]["codeFull"] ,$x1+5,$y1-60);
+					$flag=0;
+				}
+			}
+			if($i%10==0) {
+				$this->context->beginPath();
+				$this->context->fillStyle = 'Black';
+				$this->context->arc($x-1, $this->getY($this->rowPriceArr[$i]->low)+5, 3, 0, 1 * Math::PI, false);
+				$this->context->fill();
+			}
+		}
+	}
+
+	public function paintOxy(){
+		$this->context->restore();
+		$this->context->beginPath();
+		$this->context->strokeStyle = 'black';
+		$this->context->globalAlpha = 1;
+		$this->context->lineWidth = 1;
+		//Draw Oy
+		$ox = 0;
+		$ox2 = $this->width - $this->ox;
+		$this->context->moveTo($ox, $this->getY($this->minStockDataY) + $this->padY);
+		$this->context->lineTo($ox, $this->getY($this->maxStockDataY));
+		$this->context->moveTo($ox2, $this->getY($this->minStockDataY) + $this->padY);
+		$this->context->lineTo($ox2, $this->getY($this->maxStockDataY));
+
+		$one = ($this->maxStockDataY - $this->minStockDataY)/($this->stickY-1);
+		for($value=$this->minStockDataY; $value<=$this->maxStockDataY; $value = $value+$one){
+			$y = $this->getY($value);
+			if($y-8<=0 || $y>=$this->getY($this->minStockDataY)) continue;
+			$this->context->moveTo($ox2, $y);
+			$this->context->lineTo($ox2-8, $y);
+			$this->paintText(round($value,1), $ox2 + $this->ox - 34, $y - 8);
+		}
+
+		//draw Ox
+		//$y = $this->getY($this->minStockDataY);// + $this->padY;
+		//$this->context->moveTo($ox, $y);
+		//$this->context->lineTo($ox2, $y);
+
+		for($i=0; $i<$this->rowPriceArr->length; $i++){
+			$x = $this->getX($i);
+			if($x<$this->padX) break;
+		}
+
+		$this->context->closePath();
+		$this->context->stroke();
+
+
+		for($i=0; $i<$this->rowPriceArr->length; $i++){
+			$x = $this->getX($i);
+			if($x<$this->padX) break;
+			if(($i==-1) ){// || ((substr($this->rowPriceArr[$i]->stockDate,0,10) == stock_ViewChart::$startDate || substr($this->rowPriceArr[$i]->stockDate,0,10) == stock_ViewChart::$startDate2 || substr($this->rowPriceArr[$i]->stockDate,0,10) == stock_ViewChart::$startDate3 || substr($this->rowPriceArr[$i]->stockDate,0,10) == stock_ViewChart::$startDate4) )){
+			//if($i==10 || $i==20 || $i==60 || $i==120){
+				if($i==120) $this->context->strokeStyle='Green';
+				if($i==10) $this->context->strokeStyle='Purple';
+				if($i==20) $this->context->strokeStyle='Teal';
+				if($i==60) $this->context->strokeStyle='Sienna';
+				//if(substr($this->rowPriceArr[$i]->stockDate,0,10) == stock_ViewChart::$startDate ) $this->context->strokeStyle='Purple';
+				//if(substr($this->rowPriceArr[$i]->stockDate,0,10) == stock_ViewChart::$startDate2 ) $this->context->strokeStyle='Sienna';
+				//if(substr($this->rowPriceArr[$i]->stockDate,0,10) == stock_ViewChart::$startDate3 ) $this->context->strokeStyle='Teal';
+				//if(substr($this->rowPriceArr[$i]->stockDate,0,10) == stock_ViewChart::$startDate4 ) $this->context->strokeStyle='Green';
+				//if($i==10) 
+				//if($this->w==1) continue;
+				$this->context->restore();
+				$this->context->beginPath();
+				$this->context->strokeStyle='Red';				
+				$this->context->globalAlpha=1;
+				$this->context->lineWidth=1;
+				$this->context->moveTo($x, $y);
+				$this->context->lineTo($x, $this->getY($this->maxStockDataY) );
+				$this->context->closePath();
+				$this->context->stroke();
+			}
+		}
+		return;
+	}
+	
+	public function paintCap(){
+		$n=0;
+		foreach($this->capMap as $m=>$vArr){
+			$this->context->restore();
+			$this->context->beginPath();
+			if($n==0) $this->context->strokeStyle = 'blue';
+			if($n==1) $this->context->strokeStyle = 'blue';//'Red';
+			if($n==2) $this->context->strokeStyle = 'Red';
+			if($n==3) $this->context->strokeStyle = 'Red';//'Sienna';
+			if($n==4) $this->context->strokeStyle = 'Teal';
+			if($n==5) $this->context->strokeStyle = 'Teal';//'HotPink';
+			
+			$this->context->lineWidth=2;
+			$this->context->globalAlpha=1;
+			//alert(JSON::stringify($vArr));break;
+			$len=count($vArr);
+			for($i=0; $i<$len; $i++){
+				$x = $this->getX($i);
+				if($x<0) break;
+				$value = $vArr[$i];
+				if($value==null || $value == 0) continue;
+				$y = $this->getY($value);
+				if($i==0){
+					$this->context->moveTo($x, $y);
+					$this->paintText("1/".$m ,$x+5,$y-8);
+				} else{
+					$this->context->lineTo($x, $y);
+				}
+			}
+			$this->context->stroke();
+			$this->context->globalAlpha=1;
+			$n++;
+		}
+	}
+	public function conPaint2(){
+		return $this;
+	}
+	public function viewPaint2(){
+		$this->context->clearRect(0, 0, $this->width, $this->height);
+		$this->divCanvasText->html("");
+		
+		$this->interval = 1;
+		$this->padX1 = 1*550+0*171;
+		
+		$this->isIndex = false;
+		
+		//$this->con();
+		$this->padX = 60;
+		$this->w = 3;
+		$this->padY = 0;
+		//$this->minMaxPadFactor=1.5;
+		$this->saveDtParams();
+		$this->paintOxy();
+		
+		//$this->makeMa();
+		//$this->makeFirst();
+		//$this->paintTable();
+		//$this->paintValue();
+		//$this->paintMa();
+		//$this->paintCandleStick();
+		//$this->paintClose();
+		//$this->paintStat();
+		$this->paintCap();
+	}
+	
+	public function rpcCap(){
+//<@ $this->json();
+		/*$capMap=$this->obJfile->load("stock_ViewTrade/capMap");
+		if(count($capMap)!=0){
+			$this->indexArr=$this->obJfile->load("stock_ViewTrade/indexArr");
+			return $capMap;
+		}*/
+		$rowSymbolArr=$this->viewStock->getRowSymbolArr();
+		//$statMap=$this->viewStock->loadStatMap();
+		
+		//$this->obJfile->delete("stock_ViewTrade/rowPriceArrMap");
+		//$rowPriceArrMap=$this->obJfile->load("stock_ViewTrade/rowPriceArrMap");
+		$rowPriceArrMap=array(
+		);
+		$rowPriceExArrMap=array(
+		);
+		$vo3=$this->voPrice3;
+		if(count($rowPriceArrMap)==0){
+			$rowPriceArrMap=array(
+			);
+			for($k=0; $k<count($rowSymbolArr); $k++){
+				$symbol = $rowSymbolArr[$k][0];
+				if(strlen($symbol)<3) continue;
+				if($this->viewStock->isMarket($symbol)) continue;
+				
+				$rowPriceArr=$this->viewStock->getRowPriceArrS($vo3,$symbol,500);
+				$rowPriceExArr=$this->viewStock->makeRowPriceArr($vo3,$rowPriceArr,count($rowPriceArr));
+				$rowPriceArrMap[$symbol]=$rowPriceArr;
+				$rowPriceExArrMap[$symbol]=$rowPriceExArr;
+			}
+			//$this->obJfile->save("stock_ViewTrade/rowPriceArrMap" ,$rowPriceArrMap);
+		}
+		//$this->viewStock->makeIndex();
+		
+		$this->indexArr=array();
+		
+		for($k=0; $k<count($rowSymbolArr); $k++){
+			$symbol = $rowSymbolArr[$k][0];
+			if(strlen($symbol)<3) continue;
+			if($this->viewStock->isMarket($symbol)) continue;
+			
+			$rowPriceArr=&$rowPriceArrMap[$symbol];
+			$rowPriceExArr=&$rowPriceExArrMap[$symbol];
+			$len=count($rowPriceArr);
+			for($i=0 ;$i<$len-1 ;$i++){
+				if($this->viewStock->isNull0($rowPriceArrMap[$symbol][$i+1][$vo3->close])||$this->viewStock->isNull0($rowPriceArrMap[$symbol][$i][$vo3->close])) continue;
+				////$codeFull=$rowPriceArr[$i]["codeFull"];
+				////$codeFull1=$rowPriceArr[$i+1]["codeFull"];
+				////if($codeFull==null||$codeFull1==null) continue;
+				////$stat=$statMap[$codeFull];
+				////$stat1=$statMap[$codeFull1];
+				////if($stat["count"]<50) continue;
+				////if($stat["avg"]-1>0.0000 && $rowPriceExArr[$i]["value2"]>700000){
+				if($rowPriceExArr[$i]["minMax0"]<=15 && $rowPriceExArr[$i]["minMax2"]>=10 && $rowPriceExArr[$i]["less"]==0 && $rowPriceExArr[$i]["value2"]>700000){
+					$rate=0;
+					if($rowPriceExArr[$i]["value2"]>700000) $rate+=1000000000;
+					////$rate+=10000*$stat["avg"]*100;
+					$rate-=$rowPriceExArr[$i]["maxClose2"];
+					////$rate-=$rowPriceExArr[$i]["minMax0"];
+					$rowPriceExArr[$i]["rate"]=$rate;
+				}
+				/*
+				if($this->indexArr[$i]==null) $this->indexArr[$i]=array("inc"=>0,"avg"=>0,"count"=>0);
+				if($rowPriceExArr[$i]["value2"]>$this->viewStock->valueOff) {
+					if($stat["avg"]>1.0000) $this->indexArr[$i]["inc"]++;
+					//////if($stat["prop"]>=0.5) $this->indexArr[$i]["inc"]++;
+					$this->indexArr[$i]["avg"]+=$stat["avg"]-1;
+					$this->indexArr[$i]["count"]++;
+				}
+				*/
+			}
+		}
+		//////print_p($rowPriceExArrMap);
+		/*
+		foreach($this->indexArr as $i=>$index){
+			if($this->indexArr[$i]["count"]!=0) {
+				$this->indexArr[$i]["avg"]=1+($this->indexArr[$i]["avg"]/$this->indexArr[$i]["count"]);
+				$this->indexArr[$i]["inc"]=round(100*$this->indexArr[$i]["inc"]/$this->indexArr[$i]["count"]);
+			}
+		}
+		*/
+		//fb($this->indexArr);
+		
+		function sortFunc($a, $b){
+			if($a["rate"] > $b["rate"]) return -1;
+			if($a["rate"] < $b["rate"]) return 1;
+			return 0;
+		}
+		function sortFuncInv($a, $b){
+			if($a["rate"] > $b["rate"]) return 1;
+			if($a["rate"] < $b["rate"]) return -1;
+			return 0;
+		}
+		$capMap=array();
+		$fArr=array(1/60,1/45,1/30,1/25,1/10);
+		$fArr=array(1/60,1/30,1/10);
+		$fArr=array(1/20,1/30);
+		$fArr=array(2/$this->viewStock->fnum,1/$this->viewStock->fnum);
+		$fArr=array(1/$this->viewStock->fnum);
+		$countMax=$this->viewStock->countMax;
+		$incTest=$this->viewStock->incTest;
+		foreach($fArr as $m=>$f){
+			$profitArr=array();
+			for($n=1;$n>=0;$n--){
+				if($n==0){
+					$vArr1 = $capMap[intval(1/$fArr[$m])."_1"];
+				}
+				$fbuyTest=$n;
+				if($f>1){
+					$f=1/$f;
+					$fbuyTest=1;
+				}
+				$vArr=array();
+				$v=1000000;
+				$no=0;
+				$tradeMap=array(
+				);
+				$vBuf=$v;
+				$fbuy=1;
+				for($i=240;$i>=0;$i--){
+					$fbuy=1;
+					/*
+					if($profitArr[$i+1]!=null && $profitArr[$i+2]!=null && $profitArr[$i+3]!=null){
+						if($profitArr[$i]<0
+							//|| $profitArr[$i+1]<0
+						){
+							//$fbuy=$fbuyTest;
+						}
+					} else {
+						$fbuy=$fbuyTest;
+					}
+					*/
+					if($vArr1[$i+1]!=null && $vArr1[$i+2]!=null && $vArr1[$i+3]!=null && $profitArr[$i+1]!=null && $profitArr[$i+2]!=null && $profitArr[$i+3]!=null){
+						if(($vArr1[$i] < $vArr1[$i+1]
+								&& $vArr1[$i+1] < $vArr1[$i+2]
+								//&& $vArr1[$i+2] < $vArr1[$i+3]
+							)
+							|| ($profitArr[$i]<0
+								&& $profitArr[$i+1]<0
+								//&& $profitArr[$i+2]<0
+							)
+						){
+							$fbuy=$fbuyTest;
+						}
+					} else {
+						$fbuy=$fbuyTest;
+					}
+					
+					/*if($this->indexArr[$i]["avg"]==null || $this->indexArr[$i]["avg"]<=$incTest) {
+						$fbuy=$fbuyTest;
+					}*/
+					/*if($this->indexArr[$i]["inc"]==null || $this->indexArr[$i]["inc"] <= $incTest) {
+						$fbuy=$fbuyTest;
+					}*/
+					$stockMap=array(
+					);
+					for($k=0; $k<count($rowSymbolArr); $k++){
+						$symbol = $rowSymbolArr[$k][0];
+						if(strlen($symbol)<3) continue;
+						if($this->viewStock->isNull0($rowPriceArrMap[$symbol][$i+1][$vo3->close])||$this->viewStock->isNull0($rowPriceArrMap[$symbol][$i][$vo3->close])) continue;
+						if($this->viewStock->isMarket($symbol)) continue;
+						
+						if($rowPriceExArrMap[$symbol][$i]==null || $rowPriceExArrMap[$symbol][$i]["rate"]==null) continue;
+						$stockMap[$symbol]=array(
+						);
+						$stockMap[$symbol]["rate"]=$rowPriceExArrMap[$symbol][$i]["rate"];
+					}
+					uasort($stockMap, "sortFunc");
+					//print_p($stockMap);
+					$count=0;
+					$vBuyT=0;
+					foreach($stockMap as $symbol=>$stock){
+						if($fbuy==0) break;
+						if($tradeMap[$symbol]!=null) continue;
+						$tradeMap[$symbol]=array(
+						);
+						$tradeMap[$symbol]["i"]=$i;
+						$tradeMap[$symbol]["close"]=$rowPriceArrMap[$symbol][$i][$vo3->close];
+						///////////////////////$tradeMap[$symbol]["avg"]=$rowPriceArrMap[$symbol][$i][$vo3->avg];
+						$tradeMap[$symbol]["vBuy"]=$f*$vBuf;
+						$no++;
+						$vBuy=$tradeMap[$symbol]["vBuy"];
+						$vBuyT+=(1+0.005)*$vBuy;
+						$count++;
+						if($count==$countMax) break;
+					}
+					$v=$v-$vBuyT;
+					
+					$buyT=0;$sellT=0;
+					$vSellT=0;
+					foreach($tradeMap as $symbol=>$trade){
+						if($n==1 && $i==($tradeMap[$symbol]["i"]-1)){
+							$profit=$rowPriceArrMap[$symbol][$i][$vo3->close]/$tradeMap[$symbol]["close"];
+							
+							$vBuy=$tradeMap[$symbol]["vBuy"];
+							$buyT+=(1+0.005)*$vBuy;
+							
+							$vSell=$tradeMap[$symbol]["vBuy"]*$profit;
+							$sellT+=(1-0.005)*$vSell;
+						}
+						if($i<=($tradeMap[$symbol]["i"]-3)){
+							$profit=$rowPriceArrMap[$symbol][$i][$vo3->close]/$tradeMap[$symbol]["close"];
+							$per=$rowPriceArrMap[$symbol][$i][$vo3->close]/$rowPriceArrMap[$symbol][$i+1][$vo3->close];
+							if($profit>=1 && $per>=1.00) continue;
+							$vSell=$tradeMap[$symbol]["vBuy"]*$profit;
+							$vSellT+=(1-0.005)*$vSell;
+							unset($tradeMap[$symbol]);
+						}
+					}
+					$v=$v+$vSellT;
+					
+					if($n==1) $profitArr[$i]=$sellT-$buyT;
+					
+					$vBufT=0;
+					foreach($tradeMap as $symbol=>$trade){
+						$profit=$rowPriceArrMap[$symbol][$i][$vo3->close]/$tradeMap[$symbol]["close"];
+						$vSell=$tradeMap[$symbol]["vBuy"]*$profit;
+						$vBufT+=(1-0.005)*$vSell;
+					}
+					$vBuf=$v+$vBufT;
+					$vArr[$i]=$vBuf;
+				}
+				$capMap[intval(1/$fArr[$m])."_".$n]=$vArr;
+				fb($no);
+			}
+		}
+		//$this->ao->pdo=$this->stock_ObDs->pdoAppfog();
+		$this->obJfile->save("stock_ViewTrade/indexArr", $this->indexArr);
+		$this->obJfile->save("stock_ViewTrade/capMap", $capMap);
+		return $capMap;
+//@>
+	}
+	public function onrpcCap($event ,$result){
+		$this->capMap=$result;
+		$this->viewPaint2();
+	}
+	public function rpcAppfog(){
+//<@ $this->jsonOption({"jsonpUrl":"http://cophieu.ap01.aws.af.cm/"}); $this->json();
+		return "G";
+//@>
+	}
+	
+	public static function main(){
+		//$this->jsonOption({"jsonpUrl":"http://cophieu.ap01.aws.af.cm/"})
+		//@ que($__doc)->ready(function(){
+			$viewTrade=stock_Ao::get()->bean("stock_ViewTrade/con")->view();
+			$viewTrade->jque->appendTo("body");
+			$viewTrade->rpcCap();
+			//$viewTrade->rpcAppfog();
+		//@ });
+	}
+}

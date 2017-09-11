@@ -1,0 +1,66 @@
+<?php
+import("jsml_Ao");
+import("stock_ObDs");
+/*<@
+//import("stock/res/icon.css");
+//import("stock/res/easyui.css");
+//import("stock/res/jquery.easyui.min.js");
+@>*/
+class stock_Ao extends jsml_Ao{
+	protected static $obj;
+	public static function get(){if(self::$obj == null){self::$obj = new self();self::$obj->con();} return self::$obj;}
+	public function con(){
+		$this->pdo = $this->bean("stock_ObDs/con")->pdo;
+		$this->urlJ = null;//"truc-tuyen/";
+		return $this;
+	}
+	public function toDate($str){
+		if($str==null || trim($str)=="") return null;
+		$arr = explode("-", $str);
+		return mktime(0,0,0,$arr[1],$arr[2],$arr[0]);
+	}
+	public function getTplus($date){
+		if($date==null||trim($date)=="") return null;
+		$date=$this->toDate($date);
+		$now=$this->toDate(date("y-m-d"));
+		$tp=round(($now-$date)/(24*60*60));
+		for($j=0;$j<=$tp;$j++){
+			$dayNum="".date("w",$date+$j*24*60*60);
+			if($dayNum=="0"||$dayNum=="6"){
+				$tp--;
+			}
+		}
+		return $tp;
+	}
+	public function mapNoNull(&$map){
+		if($map==null) return array(
+		);
+		return $map;
+	}
+	public function isNullEmpty($value){
+		if($value==null || trim($value)=="") return true;
+		return false;
+	}
+	public function isNull0($value){
+		if($value==null || $value==0) return true;
+		return false;
+	}
+	public function isNullEmpty0($value){
+		if($value==null || $value==0 || trim($value)=="") return true;
+		return false;
+	}
+	public function isAppfog(){
+		if( strpos($_SERVER["SERVER_NAME"], ".aws.af.cm") > 0 ) return true;
+		return false;
+	}
+	public function canSaveAppfog(){
+return false;
+		if($this->isOffline()) return false;
+		if($this->isAppfog()) return false;
+		return true;
+	}
+	public function isOffline(){
+//return true;
+		return false;
+	}
+}
