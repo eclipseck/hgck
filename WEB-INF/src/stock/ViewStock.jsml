@@ -1850,7 +1850,7 @@ class stock_ViewStock{
 						
 						if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 5.5 && 
 					  ($reRowPriceArr[$i][$voRe->maxC1]*$reRowPriceArr[$i][$voRe->minC1]/100 < 12) && 
-					  $reRowPriceArr[$i][$voRe->minC1] > 30 && $reRowPriceArr[$i][$voRe->delta] >=0.9 &&
+					  $reRowPriceArr[$i][$voRe->minC1] > 30 && $reRowPriceArr[$i][$voRe->delta] >=0.0 &&
 					  ($reRowPriceArr[$i][$voRe->value2]>=500000 || $value0>=500000)) {
 							$rate+=9000000;
 							$rate+=round($perValue*100);
@@ -1880,7 +1880,7 @@ class stock_ViewStock{
 					*/
 					if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 5.5 && 
 					  ($reRowPriceArr[$i][$voRe->maxC1]*$reRowPriceArr[$i][$voRe->minC1]/100 < 12) && 
-					  $reRowPriceArr[$i][$voRe->minC1] > 30 && $reRowPriceArr[$i][$voRe->delta] >=0.9 &&
+					  $reRowPriceArr[$i][$voRe->minC1] > 30 && $reRowPriceArr[$i][$voRe->delta] >=0.0 &&
 					  ($reRowPriceArr[$i][$voRe->value2]>=500000 || $value0>=500000)){
 						$rate+=9000000;
 						$rate+=round($perValue*100);
