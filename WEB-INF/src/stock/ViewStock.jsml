@@ -709,10 +709,10 @@ class stock_ViewStock{
 					}
 				}
 				
-				if($i==0 && $j==7-1){ //$j==$this->intervalArr[0]-1
+				if($i==0 && $j==8-1){ //$j==$this->intervalArr[0]-1
 					$re[$i][$voRe->perHigh]=round(100*($max0-$rowPriceArr[$i][$vo->close])/$max0);
 				}
-				if($i==0 && $j==10-1){ //$j==$this->intervalArr[0]-1
+				if($i==0 && $j==8-1){ //$j==$this->intervalArr[0]-1
 					//$minC=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min);
 					if($max-$min!=0) $minC=round(100*($rowPriceArr[$i][$vo->close]-$min)/($max-$min));
 					else $minC=-100;
@@ -724,7 +724,7 @@ class stock_ViewStock{
 					$re[$i][$voRe->maPerC1]=$maC/($j+1);
 					$re[$i][$voRe->maPerC1]=round(100*($rowPriceArr[$i][$vo->close]-$re[$i][$voRe->maPerC1])/$re[$i][$voRe->maPerC1]);
 				}
-				if($i==0 && $j==20-1){ //$this->intervalArr[3]
+				if($i==0 && $j==21-1){ //$this->intervalArr[3]
 					//$minC=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min);
 					if($max-$min!=0) $minC=round(100*($rowPriceArr[$i][$vo->close]-$min)/($max-$min));
 					else $minC=-100;
