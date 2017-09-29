@@ -2478,7 +2478,7 @@ $__htmlArray.push($w1);
 $__htmlArray.push('px; height: ');
 $__htmlArray.push($h1);
 
-$__htmlArray.push('px">Ca2</button>\
+$__htmlArray.push('px">Ca8</button>\
 <button id=\'buttonCand\' style="font-weight: bold; width:');
 $__htmlArray.push($w1);
 
@@ -2902,8 +2902,8 @@ var $this = this; var $__arguments = arguments;
 	}
 stock_ViewDetail.prototype.onclickButtonCand = function($event){
 var $this = this; var $__arguments = arguments; var $strConf = null; var $day = null;
-		if($this.ao.conf["combineDay"]==8) $this.ao.conf["combineDay"]=1;
-		else $this.ao.conf["combineDay"]=8;
+		if($this.ao.conf["combineDay"]==2) $this.ao.conf["combineDay"]=1;
+		else $this.ao.conf["combineDay"]=2;
 		$this.conPaint().viewPaint();
 		$this.buttonCand.text("Ca"+$this.ao.conf["combineDay"]);
 		return;
@@ -2920,7 +2920,7 @@ var $this = this; var $__arguments = arguments; var $strConf = null; var $day = 
 	}
 stock_ViewDetail.prototype.onclickButtonCand1 = function($event){
 var $this = this; var $__arguments = arguments; var $strConf = null; var $day = null;
-		$this.ao.conf["combineDay"]=2;
+		$this.ao.conf["combineDay"]=8;
 		$this.conPaint().viewPaint();
 		$this.buttonCand.text("Ca"+$this.ao.conf["combineDay"]);
 		return;

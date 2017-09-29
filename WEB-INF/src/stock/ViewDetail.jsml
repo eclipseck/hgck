@@ -43,7 +43,7 @@ class stock_ViewDetail{
 			</select>
 			<input id='textStock' type='text' size='7' style='width: <?=$w1?>px;height: <?=$h1-4?>px'></input>
 			<button id='buttonList' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">List</button>
-			<button id='buttonCand1' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Ca2</button>
+			<button id='buttonCand1' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Ca8</button>
 			<button id='buttonCand' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Ca</button>
 			<button id='buttonHA'   style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;display:none">HA</button>
 			<button id='buttonVN'   style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">VN</button>
@@ -312,8 +312,8 @@ class stock_ViewDetail{
 		}
 	}
 	public function onclickButtonCand($event){
-		if($this->ao->conf["combineDay"]==8) $this->ao->conf["combineDay"]=1;
-		else $this->ao->conf["combineDay"]=8;
+		if($this->ao->conf["combineDay"]==2) $this->ao->conf["combineDay"]=1;
+		else $this->ao->conf["combineDay"]=2;
 		$this->conPaint()->viewPaint();
 		$this->buttonCand->text("Ca".$this->ao->conf["combineDay"]);
 		return;
@@ -331,7 +331,7 @@ class stock_ViewDetail{
 		$this->buttonCand->text("Ca".$day);
 	}
 	public function onclickButtonCand1($event){
-		$this->ao->conf["combineDay"]=2;
+		$this->ao->conf["combineDay"]=8;
 		$this->conPaint()->viewPaint();
 		$this->buttonCand->text("Ca".$this->ao->conf["combineDay"]);
 		return;
