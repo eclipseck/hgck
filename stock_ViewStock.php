@@ -753,8 +753,19 @@ var $this = this; var $__arguments = arguments; var $combineDay = null; var $vo 
 		return $rowPriceArrEx;
 	}
 stock_ViewChart.prototype.conPaint = function(){
-var $this = this; var $__arguments = arguments;
+var $this = this; var $__arguments = arguments; var $faArr = null; var $arr = null; var $str = null; var $symbol = null; var $bv = null;
 		$this.symbol = $this.viewDetail.symbol;
+		
+		$faArr=explode(",",$this.ao.conf["FA"]);
+		$this.faMap={
+		};
+		for($i in $faArr){var $str = $faArr[$i];
+			$arr=explode(" ",$str);
+			$symbol=$arr[0];
+			$bv=$arr[1];
+			$this.faMap[$symbol]=$bv;
+		}
+		
 		$this.rowPriceArrMap={
 		};
 						$this.rowPriceArrMap[$this.symbol] = $this.changeRowPriceArr($this.viewDetail.rowPriceArrMap[$this.symbol]);
@@ -927,12 +938,12 @@ var $this = this; var $__arguments = arguments; var $vo1 = null; var $minStockDa
 				$iMin = $i;
 			}
 					}
+		$this._minStockDataY=$minStockDataY;
 			
 		$maxStockDataY = 0;
 		$length = count($this.rowPriceArr);
 		for($i=0; $i<$length; $i++){
-			if($i > $iMin) break;
-			$stockData = $this.rowPriceArr[$i];
+						$stockData = $this.rowPriceArr[$i];
 			$x = $this.getX($i);
 			if($x<0) break;
 						
@@ -941,6 +952,7 @@ var $this = this; var $__arguments = arguments; var $vo1 = null; var $minStockDa
 				$maxStockDataY = $stockData[$vo1.high];
 			}
 					}
+		$this._maxStockDataY=$maxStockDataY;
 		
 				$isFuture=false;
 		$futureArr=explode(",",$this.ao.conf["future"]);
@@ -1040,7 +1052,7 @@ var $this = this; var $__arguments = arguments;
 						$this.setOnePrice();
 	}
 stock_ViewChart.prototype.paintCandleStick = function($limit){
-var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = null; var $x1 = null; var $x2 = null; var $candCount = null; var $i = null; var $stockData = null; var $x = null; var $_i = null; var $xm1 = null; var $PERCENT = null; var $deltaClose = null; var $deltaHigh = null; var $percent = null;
+var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = null; var $x1 = null; var $x2 = null; var $candCount = null; var $bv = null; var $bp = null; var $i = null; var $stockData = null; var $x = null; var $_i = null; var $xm1 = null; var $PERCENT = null; var $deltaClose = null; var $deltaHigh = null; var $percent = null;
 		$voRe=$this.viewStock.voRowPriceArr;
 		$vo1=$this.voPrice1;
 		
@@ -1052,14 +1064,18 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 		$this.context.globalAlpha=1;
 		$this.context.lineWidth=1;
 		$candCount = 0;
-		for($i=0; $i<$this.rowPriceArr.length-1; $i++){
+		
+		$bv=$this.faMap[$this.symbol];
+		if($bv==null) $bp="";
+		else $bp=round(100*($this.rowPriceArr[0][$vo1.close]-$bv)/$bv);
+		$this.paintText("<div>"+round( 100*($this._maxStockDataY-$this._minStockDataY)/$this._minStockDataY )+" <span style='color:blue'>"+$bp+"</span></div>", 650 , 30);		for($i=0; $i<$this.rowPriceArr.length-1; $i++){
 			if($limit!=null && $i>=$limit) break;
 			$stockData = $this.rowPriceArr[$i];
 			$x = $this.getX($i);
 			if($this.padX == $this.padX1 && $x<0) break;
 			if($this.padX != $this.padX1 && $x< 0*(911-$this.padX1 + 20)) break;
 			
-						if($i==-180){				$this.context.restore();
+						if($i==60){				$this.context.restore();
 				$this.context.beginPath();
 				$this.context.strokeStyle='Black';			
 				$this.context.globalAlpha=1;
@@ -2920,8 +2936,7 @@ var $this = this; var $__arguments = arguments; var $strConf = null; var $day = 
 	}
 stock_ViewDetail.prototype.onclickButtonCand1 = function($event){
 var $this = this; var $__arguments = arguments; var $strConf = null; var $day = null;
-		$this.ao.conf["combineDay"]=8;
-		$this.conPaint().viewPaint();
+		$this.ao.conf["combineDay"]=4;		$this.conPaint().viewPaint();
 		$this.buttonCand.text("Ca"+$this.ao.conf["combineDay"]);
 		return;
 		
@@ -3794,6 +3809,7 @@ var $this = this; var $__arguments = arguments; var $symbol = null; var $href = 
 		if($this.ao.isNullEmpty($symbol)) return;
 		$href = $this.hrefMap[$symbol];
 		if($href == null) $href = "http://cafef.vn";
+		$href="http://m.cophieu68.vn/profilesymbol.php?id="+$symbol;
 		$this.winOverview = $__window.open($href,"__aOverview");
 	}
 stock_ViewStock.prototype.onclickButtonLink = function($event){

@@ -136,6 +136,7 @@ class stock_ViewStock{
 		if($this->ao->isNullEmpty($symbol)) return;
 		$href = $this->hrefMap[$symbol];
 		if($href == null) $href = "http://cafef.vn";
+		$href="http://m.cophieu68.vn/profilesymbol.php?id=".$symbol;
 		$this->winOverview = $__window->open($href,"__aOverview");
 	}
 	public function onclickButtonLink($event){
@@ -1682,14 +1683,16 @@ class stock_ViewStock{
 		$rowSymbolArrDb=$this->getRowSymbolArrByValue();
 		$tradeMap=$this->loadTradeMap();
 		
-		$rowSymbolArr=array();
+		$rowSymbolMap=array();
 		for($k=0; $k<count($rowSymbolArrDb); $k++){
 			$symbol = $rowSymbolArrDb[$k][0];
-			array_push($rowSymbolArr,$symbol);
+			//////////array_push($rowSymbolArr,$symbol);
+			$rowSymbolMap[$symbol]=$symbol;
 		}
 		
 		foreach($tradeMap as $symbol => $value){
-			if( !in_array($symbol,$rowSymbolArr) ) array_push($rowSymbolArr,$symbol);
+			//if( !in_array($symbol,$rowSymbolArr) ) array_push($rowSymbolArr,$symbol);
+			if($rowSymbolMap[$symbol]==null) $rowSymbolMap[$symbol]=$symbol;
 		}
 		//print_p($tradeMap);return;
 		$stockMap=array(
@@ -1706,9 +1709,23 @@ class stock_ViewStock{
 			$str=trim($str,"'");
 			$futureMap[$str]=$str;
 		}
-
-		for($k=0; $k<count($rowSymbolArr); $k++){
-			$symbol = $rowSymbolArr[$k];
+		
+		$faArr=explode(",",$this->ao->conf["FA"]);
+		$faMap=array(
+		);
+		foreach($faArr as $i=>$str){
+			$arr=explode(" ",$str);
+			$symbol=$arr[0];
+			$bv=$arr[1];
+			$faMap[$symbol]=$bv;
+		}
+		foreach($faMap as $symbol => $value){
+			//if( !in_array($symbol,$rowSymbolArr) ) array_push($rowSymbolArr,$symbol);
+			if($rowSymbolMap[$symbol]==null) $rowSymbolMap[$symbol]=$symbol;
+		}
+		//for($k=0; $k<count($rowSymbolArr); $k++){
+		foreach($rowSymbolMap as $symbol=>$symbolzzz){
+			////$symbol = $rowSymbolArr[$k];
 			if(strlen($symbol)<3) continue;
 			$rowPriceArr=$this->getRowPriceArr($vo,$symbol,90);////220
 			//$rowPriceExArr=$this->makeRowPriceArr($vo,$rowPriceArr,1);
@@ -1887,7 +1904,7 @@ class stock_ViewStock{
 					} else {
 						$rate+=round($perValue*100);
 						//$rate+= 100*$reRowPriceArr[$i][$voRe->maxC2];
-						if($reRowPriceArr[$i][$voRe->value2]<=1000000) $willunset=true;
+						if($reRowPriceArr[$i][$voRe->value2]<=500000) $willunset=true;
 					}
 				}
 				if($rowPriceArr[$i][$vo->symbol]=="VN30INDEX") $rate=99000000000;
@@ -1912,6 +1929,13 @@ class stock_ViewStock{
 					///$rate+=79000000000;//+round($reRowPriceArr[$i][$voRe->value2]/1000000);
 					$rate=79000000000+round($reRowPriceArr[$i][$voRe->value2]/1000000);
 					$willunset=false;
+				}
+				if($faMap[ $rowPriceArr[$i][$vo->symbol] ] !=null) {
+					$willunset=false;
+				}
+				
+				if($faMap[ $rowPriceArr[$i][$vo->symbol] ] !=null) {
+					$rate+=100000;
 				}
 				
 				$stockMap[$symbol][$voStock->rate]=$rate;

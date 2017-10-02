@@ -231,6 +231,17 @@ class stock_ViewChart{
 	
 	public function conPaint(){
 		$this->symbol = $this->viewDetail->symbol;
+		
+		$faArr=explode(",",$this->ao->conf["FA"]);
+		$this->faMap=array(
+		);
+		foreach($faArr as $i=>$str){
+			$arr=explode(" ",$str);
+			$symbol=$arr[0];
+			$bv=$arr[1];
+			$this->faMap[$symbol]=$bv;
+		}
+		
 		$this->rowPriceArrMap=array(
 		);
 		//$this->rowPriceArrMap[$this->symbol]=$this->viewDetail->rowPriceArr;
@@ -410,11 +421,12 @@ class stock_ViewChart{
 			}
 			//if($i>=$DAY_BREAK) break;
 		}
+		$this->_minStockDataY=$minStockDataY;
 			
 		$maxStockDataY = 0;
 		$length = count($this->rowPriceArr);
 		for($i=0; $i<$length; $i++){
-			if($i > $iMin) break;
+			//if($i > $iMin) break;
 			$stockData = $this->rowPriceArr[$i];
 			$x = $this->getX($i);
 			if($x<0) break;
@@ -426,6 +438,7 @@ class stock_ViewChart{
 			}
 			//if($i>=$DAY_BREAK) break;
 		}
+		$this->_maxStockDataY=$maxStockDataY;
 		
 		//if($this->minMaxPadFactor != $this->minMaxPadFactorWeb) $this->minMaxPadFactor = 1.93;//2.5;
 		$isFuture=false;
@@ -574,6 +587,11 @@ class stock_ViewChart{
 		$this->context->globalAlpha=1;
 		$this->context->lineWidth=1;
 		$candCount = 0;
+		
+		$bv=$this->faMap[$this->symbol];
+		if($bv==null) $bp="";
+		else $bp=round(100*($this->rowPriceArr[0][$vo1->close]-$bv)/$bv);
+		$this->paintText("<div>".round( 100*($this->_maxStockDataY-$this->_minStockDataY)/$this->_minStockDataY )." <span style='color:blue'>".$bp."</span></div>", 650 , 30);////// 850 485
 		for($i=0; $i<$this->rowPriceArr->length-1; $i++){
 			if($limit!=null && $i>=$limit) break;
 			$stockData = $this->rowPriceArr[$i];
@@ -582,7 +600,7 @@ class stock_ViewChart{
 			if($this->padX != $this->padX1 && $x< 0*(911-$this->padX1 + 20)) break;
 			
 			//if($i==$this->viewStock->intervalArr[3] || $i==125 || $i==250 || $i==166){//w1:250:12.5th w2:166:8.3th w3:125:6.25th
-			if($i==-180){//w1:250:12.5th w2:166:8.3th w3:125:6.25th
+			if($i==60){//w1:250:12.5th w2:166:8.3th w3:125:6.25th
 				$this->context->restore();
 				$this->context->beginPath();
 				$this->context->strokeStyle='Black';			

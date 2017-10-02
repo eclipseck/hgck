@@ -331,7 +331,7 @@ class stock_ViewDetail{
 		$this->buttonCand->text("Ca".$day);
 	}
 	public function onclickButtonCand1($event){
-		$this->ao->conf["combineDay"]=8;
+		$this->ao->conf["combineDay"]=4;//
 		$this->conPaint()->viewPaint();
 		$this->buttonCand->text("Ca".$this->ao->conf["combineDay"]);
 		return;
@@ -642,7 +642,7 @@ class stock_ViewDetail{
 ///////////////////////////////////////////////
 		$vo=$this->voPrice1;
 		if($mode=="get1") $rowPriceArr=$this->viewStock->getRowPriceArr($vo,$symbol,1);//450
-		else if($mode=="getAll" || $mode=="preload") $rowPriceArr=$this->viewStock->getRowPriceArr($vo,$symbol,390);// 736
+		else if($mode=="getAll" || $mode=="preload") $rowPriceArr=$this->viewStock->getRowPriceArr($vo,$symbol,736);// 390 736
 		
 		$len=count($rowPriceArr);
 		for($i=0; $i<$len; $i++){
