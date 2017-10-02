@@ -33,7 +33,7 @@ class stock_ViewChart{
 <div>
 	<div id="divCanvasText" style='position:relative'>
 	</div>
-	<div id="divOnePrice" style='position:absolute;left:420px;top:2px'></div>
+	<div id="divOnePrice" style='position:absolute;left:380px;top:2px'></div>
 	<canvas id="canvas"></canvas>
 </div>
 <!--/$html--><?
@@ -231,7 +231,7 @@ class stock_ViewChart{
 	
 	public function conPaint(){
 		$this->symbol = $this->viewDetail->symbol;
-		
+		/*
 		$faArr=explode(",",$this->ao->conf["FA"]);
 		$this->faMap=array(
 		);
@@ -241,7 +241,7 @@ class stock_ViewChart{
 			$bv=$arr[1];
 			$this->faMap[$symbol]=$bv;
 		}
-		
+		*/
 		$this->rowPriceArrMap=array(
 		);
 		//$this->rowPriceArrMap[$this->symbol]=$this->viewDetail->rowPriceArr;
@@ -588,10 +588,11 @@ class stock_ViewChart{
 		$this->context->lineWidth=1;
 		$candCount = 0;
 		
-		$bv=$this->faMap[$this->symbol];
+		/*$bv=$this->faMap[$this->symbol];
 		if($bv==null) $bp="";
 		else $bp=round(100*($this->rowPriceArr[0][$vo1->close]-$bv)/$bv);
-		$this->paintText("<div>".round( 100*($this->_maxStockDataY-$this->_minStockDataY)/$this->_minStockDataY )." <span style='color:blue'>".$bp."</span></div>", 650 , 30);////// 850 485
+		*/
+		$this->paintText("<div><span style='color:blue'>".round( 100*($this->_maxStockDataY-$this->_minStockDataY)/$this->_minStockDataY )."</span></div>", 700 , 30);////// 850 485
 		for($i=0; $i<$this->rowPriceArr->length-1; $i++){
 			if($limit!=null && $i>=$limit) break;
 			$stockData = $this->rowPriceArr[$i];
@@ -1718,7 +1719,7 @@ cpchiacho max = 2
 			$status = str_replace(".chn","",$status);
 			$status = str_replace("-"," ",$status);
 		}
-		$this->paintText("<div style='width:380px;color:black'><b>".$status."</b></div>", 20 , 0);////// 850 485
+		$this->paintText("<div style='width:350px;color:black'><b>".$status."</b></div>", 20 , 0);////// 850 485
 		
 		return;
 		$intervalArr=$this->viewStock->intervalArr;

@@ -16,7 +16,7 @@ class stock_ViewStock{
 		$this->voPrice=$this->ao->bean("stock_VoPrice/con");
 		$this->voPrice2=$this->ao->bean("stock_VoPrice/con2");
 		$this->voPrice3=$this->ao->bean("stock_VoPrice/con3");
-		$this->voStock=get(new stock_Vo())->_con("rate,value2,trade,live,perHigh,minC1,maxC1","");//7
+		$this->voStock=get(new stock_Vo())->_con("rate,value2,trade,live,perHigh,minC1,maxC1,bv,roe","");//7
 		
 		$this->voRowPriceArr=get(new stock_Vo())->_con("value2,code,minC1,maxC1,minC2,maxC2,perHigh,maPerC1,maPerC2,maC1,maC2,maC3,maC4,dev,status,status0,min,imin,max,imax,delta,minMax","");
 		$this->voStat=get(new stock_Vo())->_con("total,avg","");
@@ -136,7 +136,7 @@ class stock_ViewStock{
 		if($this->ao->isNullEmpty($symbol)) return;
 		$href = $this->hrefMap[$symbol];
 		if($href == null) $href = "http://cafef.vn";
-		$href="http://m.cophieu68.vn/profilesymbol.php?id=".$symbol;
+		//$href="http://m.cophieu68.vn/profilesymbol.php?id=".$symbol;
 		$this->winOverview = $__window->open($href,"__aOverview");
 	}
 	public function onclickButtonLink($event){
@@ -987,6 +987,19 @@ class stock_ViewStock{
 		return "<span style='color:".$color."'>".$value."</span>";
 	}
 	
+	public function formatRoe($value){
+		if($value==null) return "";
+		if($value>=20) $color="blue";
+		else $color="red";
+		if($value>=100) $value=99;
+		if($value<=-100) $value=-99;
+		
+		if($value <0 ) $value = "<u>".number_format(-1*$value,0)."</u>";
+		else $value = number_format(1*$value,0,",","");
+		
+
+		return "<span style='color:".$color."'>".$value."</span>";
+	}
 	public function formatPercentScale($value, $maPer){
 		if($value==null) return "";
 		if($value>=40) $color="blue";
@@ -1483,6 +1496,9 @@ class stock_ViewStock{
 		if($stock[$voStock->maxC1]>=100) $stock[$voStock->maxC1]=99;
 		//if($stock[$voStock->minMaxArr][3]>=100) $stock[$voStock->minMaxArr][3]=99;
 		
+		if(!$this->isNull0($stock[$voStock->bv])) $bvp=(1*($stock[$voStock->live][$vo->close]-$stock[$voStock->bv])/$stock[$voStock->bv]);
+		else $bvp=null;
+		
 ?>
 <!--$htmlTr2-->
 	<tr>
@@ -1513,7 +1529,9 @@ class stock_ViewStock{
 		<td style="border-left:0px solid black;<?= $trStyle ?>"><?= $this->formatPrice($vo->sellPrice1,$stock[$voStock->live],$_live) ?></td>
 		<td style="border-right:2px solid black;<?= $trStyle ?>"><?= $this->formatVolume1($vo->sellVolume1,$stock[$voStock->live],$_live,$symbol) ?></td>
 
+		<td style="color:black;border-right:0px solid black;<?= $trStyle ?>" ><?= $this->formatPer($bvp) ?></td>
 		<td style="color:black;border-right:0px solid black;<?= $trStyle ?>" ><?= $this->formatVolume2($buy,$vo->sellPrice1,$stock[$voStock->live],$_live) ?></td>
+		<td style="color:black;border-right:0px solid black;<?= $trStyle ?>" ><?= $this->formatRoe($stock[$voStock->roe]) ?></td>
 		
 <? /*
 		<td style="border-right:0px solid black;<?= $trStyle ?>"> <?= $this->formatPercentScale( $stock[$voStock->minMaxArr][2], $stock[$voStock->minMaxArr][7] ) ?> </td>
@@ -1664,6 +1682,62 @@ class stock_ViewStock{
 			else $this->indexArr[$i]["codePer"].="t".round(100*$this->indexArr[$i]["per"]);
 		}
 	}
+	public function rpcMakeTa(){
+//<@ $this->json();
+		$taMap=array(
+		);
+		$stockMap=$this->rpcStockMap();
+		foreach($stockMap as $symbol=>$stock){
+try{
+			if($this->isMarket($symbol)) continue;
+			//if($symbol=="VN30F1710") continue;
+			$href="http://m.cophieu68.vn/profilesymbol.php?id=".$symbol;
+			
+			$httpClient = new Zend_Http_Client($href);
+			$html = $httpClient->request('GET')->getBody();
+			
+			
+			
+			$pos1=strpos($html,'<table width="100%" cellpadding="4" cellspacing="1">');
+			if($pos1===FALSE) continue;
+			$html = substr($html,$pos1);
+			$pos1=strpos($html,'</table>');
+			$html = substr($html,0,$pos1+9);
+			$html = '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/></head><body>'.$html.'</body></html>';
+
+			$doc = new DOMDocument();
+			$old_E = error_reporting(E_ERROR);			
+			$doc->loadHTML($html);
+			error_reporting($old_E);
+			
+			$taMap[$symbol]=array(
+			);
+			
+			$tableArr = $doc->getElementsByTagName('table');
+			foreach( $tableArr as $table){
+			}
+			$trNodes = $table->childNodes;
+			
+			$str = $trNodes->item(3)->childNodes->item(2)->nodeValue ;
+			$pos=strpos($str,"(");
+			$str=trim(substr($str,0,$pos));
+			$str=(double)$str;
+			$taMap[$symbol]["bv"]=$str;
+			
+			$str = $trNodes->item(7)->childNodes->item(2)->nodeValue ;
+			$str=trim($str,"%");
+			$str=(double)$str;
+			$taMap[$symbol]["roe"]=$str;
+			
+			$str = $trNodes->item(25)->childNodes->item(2)->nodeValue ;
+			$str=trim($str);
+			$taMap[$symbol]["name"]=$str;
+} catch (Exception $ex){
+}
+		}
+		$this->obJfile->save("stock_ViewStock/taMap",$taMap);
+//@>
+	}
 	public function restartStockMap(){
 		$this->stockMapTime=null;
 		$this->xhrStockMap->abort();
@@ -1702,6 +1776,9 @@ class stock_ViewStock{
 		
 		$voStat=$this->voStat;
 		$statMap=$this->obJfile->load("stock_ViewStock/statMap");
+		
+		$taMap=$this->obJfile->load("stock_ViewStock/taMap");
+		
 		$futureArr=explode(",",$this->ao->conf["future"]);
 		$futureMap=array(
 		);
@@ -1714,11 +1791,15 @@ class stock_ViewStock{
 		$faMap=array(
 		);
 		foreach($faArr as $i=>$str){
-			$arr=explode(" ",$str);
-			$symbol=$arr[0];
-			$bv=$arr[1];
-			$faMap[$symbol]=$bv;
+			$symbol=$str;
+			$faMap[$symbol]=$symbol;
 		}
+		$faArr=explode(",",$this->ao->conf["FA2"]);
+		foreach($faArr as $i=>$str){
+			$symbol=$str;
+			$faMap[$symbol]=$symbol;
+		}
+		
 		foreach($faMap as $symbol => $value){
 			//if( !in_array($symbol,$rowSymbolArr) ) array_push($rowSymbolArr,$symbol);
 			if($rowSymbolMap[$symbol]==null) $rowSymbolMap[$symbol]=$symbol;
@@ -1795,6 +1876,8 @@ class stock_ViewStock{
 					$stockMap[$symbol][$voStock->avg]=$statMap[$code][$voStat->avg];
 				}
 				*/
+				$stockMap[$symbol][$voStock->bv]=$taMap[$symbol]["bv"];
+				$stockMap[$symbol][$voStock->roe]=$taMap[$symbol]["roe"];
 				$rate=0;
 				/////////if($stockMap[$symbol][$voStock->value2]>700000) $rate+=1000000000;
 				

@@ -52,6 +52,7 @@ class stock_ViewDetail{
 		<div id="divConf" style="text-align:right;">
 			<br/>
 			
+			<button id='buttonTa' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Ta</button>
 			<button id='buttonClear' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Clear</button>
 			<button id='buttonConf' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;display:">Conf</button>
 			<button id='buttonClean' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Clean</button>
@@ -84,6 +85,7 @@ class stock_ViewDetail{
 		//@ $this->buttonCand1=$this->jque->find("#buttonCand1")->bind("click", function($event){ $this->onclickButtonCand1($event); });
 		//@ $this->buttonCap=$this->jque->find("#buttonCap")->bind("click", function($event){ $this->onclickButtonCap($event); });
 		//@ $this->buttonClean=$this->jque->find("#buttonClean")->bind("click", function($event){ $this->onclickButtonClean($event); });
+		//@ $this->buttonTa=$this->jque->find("#buttonTa")->bind("click", function($event){ $this->onclickButtonTa($event); });
 		//@ $this->buttonClear=$this->jque->find("#buttonClear")->bind("click", function($event){ $this->onclickButtonClear($event); });
 		//@ $this->buttonMstock=$this->jque->find("#buttonMstock")->bind("click", function($event){ $this->onclickButtonMstock($event); });
 		//@ $this->buttonBack=$this->jque->find("#buttonBack")->bind("click", function($event){ $this->onclickButtonBack($event); });
@@ -105,6 +107,7 @@ class stock_ViewDetail{
 		//@ que($this)->bind("rpc.rpcBuyTrade", function($event, $result){ $this->onrpcBuyTrade($event, $result); });
 		//@ que($this)->bind("rpc.rpcSellTrade", function($event, $result){ $this->onrpcSellTrade($event, $result); });
 		//@ que($this)->bind("rpc.rpcDetail", function($event, $result){ $this->onrpcDetail($event, $result); });
+		//@ que($this->viewStock)->bind("rpc.rpcMakeTa", function($event, $result){ $this->onrpcMakeTa($event, $result); });
 
 		//@ que($__doc)->bind("keydown", function ($event){ return $this->onkeydown($event); });
 		
@@ -394,6 +397,14 @@ class stock_ViewDetail{
 			}
 		}
 		$this->highlight();
+	}
+	public function onclickButtonTa($event){
+		if(confirm("Ta")){
+			$this->viewStock->rpcMakeTa();
+		}
+	}
+	public function onrpcMakeTa($event,$result){
+		alert("Finish");
 	}
 	public function preloadDetail($symbol){
 		if($this->viewStock->stockMap!=null) {
