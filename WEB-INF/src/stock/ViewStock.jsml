@@ -191,20 +191,22 @@ class stock_ViewStock{
 	public function onclickButtonConf($event){
 		$strConf=$this->viewDetail->textConf->prop("value");
 		$strTradeMap=$this->viewDetail->textTrade->prop("value");
+		$choice=prompt("blank for all", "conf");
+		if($choice==null) return;
+		if($choice=="conf") $strTradeMap=null;
 		$map=array(
 			"strConf"=>$strConf,
 			"strTradeMap"=>$strTradeMap
 		);
-		if(confirm("SAVE: ".$strConf)){
-			$this->rpcConf( $map );
-		}
+		$this->rpcConf( $map );
 	}
 	public function rpcConf( $map ){
 //<@ $this->json($map);
 		$strConf=$map["strConf"];
 		$strTradeMap=$map["strTradeMap"];
 		$this->obJfile->save("stock_ViewDetail/strConf",$strConf);
-		$this->obJfile->saveStr("stock_ViewStock/tradeMap",$strTradeMap);
+		if($strTradeMap!=null) $this->obJfile->saveStr("stock_ViewStock/tradeMap",$strTradeMap);
+		else $map["strTradeMap"]=$this->obJfile->loadStr("stock_ViewStock/tradeMap");
 		$this->makeConf($this->loadConf());
 		if($this->ao->canSaveAppfog()){
 			$url="http://cophieu.ap01.aws.af.cm/j.php?s=stock_ViewStock/rpcConf";
@@ -214,12 +216,14 @@ class stock_ViewStock{
 			$client->setParameterPost('paramArray', json_encode($paramArray));
 			$body=$client->request("POST")->getBody();
 		}
-		return $strConf;
+		return $map;
 //@>
 	}
 	public function onrpcConf($event ,$result){
-		$strConf=$result;
+		$strConf=$result["strConf"];
+		$strTradeMap=$result["strTradeMap"];
 		$this->viewDetail->textConf->prop("value",$strConf);
+		$this->viewDetail->textTrade->prop("value",$strTradeMap);
 		$this->makeConf($strConf);
 		$this->viewDetail->buttonList->click();
 	}
@@ -987,7 +991,7 @@ class stock_ViewStock{
 		return "<span style='color:".$color."'>".$value."</span>";
 	}
 	
-	public function formatRoe($value){
+	public function formatRoe($value,$ysFa,$noFa){
 		if($value==null) return "";
 		if($value>=20) $color="blue";
 		else $color="red";
@@ -995,8 +999,15 @@ class stock_ViewStock{
 		if($value<=-100) $value=-99;
 		
 		if($value <0 ) $value = "<u>".number_format(-1*$value,0)."</u>";
-		else $value = number_format(1*$value,0,",","");
+		else {
+			$value = number_format(1*$value,0,",","");
+			if($ysFa) {
+				$color="blue";
+				$value = "<u>".$value."</u>";
+			}
+		}
 		
+		if($noFa) $color="red";
 
 		return "<span style='color:".$color."'>".$value."</span>";
 	}
@@ -1007,6 +1018,7 @@ class stock_ViewStock{
 		//if($maPer>=0) $color="blue";
 		//else $color="red";
 		if($value>=100) $value=99;
+		if($value<=-100) $value=-99;
 		if($value<0) $color="limegreen";
 		
 		if($value <0 ) $value = "".number_format(-1*$value,0)."";
@@ -1394,6 +1406,22 @@ class stock_ViewStock{
 	$seperate3=null;
 	$seperate4=null;
 	$seperate5=null;
+
+	$ysFaArr=explode(",",$this->ao->conf["ysFA"]);
+	$ysFaMap=array(
+	);
+	foreach($ysFaArr as $i=>$str){
+		$symbol=$str;
+		$ysFaMap[$symbol]=$symbol;
+	}
+	
+	$noFaArr=explode(",",$this->ao->conf["noFA"]);
+	$noFaMap=array(
+	);
+	foreach($noFaArr as $i=>$str){
+		$symbol=$str;
+		$noFaMap[$symbol]=$symbol;
+	}
 	foreach($this->stockMap as $symbol=>$stock){
 		if($this->_stockMap[$symbol]!=null) $_live=$this->_stockMap[$symbol][$voStock->live];
 		$buy=null;
@@ -1499,6 +1527,11 @@ class stock_ViewStock{
 		if(!$this->isNull0($stock[$voStock->bv])) $bvp=(1*($stock[$voStock->live][$vo->close]-$stock[$voStock->bv])/$stock[$voStock->bv]);
 		else $bvp=null;
 		
+		$ysFa=false;
+		if($ysFaMap[$symbol]!=null) $ysFa=true;
+		
+		$noFa=false;
+		if($noFaMap[$symbol]!=null) $noFa=true;
 ?>
 <!--$htmlTr2-->
 	<tr>
@@ -1531,7 +1564,7 @@ class stock_ViewStock{
 
 		<td style="color:black;border-right:0px solid black;<?= $trStyle ?>" ><?= $this->formatPer($bvp) ?></td>
 		<td style="color:black;border-right:0px solid black;<?= $trStyle ?>" ><?= $this->formatVolume2($buy,$vo->sellPrice1,$stock[$voStock->live],$_live) ?></td>
-		<td style="color:black;border-right:0px solid black;<?= $trStyle ?>" ><?= $this->formatRoe($stock[$voStock->roe]) ?></td>
+		<td style="color:black;border-right:0px solid black;<?= $trStyle ?>" ><?= $this->formatRoe($stock[$voStock->roe],$ysFa,$noFa) ?></td>
 		
 <? /*
 		<td style="border-right:0px solid black;<?= $trStyle ?>"> <?= $this->formatPercentScale( $stock[$voStock->minMaxArr][2], $stock[$voStock->minMaxArr][7] ) ?> </td>
@@ -1800,6 +1833,22 @@ try{
 			$faMap[$symbol]=$symbol;
 		}
 		
+		$ysFaArr=explode(",",$this->ao->conf["ysFA"]);
+		$ysFaMap=array(
+		);
+		foreach($ysFaArr as $i=>$str){
+			$symbol=$str;
+			$ysFaMap[$symbol]=$symbol;
+		}
+		
+		$noFaArr=explode(",",$this->ao->conf["noFA"]);
+		$noFaMap=array(
+		);
+		foreach($noFaArr as $i=>$str){
+			$symbol=$str;
+			$noFaMap[$symbol]=$symbol;
+		}
+		
 		foreach($faMap as $symbol => $value){
 			//if( !in_array($symbol,$rowSymbolArr) ) array_push($rowSymbolArr,$symbol);
 			if($rowSymbolMap[$symbol]==null) $rowSymbolMap[$symbol]=$symbol;
@@ -1984,9 +2033,13 @@ try{
 					  ($reRowPriceArr[$i][$voRe->value2]>=500000 || $value0>=500000)){
 						$rate+=9000000;
 						$rate+=round($perValue*100);
+						
+						if(($stockMap[$symbol][$voStock->roe]>=20 || $ysFaMap[$symbol]!=null) && $live[$vo2->close]<=3*$stockMap[$symbol][$voStock->bv] && $noFaMap[$symbol]==null) $rate+=100000;
+						
 					} else {
 						$rate+=round($perValue*100);
 						//$rate+= 100*$reRowPriceArr[$i][$voRe->maxC2];
+						if(($stockMap[$symbol][$voStock->roe]>=20 || $ysFaMap[$symbol]!=null) && $live[$vo2->close]<=3*$stockMap[$symbol][$voStock->bv] && $noFaMap[$symbol]==null) $rate+=100000;
 						if($reRowPriceArr[$i][$voRe->value2]<=500000) $willunset=true;
 					}
 				}

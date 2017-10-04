@@ -2933,7 +2933,10 @@ var $this = this; var $__arguments = arguments; var $strConf = null; var $day = 
 	}
 stock_ViewDetail.prototype.onclickButtonCand1 = function($event){
 var $this = this; var $__arguments = arguments; var $strConf = null; var $day = null;
-		$this.ao.conf["combineDay"]=4;		$this.conPaint().viewPaint();
+				if($this.ao.conf["combineDay"]==3) $this.ao.conf["combineDay"]=4;
+		else $this.ao.conf["combineDay"]=3;
+		
+		$this.conPaint().viewPaint();
 		$this.buttonCand.text("Ca"+$this.ao.conf["combineDay"]);
 		return;
 		
@@ -3855,16 +3858,17 @@ var $this = this; var $__arguments = arguments; var $conf = null;
 		
 	}
 stock_ViewStock.prototype.onclickButtonConf = function($event){
-var $this = this; var $__arguments = arguments; var $strConf = null; var $strTradeMap = null; var $map = null;
+var $this = this; var $__arguments = arguments; var $strConf = null; var $strTradeMap = null; var $choice = null; var $map = null;
 		$strConf=$this.viewDetail.textConf.prop("value");
 		$strTradeMap=$this.viewDetail.textTrade.prop("value");
+		$choice=prompt("blank for all", "conf");
+		if($choice==null) return;
+		if($choice=="conf") $strTradeMap=null;
 		$map={
 			"strConf":$strConf,
 			"strTradeMap":$strTradeMap
 		};
-		if(confirm("SAVE: "+$strConf)){
-			$this.rpcConf( $map );
-		}
+		$this.rpcConf( $map );
 	}
 stock_ViewStock.prototype.rpcConf = function( $map ){
 var $this = this; var $__arguments = arguments;
@@ -3872,9 +3876,11 @@ var $this = this; var $__arguments = arguments;
 
 	}
 stock_ViewStock.prototype.onrpcConf = function($event ,$result){
-var $this = this; var $__arguments = arguments; var $strConf = null;
-		$strConf=$result;
+var $this = this; var $__arguments = arguments; var $strConf = null; var $strTradeMap = null;
+		$strConf=$result["strConf"];
+		$strTradeMap=$result["strTradeMap"];
 		$this.viewDetail.textConf.prop("value",$strConf);
+		$this.viewDetail.textTrade.prop("value",$strTradeMap);
 		$this.makeConf($strConf);
 		$this.viewDetail.buttonList.click();
 	}
@@ -4300,7 +4306,7 @@ var $this = this; var $__arguments = arguments; var $vo = null; var $color = nul
 		
 		return "<span style='color:"+$color+"'>"+$value+"</span>";
 	}
-stock_ViewStock.prototype.formatRoe = function($value){
+stock_ViewStock.prototype.formatRoe = function($value,$ysFa,$noFa){
 var $this = this; var $__arguments = arguments; var $color = null;
 		if($value==null) return "";
 		if($value>=20) $color="blue";
@@ -4309,8 +4315,15 @@ var $this = this; var $__arguments = arguments; var $color = null;
 		if($value<=-100) $value=-99;
 		
 		if($value <0 ) $value = "<u>"+number_format(-1*$value,0)+"</u>";
-		else $value = number_format(1*$value,0,",","");
+		else {
+			$value = number_format(1*$value,0,",","");
+			if($ysFa) {
+				$color="blue";
+				$value = "<u>"+$value+"</u>";
+			}
+		}
 		
+		if($noFa) $color="red";
 
 		return "<span style='color:"+$color+"'>"+$value+"</span>";
 	}
@@ -4320,6 +4333,7 @@ var $this = this; var $__arguments = arguments; var $color = null;
 		if($value>=40) $color="blue";
 		else $color="red";
 						if($value>=100) $value=99;
+		if($value<=-100) $value=-99;
 		if($value<0) $color="limegreen";
 		
 		if($value <0 ) $value = ""+number_format(-1*$value,0)+"";
@@ -4627,7 +4641,7 @@ var $this = this; var $__arguments = arguments; var $voStock = null;
 		return $this.stockMap[$symbol][$voStock.live];
 	}
 stock_ViewStock.prototype.onrpcStockMap = function($event ,$result){
-var $this = this; var $__arguments = arguments; var $vo = null; var $voStock = null; var $count = null; var $valueT = null; var $valueNowT = null; var $profitT = null; var $valueTfake = null; var $valueNowTfake = null; var $profitTfake = null; var $seperate = null; var $seperate2 = null; var $seperate3 = null; var $seperate4 = null; var $seperate5 = null; var $symbol = null; var $_live = null; var $buy = null; var $perSell = null; var $perBuy = null; var $stock = null; var $buyPrice = null; var $symbolTrade = null; var $trade = null; var $dateArr = null; var $priceArr = null; var $volumeArr = null; var $marketArr = null; var $live = null; var $value = null; var $valueNow = null; var $profit = null; var $canSell = null; var $i = null; var $date = null; var $tp = null; var $price = null; var $volume = null; var $marketTrade = null; var $per = null; var $trStyle = null; var $perValue = null; var $value0 = null; var $bvp = null; var $html2 = null; var $htmlTr2 = null; var $html = null; var $arrayStock_symbol = null; var $selectStock = null; var $selectedSymbol = null; var $selectedIndex = null;
+var $this = this; var $__arguments = arguments; var $vo = null; var $voStock = null; var $count = null; var $valueT = null; var $valueNowT = null; var $profitT = null; var $valueTfake = null; var $valueNowTfake = null; var $profitTfake = null; var $seperate = null; var $seperate2 = null; var $seperate3 = null; var $seperate4 = null; var $seperate5 = null; var $ysFaArr = null; var $ysFaMap = null; var $symbol = null; var $str = null; var $noFaArr = null; var $noFaMap = null; var $_live = null; var $buy = null; var $perSell = null; var $perBuy = null; var $stock = null; var $buyPrice = null; var $symbolTrade = null; var $trade = null; var $dateArr = null; var $priceArr = null; var $volumeArr = null; var $marketArr = null; var $live = null; var $value = null; var $valueNow = null; var $profit = null; var $canSell = null; var $i = null; var $date = null; var $tp = null; var $price = null; var $volume = null; var $marketTrade = null; var $per = null; var $trStyle = null; var $perValue = null; var $value0 = null; var $bvp = null; var $ysFa = null; var $noFa = null; var $html2 = null; var $htmlTr2 = null; var $html = null; var $arrayStock_symbol = null; var $selectStock = null; var $selectedSymbol = null; var $selectedIndex = null;
 		$vo=$this.voPrice2;
 		$voStock=$this.voStock;
 		$this._stockMap=$this.stockMap;
@@ -4679,6 +4693,22 @@ $html2 = $__html2Array.join("");
 	$seperate3=null;
 	$seperate4=null;
 	$seperate5=null;
+
+	$ysFaArr=explode(",",$this.ao.conf["ysFA"]);
+	$ysFaMap={
+	};
+	for($i in $ysFaArr){var $str = $ysFaArr[$i];
+		$symbol=$str;
+		$ysFaMap[$symbol]=$symbol;
+	}
+	
+	$noFaArr=explode(",",$this.ao.conf["noFA"]);
+	$noFaMap={
+	};
+	for($i in $noFaArr){var $str = $noFaArr[$i];
+		$symbol=$str;
+		$noFaMap[$symbol]=$symbol;
+	}
 	for($symbol in $this.stockMap){var $stock = $this.stockMap[$symbol];
 		if($this._stockMap[$symbol]!=null) $_live=$this._stockMap[$symbol][$voStock.live];
 		$buy=null;
@@ -4770,6 +4800,11 @@ $html2 = $__html2Array.join("");
 		if(!$this.isNull0($stock[$voStock.bv])) $bvp=(1*($stock[$voStock.live][$vo.close]-$stock[$voStock.bv])/$stock[$voStock.bv]);
 		else $bvp=null;
 		
+		$ysFa=false;
+		if($ysFaMap[$symbol]!=null) $ysFa=true;
+		
+		$noFa=false;
+		if($noFaMap[$symbol]!=null) $noFa=true;
 
 var $__htmlTr2Array = new Array();
 $__htmlTr2Array.push('\
@@ -4906,7 +4941,7 @@ $__htmlTr2Array.push('</td>\
 $__htmlTr2Array.push( $trStyle );
 
 $__htmlTr2Array.push('" >');
-$__htmlTr2Array.push( $this.formatRoe($stock[$voStock.roe]) );
+$__htmlTr2Array.push( $this.formatRoe($stock[$voStock.roe],$ysFa,$noFa) );
 
 $__htmlTr2Array.push('</td>\
  ');
