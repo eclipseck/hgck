@@ -179,7 +179,9 @@ try{
 			return $rowPriceLiveMap;
 		}
 		
-		$httpClient = new Zend_Http_Client('http://stockboard.sbsc.com.vn/HO.ashx?FileName=0');
+		$httpClient = new Zend_Http_Client('http://stockboard.sbsc.com.vn/HO.ashx?FileName=0&_='.time());
+		//$httpClient = new Zend_Http_Client('http://stockboard.sbsc.com.vn/HO.ashx?FileName=505&_t=1507516901268');
+		//echo 'http://stockboard.sbsc.com.vn/HO.ashx?FileName=0&_='.time();
 		$html = trim($httpClient->request('GET')->getBody());
 		
 		$this->date=$this->toDate(substr($html,0,10));
@@ -216,7 +218,6 @@ try{
 		$pos2=strpos($html,"|@");
 		
 		$text=substr($html,$pos1+3,$pos2-$pos1-3);
-		
 		$vo = $this->voPrice2;
 		
 		$arr=explode("|",$text);
@@ -398,6 +399,7 @@ try{
 		}
 		//print_p($rowPriceLiveMap); return;
 } catch (Exception $ex){
+	echo "Error";
 	$rowPriceLiveMap=$this->obJfile->load("stock_ViewPrice/rowPriceLiveMap");
 	return $rowPriceLiveMap;
 }

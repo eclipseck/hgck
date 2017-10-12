@@ -335,8 +335,8 @@ class stock_ViewDetail{
 	}
 	public function onclickButtonCand1($event){
 		//$this->ao->conf["combineDay"]=4;//
-		if($this->ao->conf["combineDay"]==3) $this->ao->conf["combineDay"]=4;
-		else $this->ao->conf["combineDay"]=3;
+		if($this->ao->conf["combineDay"]==4) $this->ao->conf["combineDay"]=3;
+		else $this->ao->conf["combineDay"]=4;
 		
 		$this->conPaint()->viewPaint();
 		$this->buttonCand->text("Ca".$this->ao->conf["combineDay"]);

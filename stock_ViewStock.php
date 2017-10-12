@@ -629,7 +629,7 @@ $__htmlArray.push('\
 <div>\
 <div id="divCanvasText" style=\'position:relative\'>\
 </div>\
-<div id="divOnePrice" style=\'position:absolute;left:380px;top:2px\'></div>\
+<div id="divOnePrice" style=\'position:absolute;left:280px;top:2px\'></div>\
 <canvas id="canvas"></canvas>\
 </div>\
 ');
@@ -653,7 +653,7 @@ $html = $__htmlArray.join("");
 		return $this;
 	}
 stock_ViewChart.prototype.makeRowPriceArr = function($vo, $rowPriceArr ,$limit){
-var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null; var $len = null; var $i = null;if($limit==null) $limit=null; var $len2 = null; var $ma0 = null; var $ma1 = null; var $ma2 = null; var $ma3 = null; var $maC = null; var $j = null; var $x = null; var $dev = null; var $k = null; var $y = null; var $close = null;
+var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null; var $len = null; var $i = null;if($limit==null) $limit=null; var $len2 = null; var $ma01 = null; var $ma02 = null; var $ma0 = null; var $ma1 = null; var $ma2 = null; var $ma3 = null; var $maC = null; var $j = null; var $x = null; var $dev = null; var $k = null; var $y = null; var $close = null;
 				$re=[];
 		$voRe=$this.viewStock.voRowPriceArr;
 		$len=count($rowPriceArr);
@@ -666,20 +666,26 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 		
 		
 		if($this.ao.conf["combineDay"]==1){
-			$ma0=8;
+			$ma01=5;
+			$ma02=8;
+			$ma0=13;
 			$ma1=21;
 			$ma2=34;
 			$ma3=55;
-		} else if($this.ao.conf["combineDay"]==2 || $this.ao.conf["combineDay"]==8){ 			$ma0=5;
-			$ma1=13;
-			$ma2=21;
-			$ma3=34;
+		} else if($this.ao.conf["combineDay"]==2 || $this.ao.conf["combineDay"]==8){ 			$ma01=5;
+			$ma02=8;
+			$ma0=13;
+			$ma1=21;
+			$ma2=34;
+			$ma3=55;
 			
 														} else {
-			$ma0=5;
-			$ma1=13;
-			$ma2=21;
-			$ma3=34;
+			$ma01=5;
+			$ma02=8;
+			$ma0=13;
+			$ma1=21;
+			$ma2=34;
+			$ma3=55;
 		}
 		
 		for($i=$len-1 ; $i >=0 ;$i--){
@@ -692,10 +698,12 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 				if($rowPriceArr[$x+1]==null || $this.ao.isNull0($rowPriceArr[$x+1][$vo.close])) break;
 
 				$maC+=$rowPriceArr[$x+1][$vo.close];
-								if($j==$ma0-1 || $j==$ma1-1 || $j==$ma2-1 || $j==$ma3-1){
+								if($j==$ma0-1 || $j==$ma1-1 || $j==$ma2-1 || $j==$ma3-1  || $j==$ma01-1 || $j==$ma02-1){
 					if($j==$ma0-1) $re[$i][$voRe.maC1]=$maC/($j+1);
 					if($j==$ma1-1) $re[$i][$voRe.maC2]=$maC/($j+1);
 					if($j==$ma2-1) $re[$i][$voRe.maC3]=$maC/($j+1);
+					if($j==$ma01-1) $re[$i]["ma01"]=$maC/($j+1);
+					if($j==$ma02-1) $re[$i]["ma02"]=$maC/($j+1);
 					if($j==$ma3-1) {
 						$re[$i][$voRe.maC4]=$maC/($j+1);
 						$dev=0;
@@ -1056,7 +1064,7 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 		$candCount = 0;
 		
 		
-		$this.paintText("<div><span style='color:blue'>"+round( 100*($this._maxStockDataY-$this._minStockDataY)/$this._minStockDataY )+"</span></div>", 700 , 30);		for($i=0; $i<$this.rowPriceArr.length-1; $i++){
+		$this.paintText("<div><span style='color:blue'>"+round( 100*($this._maxStockDataY-$this._minStockDataY)/$this._minStockDataY )+"</span></div>", 150 , 0);		for($i=0; $i<$this.rowPriceArr.length-1; $i++){
 			if($limit!=null && $i>=$limit) break;
 			$stockData = $this.rowPriceArr[$i];
 			$x = $this.getX($i);
@@ -1663,7 +1671,7 @@ var $this = this; var $__arguments = arguments; var $vo1 = null; var $symbol = n
 			$status = str_replace(".chn","",$status);
 			$status = str_replace("-"," ",$status);
 		}
-		$this.paintText("<div style='width:350px;color:black'><b>"+$status+"</b></div>", 20 , 0);		
+		$this.paintText("<div style='width:350px;color:black'><b>"+$status+"</b></div>", 20 , 30);		
 		return;
 		$intervalArr=$this.viewStock.intervalArr;
 		$percentArr=$this.viewStock.percentArr;
@@ -1782,6 +1790,10 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 			if($limit!= null && $k!=1 && $k!=2 && $k!=3 && $k!=4 && $k!=5 && $k!=6) continue;
 			if($k==1){
 								$this.context.strokeStyle='Black';
+				$this.context.strokeStyle='sienna';
+				$this.context.strokeStyle='purple';
+				$this.context.strokeStyle='hotpink';
+				$this.context.strokeStyle='sienna';
 			}
 			else if($k==2){
 								$this.context.strokeStyle='Blue';
@@ -1792,17 +1804,14 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 			}
 			else if($k==4){
 								$this.context.strokeStyle='sienna';
+				$this.context.strokeStyle='black';
 				
 			}
 			else if($k==5){
-				continue;
-				$this.context.strokeStyle='Black';
-				$this.context.strokeStyle='blue';
+								$this.context.strokeStyle='black';
 			}
 			else if($k==6){
-				continue;
-				$this.context.strokeStyle='hotpink';
-				$this.context.strokeStyle='blue';
+								$this.context.strokeStyle='black';
 			}
 						
 			if($k==4){
@@ -1866,6 +1875,8 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 				else if($k==2) $y = $stockData[$voRe.maC2];
 				else if($k==3) $y = $stockData[$voRe.maC3];
 				else if($k==4) $y = $stockData[$voRe.maC4];
+				else if($k==5) $y = $stockData["ma01"];
+				else if($k==6) $y = $stockData["ma02"];
 				if($y==null) continue;
 				$y = $this.getY($y);
 				if($i==0){
@@ -2933,8 +2944,8 @@ var $this = this; var $__arguments = arguments; var $strConf = null; var $day = 
 	}
 stock_ViewDetail.prototype.onclickButtonCand1 = function($event){
 var $this = this; var $__arguments = arguments; var $strConf = null; var $day = null;
-				if($this.ao.conf["combineDay"]==3) $this.ao.conf["combineDay"]=4;
-		else $this.ao.conf["combineDay"]=3;
+				if($this.ao.conf["combineDay"]==4) $this.ao.conf["combineDay"]=3;
+		else $this.ao.conf["combineDay"]=4;
 		
 		$this.conPaint().viewPaint();
 		$this.buttonCand.text("Ca"+$this.ao.conf["combineDay"]);
@@ -3714,7 +3725,7 @@ var $this = this; var $__arguments = arguments;
 		$this.voPrice=$this.ao.bean("stock_VoPrice/con");
 		$this.voPrice2=$this.ao.bean("stock_VoPrice/con2");
 		$this.voPrice3=$this.ao.bean("stock_VoPrice/con3");
-		$this.voStock=get(new stock_Vo())._con("rate,value2,trade,live,perHigh,minC1,maxC1,bv,roe","");		
+		$this.voStock=get(new stock_Vo())._con("rate,value2,trade,live,perHigh,minC1,maxC1,bv,roe,ff2","");		
 		$this.voRowPriceArr=get(new stock_Vo())._con("value2,code,minC1,maxC1,minC2,maxC2,perHigh,maPerC1,maPerC2,maC1,maC2,maC3,maC4,dev,status,status0,min,imin,max,imax,delta,minMax","");
 		$this.voStat=get(new stock_Vo())._con("total,avg","");
 		
@@ -3731,7 +3742,7 @@ var $this = this; var $__arguments = arguments;
 		$this.firstRun=true;
 		
 								$this.intervalArr = [8,21,34,55];				$this.percentArr = [20,50,80,100];
-		$this.valueOff=500000;
+		$this.valueOff=100000;
 		$this.stockMap={
 		};
 		$this._stockMap={
@@ -4085,7 +4096,7 @@ var $this = this; var $__arguments = arguments; var $re = null; var $len = null;
 		return $re;
 	}
 stock_ViewStock.prototype.makeRowPriceArr2 = function($vo, $rowPriceArr ,$limit){
-var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null; var $len = null; var $i = null;if($limit==null) $limit=null; var $len2 = null; var $ma0 = null; var $ma1 = null; var $ma2 = null; var $ma3 = null; var $maC = null; var $j = null; var $x = null; var $dev = null; var $k = null; var $y = null; var $close = null;
+var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null; var $len = null; var $i = null;if($limit==null) $limit=null; var $len2 = null; var $ma0 = null; var $ma1 = null; var $ma2 = null; var $ma3 = null; var $ma01 = null; var $ma02 = null; var $maC = null; var $j = null; var $x = null; var $dev = null; var $k = null; var $y = null; var $close = null;
 				$re=[];
 		$voRe=$this.voRowPriceArr;
 		$len=count($rowPriceArr);
@@ -4104,7 +4115,9 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 			$ma3=55
 		} else if($this.ao.conf["combineDay"]==2 || $this.ao.conf["combineDay"]==8){
 					$ma0=5;
+			$ma01=9;
 			$ma1=13;
+			$ma02=17;
 			$ma2=21;
 			$ma3=34;
 			
@@ -4125,10 +4138,12 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 				if($rowPriceArr[$x+1]==null || $this.isNull0($rowPriceArr[$x+1][$vo.close])) break;
 
 				$maC+=$rowPriceArr[$x+1][$vo.close];
-								if($j==$ma0-1 || $j==$ma1-1 || $j==$ma2-1 || $j==$ma3-1){
+								if($j==$ma0-1 || $j==$ma1-1 || $j==$ma2-1 || $j==$ma3-1 || $j==$ma01-1 || $j==$ma02-1){
 					if($j==$ma0-1) $re[$i][$voRe.maC1]=$maC/($j+1);
 					if($j==$ma1-1) $re[$i][$voRe.maC2]=$maC/($j+1);
 					if($j==$ma2-1) $re[$i][$voRe.maC3]=$maC/($j+1);
+					if($j==$ma01-1) $re[$i]["ma01"]=$maC/($j+1);
+					if($j==$ma02-1) $re[$i]["ma02"]=$maC/($j+1);
 					if($j==$ma3-1) {
 						$re[$i][$voRe.maC4]=$maC/($j+1);
 						$dev=0;
@@ -4306,6 +4321,25 @@ var $this = this; var $__arguments = arguments; var $vo = null; var $color = nul
 		
 		return "<span style='color:"+$color+"'>"+$value+"</span>";
 	}
+stock_ViewStock.prototype.formatBvp = function($value){
+var $this = this; var $__arguments = arguments; var $vo = null; var $dt = null; var $symbol = null; var $color = null; var $f = null;
+				$vo=$this.voPrice2;
+		
+		if($dt && $this.isMarket($symbol)){
+			return "<div _tag='volume0' style='background-color:blue;color:white;text-align:center;'></div>";
+		}
+	
+		$color="black";
+		
+		$f=10;
+		if($value>=10)$value=9.9;
+		if($value<=-10)$value=-9.9;
+		
+		if($value <0 ) $value = "<u>"+number_format(-$f*$value,0)+"</u>";
+		else $value = number_format($f*$value,0,",","");
+		
+		return "<span style='color:"+$color+"'>"+$value+"</span>";
+	}
 stock_ViewStock.prototype.formatRoe = function($value,$ysFa,$noFa){
 var $this = this; var $__arguments = arguments; var $color = null;
 		if($value==null) return "";
@@ -4327,10 +4361,37 @@ var $this = this; var $__arguments = arguments; var $color = null;
 
 		return "<span style='color:"+$color+"'>"+$value+"</span>";
 	}
+stock_ViewStock.prototype.formatFf0 = function($value,$ysFa,$noFa){
+var $this = this; var $__arguments = arguments; var $color = null;
+		return $this.formatPer($value);
+		if($value==null) return "";
+		if($value>=0) $color="blue";
+		else $color="red";
+		if($value>=100) $value=99;
+		if($value<=-100) $value=-99;
+		$color="black";
+				if($value <0 ) $value = "<u>"+number_format(-1*$value,0)+"</u>";
+		
+		
+		return "<span style='color:"+$color+"'>"+$value+"</span>";
+	}
+stock_ViewStock.prototype.formatFf = function($value,$ysFa,$noFa){
+var $this = this; var $__arguments = arguments; var $color = null;
+		return $this.formatPer($value);
+		if($value==null) return "";
+		if($value>=0) $color="blue";
+		else $color="red";
+		if($value>=100) $value=99;
+		if($value<=-100) $value=-99;
+				if($value <0 ) $value = ""+number_format(-1*$value,0)+"";
+		
+		
+		return "<span style='color:"+$color+"'>"+$value+"</span>";
+	}
 stock_ViewStock.prototype.formatPercentScale = function($value, $maPer){
 var $this = this; var $__arguments = arguments; var $color = null;
 		if($value==null) return "";
-		if($value>=40) $color="blue";
+		if($value>=50) $color="blue";
 		else $color="red";
 						if($value>=100) $value=99;
 		if($value<=-100) $value=-99;
@@ -4927,7 +4988,21 @@ $__htmlTr2Array.push('</td>\
 $__htmlTr2Array.push( $trStyle );
 
 $__htmlTr2Array.push('" >');
-$__htmlTr2Array.push( $this.formatPer($bvp) );
+$__htmlTr2Array.push( $this.formatRoe($stock[$voStock.roe],$ysFa,$noFa) );
+
+$__htmlTr2Array.push('</td>\
+<td style="color:black;border-right:0px solid black;');
+$__htmlTr2Array.push( $trStyle );
+
+$__htmlTr2Array.push('" >');
+$__htmlTr2Array.push( $this.formatBvp($bvp) );
+
+$__htmlTr2Array.push('</td>\
+  <td style="color:black;border-right:0px solid black;');
+$__htmlTr2Array.push( $trStyle );
+
+$__htmlTr2Array.push('" >');
+$__htmlTr2Array.push( $this.formatFf($stock[$voStock.ff2],$ysFa,$noFa) );
 
 $__htmlTr2Array.push('</td>\
 <td style="color:black;border-right:0px solid black;');
@@ -4937,14 +5012,7 @@ $__htmlTr2Array.push('" >');
 $__htmlTr2Array.push( $this.formatVolume2($buy,$vo.sellPrice1,$stock[$voStock.live],$_live) );
 
 $__htmlTr2Array.push('</td>\
-<td style="color:black;border-right:0px solid black;');
-$__htmlTr2Array.push( $trStyle );
-
-$__htmlTr2Array.push('" >');
-$__htmlTr2Array.push( $this.formatRoe($stock[$voStock.roe],$ysFa,$noFa) );
-
-$__htmlTr2Array.push('</td>\
- ');
+  ');
   
 $__htmlTr2Array.push('\
 </tr>\

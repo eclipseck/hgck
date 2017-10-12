@@ -33,7 +33,7 @@ class stock_ViewChart{
 <div>
 	<div id="divCanvasText" style='position:relative'>
 	</div>
-	<div id="divOnePrice" style='position:absolute;left:380px;top:2px'></div>
+	<div id="divOnePrice" style='position:absolute;left:280px;top:2px'></div>
 	<canvas id="canvas"></canvas>
 </div>
 <!--/$html--><?
@@ -134,25 +134,31 @@ class stock_ViewChart{
 		
 		
 		if($this->ao->conf["combineDay"]==1){
-			$ma0=8;
+			$ma01=5;
+			$ma02=8;
+			$ma0=13;
 			$ma1=21;
 			$ma2=34;
 			$ma3=55;
 		} else if($this->ao->conf["combineDay"]==2 || $this->ao->conf["combineDay"]==8){ ///5 8 13 21 34 55 89
-			$ma0=5;
-			$ma1=13;
-			$ma2=21;
-			$ma3=34;
+			$ma01=5;
+			$ma02=8;
+			$ma0=13;
+			$ma1=21;
+			$ma2=34;
+			$ma3=55;
 			
 			//$ma0=4;
 			//$ma1=11;
 			//$ma2=17;//23
 			//$ma3=55;
 		} else {
-			$ma0=5;
-			$ma1=13;
-			$ma2=21;
-			$ma3=34;
+			$ma01=5;
+			$ma02=8;
+			$ma0=13;
+			$ma1=21;
+			$ma2=34;
+			$ma3=55;
 		}
 		
 		for($i=$len-1 ; $i >=0 ;$i--){
@@ -167,10 +173,12 @@ class stock_ViewChart{
 
 				$maC+=$rowPriceArr[$x+1][$vo->close];
 				//$maC+=($rowPriceArr[$x+1][$vo->low]+$rowPriceArr[$x+1][$vo->high])/2;
-				if($j==$ma0-1 || $j==$ma1-1 || $j==$ma2-1 || $j==$ma3-1){
+				if($j==$ma0-1 || $j==$ma1-1 || $j==$ma2-1 || $j==$ma3-1  || $j==$ma01-1 || $j==$ma02-1){
 					if($j==$ma0-1) $re[$i][$voRe->maC1]=$maC/($j+1);
 					if($j==$ma1-1) $re[$i][$voRe->maC2]=$maC/($j+1);
 					if($j==$ma2-1) $re[$i][$voRe->maC3]=$maC/($j+1);
+					if($j==$ma01-1) $re[$i]["ma01"]=$maC/($j+1);
+					if($j==$ma02-1) $re[$i]["ma02"]=$maC/($j+1);
 					if($j==$ma3-1) {
 						$re[$i][$voRe->maC4]=$maC/($j+1);
 						$dev=0;
@@ -592,7 +600,7 @@ class stock_ViewChart{
 		if($bv==null) $bp="";
 		else $bp=round(100*($this->rowPriceArr[0][$vo1->close]-$bv)/$bv);
 		*/
-		$this->paintText("<div><span style='color:blue'>".round( 100*($this->_maxStockDataY-$this->_minStockDataY)/$this->_minStockDataY )."</span></div>", 700 , 30);////// 850 485
+		$this->paintText("<div><span style='color:blue'>".round( 100*($this->_maxStockDataY-$this->_minStockDataY)/$this->_minStockDataY )."</span></div>", 150 , 0);////// 850 485
 		for($i=0; $i<$this->rowPriceArr->length-1; $i++){
 			if($limit!=null && $i>=$limit) break;
 			$stockData = $this->rowPriceArr[$i];
@@ -1719,7 +1727,7 @@ cpchiacho max = 2
 			$status = str_replace(".chn","",$status);
 			$status = str_replace("-"," ",$status);
 		}
-		$this->paintText("<div style='width:350px;color:black'><b>".$status."</b></div>", 20 , 0);////// 850 485
+		$this->paintText("<div style='width:350px;color:black'><b>".$status."</b></div>", 20 , 30);////// 850 485
 		
 		return;
 		$intervalArr=$this->viewStock->intervalArr;
@@ -1853,6 +1861,10 @@ cpchiacho max = 2
 			if($k==1){
 				//continue;
 				$this->context->strokeStyle='Black';
+				$this->context->strokeStyle='sienna';
+				$this->context->strokeStyle='purple';
+				$this->context->strokeStyle='hotpink';
+				$this->context->strokeStyle='sienna';
 			}
 			else if($k==2){
 				//continue;
@@ -1866,17 +1878,16 @@ cpchiacho max = 2
 			else if($k==4){
 				//continue;
 				$this->context->strokeStyle='sienna';
+				$this->context->strokeStyle='black';
 				
 			}
 			else if($k==5){
-				continue;
-				$this->context->strokeStyle='Black';
-				$this->context->strokeStyle='blue';
+				//continue;
+				$this->context->strokeStyle='black';
 			}
 			else if($k==6){
-				continue;
-				$this->context->strokeStyle='hotpink';
-				$this->context->strokeStyle='blue';
+				//continue;
+				$this->context->strokeStyle='black';
 			}
 						
 			if($k==4){
@@ -1941,6 +1952,8 @@ cpchiacho max = 2
 				else if($k==2) $y = $stockData[$voRe->maC2];
 				else if($k==3) $y = $stockData[$voRe->maC3];
 				else if($k==4) $y = $stockData[$voRe->maC4];
+				else if($k==5) $y = $stockData["ma01"];
+				else if($k==6) $y = $stockData["ma02"];
 				if($y==null) continue;
 				$y = $this->getY($y);
 				if($i==0){
