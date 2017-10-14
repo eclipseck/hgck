@@ -22,6 +22,7 @@ class stock_ViewChart{
 		
 		$this->rowPriceArrMap=array(
 		);
+		$this->voRowPriceArr=get(new stock_Vo())->_con("maC1,maC2,maC3,maC4,dev,minMax1","");		
 		return $this;
 	}
 
@@ -123,7 +124,7 @@ class stock_ViewChart{
 	public function makeRowPriceArr($vo, $rowPriceArr ,$limit=null){
 		//$vo=$this->voPrice;
 		$re=array();
-		$voRe=$this->viewStock->voRowPriceArr;
+		$voRe=$this->voRowPriceArr;
 		$len=count($rowPriceArr);
 		for($i=0 ; $i < $len ;$i++){
 			$re[$i]=array();
@@ -140,6 +141,13 @@ class stock_ViewChart{
 			$ma1=21;
 			$ma2=34;
 			$ma3=55;
+			/*
+			$ma01=5;
+			$ma02=9;
+			$ma0=13;
+			$ma1=17;
+			$ma2=21;
+			$ma3=25;*/
 		} else if($this->ao->conf["combineDay"]==2 || $this->ao->conf["combineDay"]==8){ ///5 8 13 21 34 55 89
 			$ma01=5;
 			$ma02=8;
@@ -165,11 +173,24 @@ class stock_ViewChart{
 			//if($i >= $len - $ma3) continue;
 			if($this->ao->isNull0($rowPriceArr[$i][$vo->close])) continue;
 			
+			$min1=999999;$max1=-999999;
 			$maC=0;
 			for($j=0 ; $j < $ma3 ; $j++){
 				$x=$i+$j;
 				if($this->ao->isNull0($rowPriceArr[$x][$vo->close])) break;
 				if($rowPriceArr[$x+1]==null || $this->ao->isNull0($rowPriceArr[$x+1][$vo->close])) break;
+				
+				if($i==0 && $j>=1 && $j<=4){
+					if($rowPriceArr[$x][$vo->close]<$min1){
+						$min1=$rowPriceArr[$x][$vo->close];
+					}
+					if($rowPriceArr[$x][$vo->close]>$max1){
+						$max1=$rowPriceArr[$x][$vo->close];
+					}
+					if($j==4){
+						if($min1!=0) $re[$i][$voRe->minMax1]=round(100*($max1-$min1)/$min1);
+					}
+				}
 
 				$maC+=$rowPriceArr[$x+1][$vo->close];
 				//$maC+=($rowPriceArr[$x+1][$vo->low]+$rowPriceArr[$x+1][$vo->high])/2;
@@ -566,7 +587,7 @@ class stock_ViewChart{
 	}
 
 	public function paintCandleStick($limit){
-		$voRe=$this->viewStock->voRowPriceArr;
+		$voRe=$this->voRowPriceArr;
 		$vo1=$this->voPrice1;
 		
 		$this->context->globalAlpha=1;
@@ -629,7 +650,8 @@ class stock_ViewChart{
 			//if($this->rowPriceExArr[$i]["less"]==0){
 			//if($this->rowPriceExArr[$i]["less"]==0 && !($this->rowPriceExArr[$i+1]["less"]==0 && $this->rowPriceExArr[$i+1]["less"]==0) && $this->rowPriceExArr[$i]["maGreat"]>=1){
 			//if($this->rowPriceExArr[$i][$voRe->status]=="great" || $this->rowPriceExArr[$i][$voRe->status]=="greatF"){
-			if(1==0&&$this->rowPriceExArr[$i][$voRe->status]=="greatF"){
+			//if(1==0&&$this->rowPriceExArr[$i][$voRe->status]=="greatF"){
+			if($i==4){
 				/*
 				$this->context->restore();
 				$this->context->beginPath();
@@ -650,8 +672,10 @@ class stock_ViewChart{
 					
 					$this->context->beginPath();
 					$this->context->fillStyle = 'Black';
-					$this->context->arc($xm1, $this->getY($stockData[$vo1->low])+16, 7, 0, 2 * Math::PI, false);
+					$this->context->arc($xm1, $this->getY($stockData[$vo1->high])-16, 7, 0, 2 * Math::PI, false);
 					$this->context->fill();
+					
+					$this->paintText("<span style='color:black'><b>".$this->rowPriceExArr[0][$voRe->minMax1]."</b></span>",$xm1-7,  $this->getY($stockData[$vo1->high])-52);
 					/*
 					if($i==0){
 						$this->context->fillStyle = 'blue';
@@ -849,7 +873,7 @@ class stock_ViewChart{
 	}
 	
 	public function paintIndicator(){
-		$voRe=$this->viewStock->voRowPriceArr;
+		$voRe=$this->voRowPriceArr;
 		$vo1=$this->voPrice1;
 		$this->context->restore();
 		$this->context->globalAlpha=1;
@@ -1851,7 +1875,7 @@ cpchiacho max = 2
 	}
 	
 	public function paintMa($limit){
-		$voRe=$this->viewStock->voRowPriceArr;
+		$voRe=$this->voRowPriceArr;
 		$vo1=$this->voPrice1;
 		$this->context->restore();
 		$vo = new stock_VoPrice();
@@ -1861,36 +1885,59 @@ cpchiacho max = 2
 			if($k==1){
 				//continue;
 				$this->context->strokeStyle='Black';
-				$this->context->strokeStyle='sienna';
+				
 				$this->context->strokeStyle='purple';
 				$this->context->strokeStyle='hotpink';
+				$this->context->strokeStyle='green';
 				$this->context->strokeStyle='sienna';
+				
+				$this->context->strokeStyle='Red';
+				$this->context->strokeStyle='blue';
 			}
 			else if($k==2){
 				//continue;
-				$this->context->strokeStyle='Blue';
+				$this->context->strokeStyle='Olive ';
+				$this->context->strokeStyle='blue';
+				$this->context->strokeStyle='sienna';
+				
+				$this->context->strokeStyle='Red';
+				$this->context->strokeStyle='blue';
 			}
 			else if($k==3){
-				//continue;
-				$this->context->strokeStyle='hotpink';
+				//continue;s
+				$this->context->strokeStyle='blue';
+				$this->context->strokeStyle='Red';
+				$this->context->strokeStyle='Teal';
+				
+				$this->context->strokeStyle='blue';
 				$this->context->strokeStyle='Red';
 			}
 			else if($k==4){
 				//continue;
-				$this->context->strokeStyle='sienna';
 				$this->context->strokeStyle='black';
+				$this->context->strokeStyle='Red';
+				$this->context->strokeStyle='blue';
+				$this->context->strokeStyle='Teal';
 				
+				$this->context->strokeStyle='blue';
+				$this->context->strokeStyle='Red';
 			}
 			else if($k==5){
 				//continue;
 				$this->context->strokeStyle='black';
+				$this->context->strokeStyle='purple';
+				//$this->context->strokeStyle='sienna';
+				$this->context->strokeStyle='Black';
 			}
 			else if($k==6){
 				//continue;
 				$this->context->strokeStyle='black';
+				//$this->context->strokeStyle='sienna';
+				$this->context->strokeStyle='black';
+				
 			}
 						
-			if($k==4){
+			if($k==-4){
 				
 				for($j=2; $j<=3; $j++){
 					$this->context->beginPath();
@@ -1939,7 +1986,7 @@ cpchiacho max = 2
 			
 			$this->context->globalAlpha=1;
 			$this->context->beginPath();
-			$this->context->lineWidth=3;
+			$this->context->lineWidth=2;
 			///////if($this->w>=3) $this->context->lineWidth=2;
 			
 			for($i=0; $i<$this->rowPriceArr->length; $i++){
@@ -1951,7 +1998,10 @@ cpchiacho max = 2
 				if($k==1) $y = $stockData[$voRe->maC1];
 				else if($k==2) $y = $stockData[$voRe->maC2];
 				else if($k==3) $y = $stockData[$voRe->maC3];
-				else if($k==4) $y = $stockData[$voRe->maC4];
+				else if($k==4) {
+					$this->context->lineWidth=2;
+					$y = $stockData[$voRe->maC4];
+				}
 				else if($k==5) $y = $stockData["ma01"];
 				else if($k==6) $y = $stockData["ma02"];
 				if($y==null) continue;

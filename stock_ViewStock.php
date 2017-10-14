@@ -618,6 +618,7 @@ var $this = this; var $__arguments = arguments;
 		$this.width = 939;		$this.height = 720;		
 		$this.rowPriceArrMap={
 		};
+		$this.voRowPriceArr=get(new stock_Vo())._con("maC1,maC2,maC3,maC4,dev,minMax1","");		
 		return $this;
 	}
 stock_ViewChart.prototype.view = function(){
@@ -653,9 +654,9 @@ $html = $__htmlArray.join("");
 		return $this;
 	}
 stock_ViewChart.prototype.makeRowPriceArr = function($vo, $rowPriceArr ,$limit){
-var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null; var $len = null; var $i = null;if($limit==null) $limit=null; var $len2 = null; var $ma01 = null; var $ma02 = null; var $ma0 = null; var $ma1 = null; var $ma2 = null; var $ma3 = null; var $maC = null; var $j = null; var $x = null; var $dev = null; var $k = null; var $y = null; var $close = null;
+var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null; var $len = null; var $i = null;if($limit==null) $limit=null; var $len2 = null; var $ma01 = null; var $ma02 = null; var $ma0 = null; var $ma1 = null; var $ma2 = null; var $ma3 = null; var $min1 = null; var $max1 = null; var $maC = null; var $j = null; var $x = null; var $dev = null; var $k = null; var $y = null; var $close = null;
 				$re=[];
-		$voRe=$this.viewStock.voRowPriceArr;
+		$voRe=$this.voRowPriceArr;
 		$len=count($rowPriceArr);
 		for($i=0 ; $i < $len ;$i++){
 			$re[$i]=[];
@@ -672,6 +673,7 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 			$ma1=21;
 			$ma2=34;
 			$ma3=55;
+			
 		} else if($this.ao.conf["combineDay"]==2 || $this.ao.conf["combineDay"]==8){ 			$ma01=5;
 			$ma02=8;
 			$ma0=13;
@@ -691,11 +693,24 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 		for($i=$len-1 ; $i >=0 ;$i--){
 						if($this.ao.isNull0($rowPriceArr[$i][$vo.close])) continue;
 			
+			$min1=999999;$max1=-999999;
 			$maC=0;
 			for($j=0 ; $j < $ma3 ; $j++){
 				$x=$i+$j;
 				if($this.ao.isNull0($rowPriceArr[$x][$vo.close])) break;
 				if($rowPriceArr[$x+1]==null || $this.ao.isNull0($rowPriceArr[$x+1][$vo.close])) break;
+				
+				if($i==0 && $j>=1 && $j<=4){
+					if($rowPriceArr[$x][$vo.close]<$min1){
+						$min1=$rowPriceArr[$x][$vo.close];
+					}
+					if($rowPriceArr[$x][$vo.close]>$max1){
+						$max1=$rowPriceArr[$x][$vo.close];
+					}
+					if($j==4){
+						if($min1!=0) $re[$i][$voRe.minMax1]=round(100*($max1-$min1)/$min1);
+					}
+				}
 
 				$maC+=$rowPriceArr[$x+1][$vo.close];
 								if($j==$ma0-1 || $j==$ma1-1 || $j==$ma2-1 || $j==$ma3-1  || $j==$ma01-1 || $j==$ma02-1){
@@ -1051,7 +1066,7 @@ var $this = this; var $__arguments = arguments;
 	}
 stock_ViewChart.prototype.paintCandleStick = function($limit){
 var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = null; var $x1 = null; var $x2 = null; var $candCount = null; var $i = null; var $stockData = null; var $x = null; var $_i = null; var $xm1 = null; var $PERCENT = null; var $deltaClose = null; var $deltaHigh = null; var $percent = null;
-		$voRe=$this.viewStock.voRowPriceArr;
+		$voRe=$this.voRowPriceArr;
 		$vo1=$this.voPrice1;
 		
 		$this.context.globalAlpha=1;
@@ -1084,7 +1099,7 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 			
 			$this.context.globalAlpha=1;
 			
-																					if(1==0&$this.rowPriceExArr[$i][$voRe.status]=="greatF"){
+																								if($i==4){
 				
 				if($this.symbol != "VNINDEX" && $this.symbol != "HAINDEX"){
 					$_i=$i;
@@ -1092,8 +1107,10 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 					
 					$this.context.beginPath();
 					$this.context.fillStyle = 'Black';
-					$this.context.arc($xm1, $this.getY($stockData[$vo1.low])+16, 7, 0, 2 * Math.PI, false);
+					$this.context.arc($xm1, $this.getY($stockData[$vo1.high])-16, 7, 0, 2 * Math.PI, false);
 					$this.context.fill();
+					
+					$this.paintText("<span style='color:black'><b>"+$this.rowPriceExArr[0][$voRe.minMax1]+"</b></span>",$xm1-7,  $this.getY($stockData[$vo1.high])-52);
 					
 				}
 			}
@@ -1225,7 +1242,7 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 	}
 stock_ViewChart.prototype.paintIndicator = function(){
 var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = null; var $vo = null; var $w = null; var $i = null; var $stockData = null; var $x = null; var $y3 = null; var $x1 = null; var $x2 = null; var $y = null; var $k = null; var $limit = null;
-		$voRe=$this.viewStock.voRowPriceArr;
+		$voRe=$this.voRowPriceArr;
 		$vo1=$this.voPrice1;
 		$this.context.restore();
 		$this.context.globalAlpha=1;
@@ -1781,7 +1798,7 @@ var $this = this; var $__arguments = arguments; var $vo1 = null; var $vo = null;
 	}
 stock_ViewChart.prototype.paintMa = function($limit){
 var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = null; var $vo = null; var $k = null; var $j = null; var $i = null; var $x = null; var $stockData = null; var $y = null;
-		$voRe=$this.viewStock.voRowPriceArr;
+		$voRe=$this.voRowPriceArr;
 		$vo1=$this.voPrice1;
 		$this.context.restore();
 		$vo = new stock_VoPrice();
@@ -1790,31 +1807,52 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 			if($limit!= null && $k!=1 && $k!=2 && $k!=3 && $k!=4 && $k!=5 && $k!=6) continue;
 			if($k==1){
 								$this.context.strokeStyle='Black';
-				$this.context.strokeStyle='sienna';
+				
 				$this.context.strokeStyle='purple';
 				$this.context.strokeStyle='hotpink';
+				$this.context.strokeStyle='green';
 				$this.context.strokeStyle='sienna';
+				
+				$this.context.strokeStyle='Red';
+				$this.context.strokeStyle='blue';
 			}
 			else if($k==2){
-								$this.context.strokeStyle='Blue';
+								$this.context.strokeStyle='Olive ';
+				$this.context.strokeStyle='blue';
+				$this.context.strokeStyle='sienna';
+				
+				$this.context.strokeStyle='Red';
+				$this.context.strokeStyle='blue';
 			}
 			else if($k==3){
-								$this.context.strokeStyle='hotpink';
+								$this.context.strokeStyle='blue';
+				$this.context.strokeStyle='Red';
+				$this.context.strokeStyle='Teal';
+				
+				$this.context.strokeStyle='blue';
 				$this.context.strokeStyle='Red';
 			}
 			else if($k==4){
-								$this.context.strokeStyle='sienna';
-				$this.context.strokeStyle='black';
+								$this.context.strokeStyle='black';
+				$this.context.strokeStyle='Red';
+				$this.context.strokeStyle='blue';
+				$this.context.strokeStyle='Teal';
 				
+				$this.context.strokeStyle='blue';
+				$this.context.strokeStyle='Red';
 			}
 			else if($k==5){
 								$this.context.strokeStyle='black';
+				$this.context.strokeStyle='purple';
+								$this.context.strokeStyle='Black';
 			}
 			else if($k==6){
 								$this.context.strokeStyle='black';
+								$this.context.strokeStyle='black';
+				
 			}
 						
-			if($k==4){
+			if($k==-4){
 				
 				for($j=2; $j<=3; $j++){
 					$this.context.beginPath();
@@ -1863,7 +1901,7 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 			
 			$this.context.globalAlpha=1;
 			$this.context.beginPath();
-			$this.context.lineWidth=3;
+			$this.context.lineWidth=2;
 						
 			for($i=0; $i<$this.rowPriceArr.length; $i++){
 				if($limit!=null && $i>=$limit) break;
@@ -1874,7 +1912,10 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 				if($k==1) $y = $stockData[$voRe.maC1];
 				else if($k==2) $y = $stockData[$voRe.maC2];
 				else if($k==3) $y = $stockData[$voRe.maC3];
-				else if($k==4) $y = $stockData[$voRe.maC4];
+				else if($k==4) {
+					$this.context.lineWidth=2;
+					$y = $stockData[$voRe.maC4];
+				}
 				else if($k==5) $y = $stockData["ma01"];
 				else if($k==6) $y = $stockData["ma02"];
 				if($y==null) continue;
@@ -3726,7 +3767,7 @@ var $this = this; var $__arguments = arguments;
 		$this.voPrice2=$this.ao.bean("stock_VoPrice/con2");
 		$this.voPrice3=$this.ao.bean("stock_VoPrice/con3");
 		$this.voStock=get(new stock_Vo())._con("rate,value2,trade,live,perHigh,minC1,maxC1,bv,roe,ff2","");		
-		$this.voRowPriceArr=get(new stock_Vo())._con("value2,code,minC1,maxC1,minC2,maxC2,perHigh,maPerC1,maPerC2,maC1,maC2,maC3,maC4,dev,status,status0,min,imin,max,imax,delta,minMax","");
+		$this.voRowPriceArr=get(new stock_Vo())._con("value2,code,minC1,maxC1,perHigh,delta,minMax1","");
 		$this.voStat=get(new stock_Vo())._con("total,avg","");
 		
 		
