@@ -2021,12 +2021,13 @@ try{
 						$per=null;
 					}
 					$rate+=2000000000;
+					if(strpos($trade["market"], 'V') !== false){
+						$rate+=7000000000;
+					}
 					if($tp>=3) {
 						$rate+=2000000000;
 						
-						if(strpos($trade["market"], 'V') !== false){
-							$rate+=3000000000;
-						} else if(strpos($trade["market"], 'O') !== false || strpos($trade["market"], 'G') !== false  || strpos($trade["market"], 'S') !== false){
+						if(strpos($trade["market"], 'O') !== false || strpos($trade["market"], 'G') !== false  || strpos($trade["market"], 'S') !== false){
 							$rate+=2000000000;
 						} else if(strpos($trade["market"], 'W') !== false){
 							$rate+=1900000000;
