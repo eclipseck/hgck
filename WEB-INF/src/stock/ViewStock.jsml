@@ -1903,7 +1903,13 @@ try{
 			$filterMap[$str]=$str;
 		}
 		
+		$rbank=$this->ao->conf["rbank"];
+		
 		foreach($faMap as $symbol => $value){
+			//if( !in_array($symbol,$rowSymbolArr) ) array_push($rowSymbolArr,$symbol);
+			if($rowSymbolMap[$symbol]==null) $rowSymbolMap[$symbol]=$symbol;
+		}
+		foreach($ysFaMap as $symbol => $value){
 			//if( !in_array($symbol,$rowSymbolArr) ) array_push($rowSymbolArr,$symbol);
 			if($rowSymbolMap[$symbol]==null) $rowSymbolMap[$symbol]=$symbol;
 		}
@@ -1982,9 +1988,10 @@ try{
 				$stockMap[$symbol][$voStock->bv]=$taMap[$symbol]["bv"];
 				$stockMap[$symbol][$voStock->roe]=$taMap[$symbol]["roe"];
 				if(!$this->isNull0($live[$vo2->close])){
-					$f=1+(2/3)*$taMap[$symbol]["roe"]*0.01;
+					$f=1+1.0*$taMap[$symbol]["roe"]*0.01;
+					$period=10;
 					//$stockMap[$symbol][$voStock->ff1]=round(1*($taMap[$symbol]["bv"]*pow($f, 5)/$live[$vo2->close] - 1),1);
-					$stockMap[$symbol][$voStock->ff2]=round(1*($taMap[$symbol]["bv"]*pow($f,10)/$live[$vo2->close] - 1),1);
+					$stockMap[$symbol][$voStock->ff2]=round( ( $taMap[$symbol]["bv"]*pow($f,$period) - $live[$vo2->close]*pow(1+$rbank,$period) )/$live[$vo2->close] ,1);
 				}
 				$rate=0;
 				/////////if($stockMap[$symbol][$voStock->value2]>700000) $rate+=1000000000;
@@ -2037,14 +2044,27 @@ try{
 						/////////////$rate-=1000000000;
 					}
 					if($trade["market"]==","){
+						if($faMap[ $rowPriceArr[$i][$vo->symbol] ] !=null) {
+							$rate+=20000000;
+							//$rate+=5000000000;
+						}
 						if($stockMap[$symbol][$voStock->value2]>700000){
 							//$rate-=1000000000;
 							/////$rate+=10000000;
 						}
 						$rate-=100000000;
 						
+						if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 4 && 
+					  ($reRowPriceArr[$i][$voRe->maxC1]*$reRowPriceArr[$i][$voRe->minC1]/100 < 7) && 
+					  $reRowPriceArr[$i][$voRe->minC1] > 20 && $reRowPriceArr[$i][$voRe->delta] >=0.0 &&
+					  ($reRowPriceArr[$i][$voRe->value2]>=300000 || $value0>=300000)){
+							$rate+=9000000;
+							if($reRowPriceArr[$i][$voRe->minC1] > 80) $rate+=900000;
+						}
+						
 						//////////////////$rate+= 100*$reRowPriceArr[$i][$voRe->minC1];
-						$rate+=round($perValue*100);
+						if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
+						else $rate+=round($perValue*100);
 						//$rate-=100*$stockMap[$symbol][$voStock->perSell];
 						//$rate-=100*$stockMap[$symbol][$voStock->perSell];
 						/*
@@ -2056,7 +2076,11 @@ try{
 						*/
 					}
 					else{
-						
+						if($faMap[ $rowPriceArr[$i][$vo->symbol] ] !=null) {
+							//$rate+=20000000;
+							$rate+=5000000000;
+							
+						}
 						if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 4 && 
 					  ($reRowPriceArr[$i][$voRe->maxC1]*$reRowPriceArr[$i][$voRe->minC1]/100 < 7) && 
 					  $reRowPriceArr[$i][$voRe->minC1] > 20 && $reRowPriceArr[$i][$voRe->delta] >=0.0 &&
@@ -2064,18 +2088,24 @@ try{
 							$rate+=9000000;
 							if($reRowPriceArr[$i][$voRe->minC1] > 80) $rate+=900000;
 							
-							$rate+=round($perValue*100);
+							if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
+							else $rate+=round($perValue*100);
 							
 						}
 						else {
 							
-							$rate+= -100*$reRowPriceArr[$i][$voRe->minC1] + 10000*$perHigh;
-							//$rate+=round($perValue*100);
+							if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
+							//else $rate+= -100*$reRowPriceArr[$i][$voRe->minC1] + 10000*$perHigh;
+							else $rate+=round($perValue*100);
 						}
 						
 						
 					}
 				} else {
+					if($faMap[ $rowPriceArr[$i][$vo->symbol] ] !=null) {
+						$rate+=20000000;
+						//$rate+=5000000000;
+					}
 					/*
 					if( ($reRowPriceArr[$i][$voRe->status0]=="greatF" || $reRowPriceArr[$i+0][$voRe->status]=="greatF") && 
 					$reRowPriceArr[$i][$voRe->maxC2] > -1 && $reRowPriceArr[$i][$voRe->value2]>=1000000){
@@ -2136,10 +2166,6 @@ try{
 				}
 				if($faMap[ $rowPriceArr[$i][$vo->symbol] ] !=null) {
 					$willunset=false;
-				}
-				
-				if($faMap[ $rowPriceArr[$i][$vo->symbol] ] !=null) {
-					$rate+=100000;
 				}
 				
 				$stockMap[$symbol][$voStock->rate]=$rate;
