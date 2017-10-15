@@ -1096,7 +1096,7 @@ class stock_ViewStock{
 	}
 	public function formatPercentRev($value){
 		if($value==null) return "";
-		if($value<3.5) $color="blue";
+		if($value<3.0) $color="blue";
 		else $color="red";
 		if($value<0) $color="limegreen";
 		
@@ -2054,7 +2054,7 @@ try{
 						}
 						$rate-=100000000;
 						
-						if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 4 && 
+						if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 7 && 
 					  ($reRowPriceArr[$i][$voRe->maxC1]*$reRowPriceArr[$i][$voRe->minC1]/100 < 7) && 
 					  $reRowPriceArr[$i][$voRe->minC1] > 20 && $reRowPriceArr[$i][$voRe->delta] >=0.0 &&
 					  ($reRowPriceArr[$i][$voRe->value2]>=300000 || $value0>=300000)){
@@ -2081,7 +2081,7 @@ try{
 							$rate+=5000000000;
 							
 						}
-						if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 4 && 
+						if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 7 && 
 					  ($reRowPriceArr[$i][$voRe->maxC1]*$reRowPriceArr[$i][$voRe->minC1]/100 < 7) && 
 					  $reRowPriceArr[$i][$voRe->minC1] > 20 && $reRowPriceArr[$i][$voRe->delta] >=0.0 &&
 					  ($reRowPriceArr[$i][$voRe->value2]>=300000 || $value0>=300000)){
@@ -2119,7 +2119,7 @@ try{
 						$rate+=round($perValue*100);
 					}
 					*/
-					if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 4 && 
+					if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 7 && 
 					  ($reRowPriceArr[$i][$voRe->maxC1]*$reRowPriceArr[$i][$voRe->minC1]/100 < 7) && 
 					  $reRowPriceArr[$i][$voRe->minC1] > 20 && $reRowPriceArr[$i][$voRe->delta] >=0.0 &&
 					  ($reRowPriceArr[$i][$voRe->value2]>=300000 || $value0>=300000)){

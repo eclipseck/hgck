@@ -4475,7 +4475,7 @@ var $this = this; var $__arguments = arguments; var $color = null;
 stock_ViewStock.prototype.formatPercentRev = function($value){
 var $this = this; var $__arguments = arguments; var $color = null;
 		if($value==null) return "";
-		if($value<3.5) $color="blue";
+		if($value<3.0) $color="blue";
 		else $color="red";
 		if($value<0) $color="limegreen";
 		
