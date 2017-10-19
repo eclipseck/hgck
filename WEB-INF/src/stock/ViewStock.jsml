@@ -681,9 +681,11 @@ class stock_ViewStock{
 						}
 					}
 				}
-				
-				if($i==0 && $j==5-1){ //$j==$this->intervalArr[0]-1
+				if($i==0 && $j==10-1){ //$j==$this->intervalArr[0]-1
 					$re[$i][$voRe->perHigh]=round(100*($max0-$rowPriceArr[$i][$vo->close])/$max0);
+				}
+				if($i==0 && $j==5-1){ //$j==$this->intervalArr[0]-1
+					/////$re[$i][$voRe->perHigh]=round(100*($max0-$rowPriceArr[$i][$vo->close])/$max0);
 					
 					//$minC=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min);
 					if($max-$min!=0) $minC=round(100*($rowPriceArr[$i][$vo->close]-$min)/($max-$min));
@@ -2045,8 +2047,7 @@ try{
 					}
 					if($trade["market"]==","){
 						if($faMap[ $rowPriceArr[$i][$vo->symbol] ] !=null) {
-							$rate+=20000000;
-							//$rate+=5000000000;
+							//$rate+=20000000;
 						}
 						if($stockMap[$symbol][$voStock->value2]>700000){
 							//$rate-=1000000000;
@@ -2054,14 +2055,14 @@ try{
 						}
 						$rate-=100000000;
 						
-						if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 7 && 
+						/*if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 12 && 
 					  ($reRowPriceArr[$i][$voRe->maxC1]*$reRowPriceArr[$i][$voRe->minC1]/100 < 7) && 
 					  $reRowPriceArr[$i][$voRe->minC1] > 0 && $reRowPriceArr[$i][$voRe->delta] >=0.0 &&
 					  ($reRowPriceArr[$i][$voRe->value2]>=300000 || $value0>=300000)){
-							$rate+=9000000;
-							if($reRowPriceArr[$i][$voRe->minC1] > 80) $rate+=900000;
+							//$rate+=9000000;
+							if($reRowPriceArr[$i][$voRe->minC1] > 50) $rate+=900000+9000000;
 						}
-						
+						*/
 						//////////////////$rate+= 100*$reRowPriceArr[$i][$voRe->minC1];
 						if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
 						else $rate+=round($perValue*100);
@@ -2077,34 +2078,31 @@ try{
 					}
 					else{
 						if($faMap[ $rowPriceArr[$i][$vo->symbol] ] !=null) {
-							//$rate+=20000000;
-							$rate+=5000000000;
+							//$rate+=5000000000;
 							
 						}
-						if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 7 && 
+						/*if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 12 && 
 					  ($reRowPriceArr[$i][$voRe->maxC1]*$reRowPriceArr[$i][$voRe->minC1]/100 < 7) && 
 					  $reRowPriceArr[$i][$voRe->minC1] > 0 && $reRowPriceArr[$i][$voRe->delta] >=0.0 &&
 					  ($reRowPriceArr[$i][$voRe->value2]>=300000 || $value0>=300000)){
-							$rate+=9000000;
-							if($reRowPriceArr[$i][$voRe->minC1] > 80) $rate+=900000;
-							
+							//$rate+=9000000;
+							if($reRowPriceArr[$i][$voRe->minC1] > 50) $rate+=900000+9000000;
+						}*/
+						//	if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
+						//	else $rate+=round($perValue*100);
+						//}
+						//else {
 							if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
-							else $rate+=round($perValue*100);
-							
-						}
-						else {
-							
-							if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
-							//else $rate+= -100*$reRowPriceArr[$i][$voRe->minC1] + 10000*$perHigh;
-							else $rate+=round($perValue*100);
-						}
+							//else $rate+= -100*$reRowPriceArr[$i][$voRe->minC1] + 100000*$perHigh;
+							else $rate+= -round($perValue*100) + 100000*$perHigh;
+						//}
 						
 						
 					}
 				} else {
 					if($faMap[ $rowPriceArr[$i][$vo->symbol] ] !=null) {
-						$rate+=20000000;
-						//$rate+=5000000000;
+						//$rate+=20000000;
+						$rate+=2000000;
 					}
 					/*
 					if( ($reRowPriceArr[$i][$voRe->status0]=="greatF" || $reRowPriceArr[$i+0][$voRe->status]=="greatF") && 
@@ -2119,12 +2117,12 @@ try{
 						$rate+=round($perValue*100);
 					}
 					*/
-					if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 7 && 
+					if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 12 && 
 					  ($reRowPriceArr[$i][$voRe->maxC1]*$reRowPriceArr[$i][$voRe->minC1]/100 < 7) && 
 					  $reRowPriceArr[$i][$voRe->minC1] > 0 && $reRowPriceArr[$i][$voRe->delta] >=0.0 &&
 					  ($reRowPriceArr[$i][$voRe->value2]>=300000 || $value0>=300000)){
 							$rate+=9000000;
-							if($reRowPriceArr[$i][$voRe->minC1] > 80) $rate+=900000;
+							if($reRowPriceArr[$i][$voRe->minC1] > 50) $rate+=900000;
 						
 						if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
 						else $rate+=round($perValue*100);
