@@ -399,7 +399,7 @@ try{
 		}
 		//print_p($rowPriceLiveMap); return;
 } catch (Exception $ex){
-	echo "Error";
+	//echo "Error";
 	$rowPriceLiveMap=$this->obJfile->load("stock_ViewPrice/rowPriceLiveMap");
 	return $rowPriceLiveMap;
 }
