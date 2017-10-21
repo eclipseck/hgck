@@ -17,8 +17,8 @@ class stock_ViewChart{
 		$this->minMaxPadFactor = 2.5;
 		$this->minMaxPadFactorWeb = $this->minMaxPadFactor;
 	
-		$this->width = 939;//;+840  1779
-		$this->height = 720;////410;/////440;//540+0*100;
+		$this->width = 0*830+939;//;+840  1779
+		$this->height = 1300;//720;////410;/////440;//540+0*100;
 		
 		$this->rowPriceArrMap=array(
 		);
@@ -195,13 +195,42 @@ class stock_ViewChart{
 				$maC+=$rowPriceArr[$x+1][$vo->close];
 				//$maC+=($rowPriceArr[$x+1][$vo->low]+$rowPriceArr[$x+1][$vo->high])/2;
 				if($j==$ma0-1 || $j==$ma1-1 || $j==$ma2-1 || $j==$ma3-1  || $j==$ma01-1 || $j==$ma02-1){
-					if($j==$ma0-1) $re[$i][$voRe->maC1]=$maC/($j+1);
-					if($j==$ma1-1) $re[$i][$voRe->maC2]=$maC/($j+1);
-					if($j==$ma2-1) $re[$i][$voRe->maC3]=$maC/($j+1);
-					if($j==$ma01-1) $re[$i]["ma01"]=$maC/($j+1);
-					if($j==$ma02-1) $re[$i]["ma02"]=$maC/($j+1);
+					if($j==$ma0-1) {
+						$re[$i][$voRe->maC1]=$maC/($j+1);
+						/*
+						$close=$rowPriceArr[$i][$vo->close];
+						
+						if(abs($close-$re[$i][$voRe->maC1])<abs($re[$i]["ma01"]-$re[$i][$voRe->maC1])) $close=$re[$i]["ma01"];
+						if(abs($close-$re[$i][$voRe->maC1])<abs($re[$i]["ma02"]-$re[$i][$voRe->maC1])) $close=$re[$i]["ma02"];
+						
+						//if($close<$re[$i]["ma01"]) $close=$re[$i]["ma01"];
+						//if($close<$re[$i]["ma02"]) $close=$re[$i]["ma02"];
+						//////////$close=$re[$i]["ma01"];
+						$re[$i]["maP1"]=round(100*($close-$re[$i][$voRe->maC1])/$re[$i][$voRe->maC1]);*/
+					}
+					if($j==$ma1-1){ 
+						$re[$i][$voRe->maC2]=$maC/($j+1);
+						//$re[$i]["maP2"]=round(100*($rowPriceArr[$i][$vo->close]-$re[$i][$voRe->maC2])/$re[$i][$voRe->maC2]);
+					}
+					if($j==$ma2-1){
+						$re[$i][$voRe->maC3]=$maC/($j+1);
+						//$re[$i]["maP3"]=round(100*($rowPriceArr[$i][$vo->close]-$re[$i][$voRe->maC3])/$re[$i][$voRe->maC3]);
+					}
+					if($j==$ma01-1) {
+						$re[$i]["ma01"]=$maC/($j+1);
+						//$re[$i]["maP01"]=round(100*($rowPriceArr[$i][$vo->close]-$re[$i]["ma01"])/$re[$i]["ma01"]);
+					}
+					if($j==$ma02-1) {
+						$re[$i]["ma02"]=$maC/($j+1);
+						
+						//$close=$rowPriceArr[$i][$vo->close];
+						//if(abs($close-$re[$i]["ma02"])<abs($re[$i]["ma01"]-$re[$i]["ma02"])) $close=$re[$i]["ma01"];
+						//$re[$i]["maP02"]=round(100*($close-$re[$i]["ma02"])/$re[$i]["ma02"]);
+						//$re[$i]["maP02"]=round(100*($rowPriceArr[$i][$vo->close]-$re[$i]["ma02"])/$re[$i]["ma02"]);
+					}
 					if($j==$ma3-1) {
 						$re[$i][$voRe->maC4]=$maC/($j+1);
+						//$re[$i]["maP4"]=round(100*($rowPriceArr[$i][$vo->close]-$re[$i][$voRe->maC4])/$re[$i][$voRe->maC4]);
 						$dev=0;
 						for($k=0 ; $k < $ma3 ; $k++){
 							$y=$i+$k;
@@ -271,13 +300,14 @@ class stock_ViewChart{
 			$this->faMap[$symbol]=$bv;
 		}
 		*/
+		/*
 		$this->rowPriceArrMap=array(
 		);
 		//$this->rowPriceArrMap[$this->symbol]=$this->viewDetail->rowPriceArr;
 		//$this->rowPriceExArr=$this->viewStock->makeRowPriceArr2($this->voPrice1,$this->viewDetail->rowPriceArr,count($this->viewDetail->rowPriceArr));
 		$this->rowPriceArrMap[$this->symbol] = $this->changeRowPriceArr($this->viewDetail->rowPriceArrMap[$this->symbol]);
 		$this->rowPriceExArr=$this->makeRowPriceArr($this->voPrice1,$this->rowPriceArrMap[$this->symbol],1);
-		
+		*/
 		return $this;
 	}
 	public function viewPaint(){
@@ -405,37 +435,43 @@ class stock_ViewChart{
 		//$this->scaleX = ($this->width - $this->ox - $this->padX) / $this->rangeX;
 
 		$this->rangeY = $this->maxStockDataY - $this->minStockDataY;
-		$this->scaleY = ($this->height - $this->oy - $this->padY) / $this->rangeY;
+		$this->scaleY = (0.5*$this->height) / $this->rangeY;
 
 		$this->rangeY2 = $this->maxStockDataY2 - $this->minStockDataY2;
-		$this->scaleY2 = ($this->height - $this->oy) / $this->rangeY2;
+		$this->scaleY2 = (0.5*$this->height) / $this->rangeY2;
 
+		$this->maxStockDataY3=5;
+		$this->minStockDataY3=-5;
+		
 		$this->rangeY3 = $this->maxStockDataY3 - $this->minStockDataY3;
-		$this->scaleY3 = ($this->height2) / $this->rangeY3;
+		$this->scaleY3 = (0.2*$this->height) / $this->rangeY3;
+		
+		$this->maxStockDataY4=7;
+		$this->minStockDataY4=-7;
 		
 		$this->rangeY4 = $this->maxStockDataY4 - $this->minStockDataY4;
-		$this->scaleY4 = ($this->height2) / $this->rangeY4;
+		$this->scaleY4 = (0.2*$this->height) / $this->rangeY4;
 	}
 	public function getY($y){
-		return ($this->height - $this->oy - $this->padY) - ($y- $this->minStockDataY) * $this->scaleY;
+		return (0.5*$this->height+$this->oy) - ($y- $this->minStockDataY) * $this->scaleY;
 	}
 	public function getY2($y){
-		return ($this->height - $this->oy - $this->padY) - ($y- $this->minStockDataY2) * $this->scaleY2;
+		return (0.5*$this->height+$this->oy) - ($y- $this->minStockDataY2) * $this->scaleY2;
 	}
 	public function getY3($y){
 		//return ($this->height - $this->oy - $this->padY) - ($y- $this->minStockDataY3) * $this->scaleY3;
-		return ($this->height2 - $this->padY) - ($y- $this->minStockDataY3) * $this->scaleY3;
+		return (1*$this->height) - ($y- $this->minStockDataY3) * $this->scaleY3;
 	}
 	public function getY4($y){
 		//return ($this->height - $this->oy - $this->padY) - ($y- $this->minStockDataY3) * $this->scaleY3;
-		return ($this->height2 - $this->padY) - ($y- $this->minStockDataY4) * $this->scaleY4;
+		return (1*$this->height) - ($y- $this->minStockDataY4) * $this->scaleY4;
 	}
 
 	public function saveDtParams(){
 		$vo1 = $this->voPrice1;
 		$minStockDataY = 9999999;
 		$iMin=0;
-		//$DAY_BREAK = 3*12*20;
+		$DAY_BREAK = 3*20;
 		$length = count($this->rowPriceArr);
 		for($i=0; $i<$length; $i++){
 			$stockData = $this->rowPriceArr[$i];
@@ -448,7 +484,7 @@ class stock_ViewChart{
 				$minStockDataY = $stockData[$vo1->low];
 				$iMin = $i;
 			}
-			//if($i>=$DAY_BREAK) break;
+			//if($this->ao->conf["combineDay"]==1) if($i>=$DAY_BREAK) break;
 		}
 		$this->_minStockDataY=$minStockDataY;
 			
@@ -465,7 +501,7 @@ class stock_ViewChart{
 			if($stockData[$vo1->high] > $maxStockDataY) {
 				$maxStockDataY = $stockData[$vo1->high];
 			}
-			//if($i>=$DAY_BREAK) break;
+			//if($this->ao->conf["combineDay"]==1) if($i>=$DAY_BREAK) break;
 		}
 		$this->_maxStockDataY=$maxStockDataY;
 		
@@ -546,6 +582,7 @@ class stock_ViewChart{
 	}
 	
 	public function paint(){
+		$this->oy=0;
 		$this->paintField();
 		if($this->symbol == "MARKET") {
 			return;
@@ -564,6 +601,13 @@ class stock_ViewChart{
 			$this->paintClose();
 		}
 		
+		$this->rowPriceArrMap=array(
+		);
+		//$this->rowPriceArrMap[$this->symbol]=$this->viewDetail->rowPriceArr;
+		//$this->rowPriceExArr=$this->viewStock->makeRowPriceArr2($this->voPrice1,$this->viewDetail->rowPriceArr,count($this->viewDetail->rowPriceArr));
+		$this->rowPriceArrMap[$this->symbol] = $this->viewDetail->rowPriceArrMap[$this->symbol];
+		$this->rowPriceExArr=$this->makeRowPriceArr($this->voPrice1,$this->rowPriceArrMap[$this->symbol],1);
+		
 		$this->rowPriceArr = $this->rowPriceArrMap[$this->symbol];
 		$this->isIndex = false;
 		
@@ -571,6 +615,7 @@ class stock_ViewChart{
 		$this->padX = 4*5+3;
 		//$this->w = 1;
 		$this->padY = 0;
+		$this->oy=0;
 		//$this->minMaxPadFactor=1.5;
 		$this->saveDtParams();
 		
@@ -582,8 +627,28 @@ class stock_ViewChart{
 		$this->paintMa();
 		$this->paintCandleStick();
 		//$this->paintClose();
-		//$this->paintIndicator();
 		$this->setOnePrice();
+		
+		
+		$this->rowPriceArrMap=array(
+		);
+		//$this->rowPriceArrMap[$this->symbol]=$this->viewDetail->rowPriceArr;
+		//$this->rowPriceExArr=$this->viewStock->makeRowPriceArr2($this->voPrice1,$this->viewDetail->rowPriceArr,count($this->viewDetail->rowPriceArr));
+		$this->rowPriceArrMap[$this->symbol] = $this->changeRowPriceArr($this->viewDetail->rowPriceArrMap[$this->symbol]);
+		$this->rowPriceExArr=$this->makeRowPriceArr($this->voPrice1,$this->rowPriceArrMap[$this->symbol],1);
+		
+		$this->rowPriceArr = $this->rowPriceArrMap[$this->symbol];
+		
+		$this->oy = 0.5*$this->height;
+		
+		$this->saveDtParams();
+		
+		$this->paintValue();
+		//$this->makeMa();
+		$this->paintMa();
+		$this->paintCandleStick();
+		
+		//$this->paintIndicator();
 	}
 
 	public function paintCandleStick($limit){
@@ -621,7 +686,7 @@ class stock_ViewChart{
 		if($bv==null) $bp="";
 		else $bp=round(100*($this->rowPriceArr[0][$vo1->close]-$bv)/$bv);
 		*/
-		$this->paintText("<div><span style='color:blue'>".round( 100*($this->_maxStockDataY-$this->_minStockDataY)/$this->_minStockDataY )."</span></div>", 150 , 0);////// 850 485
+		$this->paintText("<div><span style='color:blue'>".round( 100*($this->_maxStockDataY-$this->_minStockDataY)/$this->_minStockDataY )."</span></div>", $this->width - 50 , 0+$this->oy);////// 850 485
 		for($i=0; $i<$this->rowPriceArr->length-1; $i++){
 			if($limit!=null && $i>=$limit) break;
 			$stockData = $this->rowPriceArr[$i];
@@ -878,9 +943,8 @@ class stock_ViewChart{
 		$this->context->restore();
 		$this->context->globalAlpha=1;
 		$vo = new stock_VoPrice();
-		$w = $this->w;
-		$this->w = 3;
-		for($i=0; $i<$this->rowPriceArr->length-1; $i++){
+		
+		for($i=0; $i<$this->rowPriceArr->length-1; $i++){ break;
 			$stockData = $this->rowPriceArr[$i];
 			$vo->row = $stockData;
 			$x = $this->getX($i);
@@ -892,9 +956,94 @@ class stock_ViewChart{
 			if($x<$this->padX) break;
 			if( $y3>=0) $this->context->fillStyle = 'blue';
 			else $this->context->fillStyle = 'red';
-			///$this->context->fillRect($x- ($this->w+1)/2, $this->getY3(0), $this->w , -$y3*$this->scaleY3);
+			$this->context->fillRect($x- ($this->w+1)/2, $this->getY3(0), $this->w , -$y3*$this->scaleY3);
 		}
-		$this->w = $w;
+		
+		//for($k=6; $k>=1; $k--){
+		for($k=1; $k<=6; $k++){
+			if($limit!= null && $k!=1 && $k!=2 && $k!=3 && $k!=4 && $k!=5 && $k!=6) continue;
+			if($k==1){
+				//continue;
+				$this->context->strokeStyle='blue';
+				$this->context->strokeStyle='Black';
+			}
+			else if($k==2){
+				continue;
+				$this->context->strokeStyle='blue';
+			}
+			else if($k==3){
+				continue;
+				$this->context->strokeStyle='Red';
+			}
+			else if($k==4){
+				continue;
+				$this->context->strokeStyle='Red';
+			}
+			else if($k==5){
+				//continue;
+				$this->context->strokeStyle='Black';
+			}
+			else if($k==6){
+				//continue;
+				$this->context->strokeStyle='black';
+				
+			}
+			
+			$this->context->globalAlpha=1;
+			$this->context->beginPath();
+			$this->context->lineWidth=3;
+			///////if($this->w>=3) $this->context->lineWidth=2;
+			
+			for($i=0; $i<$this->rowPriceArr->length; $i++){
+				if($limit!=null && $i>=$limit) break;
+				$x = $this->getX($i) - 0*50;
+				if($this->padX == $this->padX1 && $x<0) break;
+				if($this->padX != $this->padX1 && $x< 0*(911-$this->padX1 + 20)) break;
+				$stockData = $this->rowPriceExArr[$i];
+				if($k==1) $y = $stockData["maP1"];
+				else if($k==2) $y = $stockData["maP2"];
+				else if($k==3) $y = $stockData["maP3"];
+				else if($k==4) {
+					$y = $stockData["maP4"];
+				}
+				else if($k==5) $y = $stockData["maP01"];
+				else if($k==6) $y = $stockData["maP02"];
+				if($y==null) continue;
+				
+				if($y>$this->maxStockDataY3) $y=$this->maxStockDataY3;
+				if($y<$this->minStockDataY3) $y=$this->minStockDataY3;
+				$delta=$y*$this->scaleY3;
+				if(abs($delta)<1) $delta=1;
+				
+				//$y2 = $vo->getLiveVolume();
+				if($x<$this->padX) break;
+					
+				if($k==5 || $k==6){
+					if( $y>=0) $this->context->fillStyle = 'blue';
+					else $this->context->fillStyle = 'red';
+					
+					$this->context->fillRect($x- ($this->w+1)/2, $this->getY3(0), $this->w , -$delta);
+				}
+				if($k==1) {
+					if( $y>=0) $this->context->fillStyle = 'green';
+					else $this->context->fillStyle = 'brown';
+					$this->context->fillStyle = 'black';
+					$this->context->fillRect($x- ($this->w+1)/2, $this->getY3(0), $this->w , -$delta);
+					/*
+					$y = $this->getY3($y);
+					if($i==0){
+						$this->context->moveTo($x, $y);
+					} else{
+						$this->context->lineTo($x, $y);
+					}
+					*/
+				}
+			}
+			$this->context->stroke();
+		}
+		
+		return;
+		
 		$this->context->globalAlpha=1;
 		
 		$this->context->restore();
@@ -995,615 +1144,10 @@ class stock_ViewChart{
 		$this->context->globalAlpha=1;
 	}
 	
-	public function conWeb(){
-		$this->w = 3;
-		$this->padX = 10;
-		$this->ox=0;
-		$this->oy=0;
-		$this->padY = 0;
-		$this->minMaxPadFactor = 1.3;
-		$this->minMaxPadFactorWeb = $this->minMaxPadFactor;
 	
-		$this->width = 900;//1025;
-		return $this;
-	}
-	
-	public function paintMaWeb($limit){ //return;
-		$vo = new stock_VoPrice();
-		for($k=1; $k>=1; $k--){
-			if($limit!= null && $k!=1 && $k!=2 && $k!=3 && $k!=4) continue;
-			$strokeStyle = "";
-			if($k==1){
-				//if($this->w==5) continue;
-				//$this->context->strokeStyle='purple';
-				$strokeStyle=$this->color["purple"];
-			}
-			else if($k==2){
-				continue;
-				$strokeStyle=$this->color["sienna"];
-			}
-			else if($k==3){
-				$strokeStyle=$this->color["black"];
-			}
-			else if($k==4){
-				$strokeStyle=$this->color["black"];
-			}
-			$x0=null;$y0=null;
-			$length = count($this->rowPriceArr);
-			for($i=0; $i<$length; $i++){
-				if($limit!=null && $i>=$limit) break;
-				$x = $this->getX($i);
-				if($x<$this->padX) break;
-				$stockData = $this->rowPriceArr[$i];
-				if($k==1) $y = $stockData["ma1"];
-				else if($k==2) $y = $stockData["ma2"];
-				else if($k==3) $y = $stockData["ma3"];
-				else if($k==4) $y = $stockData["ma4"];
-				if($y==null) break;
-				$y = $this->getY($y);
-				if($i==0){
-					//$this->context->moveTo($x, $y);
-				} else{
-					//$this->context->lineTo($x, $y);
-					imageline($this->image, $x0, $y0, $x, $y, $strokeStyle);
-				}
-				$x0 = $x; $y0=$y;
-			}
-		}
-	}
-	
-	public function paintTableWeb(){
-
-		$stock_symbol = $this->symbol;
-		$viewPrice = new stock_ViewPrice();
-
-		$text = "
-tdmua toiuu = tdmua cbcandle <br/>
-tdban toiuu = <b style='color:red'>tcp min</b> <br/>
-cpchia = 4 <br/>
-cpchiacho max = 2
-		";
-		//$font_path = '/home/a6823594/public_html/arial.ttf';
-		if(!file_exists($font_path)) $font_path = 'arial.ttf';
-		$black = imagecolorallocate($this->image, 0, 0, 0);
-		$red = imagecolorallocate($this->image, 255, 0, 0);
-		$blue = imagecolorallocate($this->image, 0, 0, 255);
-		$mod = 1;
-		//$this->paintText("<b><span style='color:red'>".$viewPrice->formatPrice($this->rowPriceArr[0]["minMax"])."</span>_<span style='color:red;font-weight:bold'>".$viewPrice->formatPrice($this->rowPriceArr[0]["minClose"])."</span>_<span style='color:red'>".$viewPrice->formatValue($this->rowPriceArr[0]["value2"])."</span></b>", $this->width - 160, 60);
-		$string = $viewPrice->formatPrice($this->rowPriceArr[0]["minClose"])."_".$viewPrice->formatPrice($this->rowPriceArr[0]["minMax"])."_".$viewPrice->formatValue($this->rowPriceArr[0]["value2"]);
-		///////////imagettftext($this->image, 14, 0, $this->width - 250 + $mod*80, 350 - $mod*330, $black, $font_path, $string);
-		imagestring($this->image, 5, $this->width - 250 + $mod*80, 350 - $mod*330, $string, $black);
-		//$this->paintText("<b><span style='color:red'>".$viewPrice->formatPrice($this->rowPriceArr[0]["megaCount"])."</span>_<span style='color:red'>".$viewPrice->formatPrice($this->rowPriceArr[0]["minClose20"])."</span>_<span style='color:red'>".$viewPrice->formatValue($this->rowPriceArr[0]["value"])."</span></b>", $this->width - 160, 80);
-		$string = $viewPrice->formatPrice($this->rowPriceArr[0]["minClose20"])."_".$viewPrice->formatPrice($this->rowPriceArr[0]["megaCount"])."_".$viewPrice->formatValue($this->rowPriceArr[0]["value"]);
-		/////////////imagettftext($this->image, 14, 0, $this->width - 250 + $mod*80, 370 - $mod*330, $black, $font_path, $string);
-		imagestring($this->image, 5, $this->width - 250 + $mod*80, 370 - $mod*330, $string, $black);
-		//$this->paintText("<span style='color:black'><b>".$stock_symbol.".".$this->rowPriceArr[0]["market"]."</b></span>", $this->width - 250, 60)->css("width", 150);
-		$string = substr($stock_symbol,0,3).".".$this->rowPriceArr[0]["market"];
-		/////////////////imagettftext($this->image, 14, 0, $this->width - 340 + $mod*80, 350 - $mod*330, $black, $font_path, $string);
-		imagestring($this->image, 5, $this->width - 340 + $mod*80, 350 - $mod*330, $string, $black);
-		if(stock_A::get()->isLive()){
-			//$this->paintText("<span style='color:black'><b>".$text."</b></span>", $this->width - 300, 100)->css("width", 300);
-		}
-		
-		
-		$x1 = $this->getX(0);
-		$x2 = $this->getX(240);
-		
-		$y = $this->getY($this->rowPriceArr[0]["min"]);
-		//imageline($this->image, $x1, $y, $x2, $y, $black);
-		
-		$y = $this->getY(2.00*$this->rowPriceArr[0]["min"]);
-		//imageline($this->image, $x1, $y, $x2, $y, $black);
-		
-		$y = $this->getY(3.00*$this->rowPriceArr[0]["min"]);
-		//imageline($this->image, $x1, $y, $x2, $y, $blue);
-	}
-	
-	public function paintValueWeb(){
-		$stupid= 1;
-		$vo = new stock_VoPrice();
-		$w = $this->w;
-		//$this->w = 3;
-		$length = count($this->rowPriceArr);
-		if(1==1 || $this->w==5) for($i=0; $i<$length; $i++){
-			$stockData = $this->rowPriceArr[$i];
-			$vo->row = $stockData;
-			$x = $this->getX($i);
-
-			$y2 = $vo->getLiveVolume();
-			if($y2==null) continue;
-			if($x<$this->padX) break;
-			if( $stockData["close"] >= $stockData["open"]) $fillStyle = imagecolorallocate($this->image, 0x00, 0x80, 0x00);//'Green';
-			else $fillStyle = imagecolorallocate($this->image, 0xA5, 0x2A, 0x2A);//'brown';
-			//$this->context->fillRect($x- ($this->w+1)/2, $this->getY2(0), $this->w , -$y2*$this->scaleY2);
-			$x1 = $x- ($this->w+1)/2;
-			$y1 = $this->getY2(0);
-			imagefilledrectangle($this->image, $x1, $y1, $x1 + $this->w - $stupid, $y1 -$y2*$this->scaleY2 - $stupid, $fillStyle );
-			//imagecolordeallocate($this->image, $fillStyle);
-		}
-		//$this->w = $w;
-		return;
-	}
-	
-	public function paintCandleStickWeb($limit){ 
-		$length = count($this->rowPriceArr);
-		$stupid = 1;
-		$candCount = 0;
-		$perNow = round(100*($this->rowPriceArr[0]["close"] - $this->rowPriceArr[1]["close"])/$this->rowPriceArr[1]["close"]);
-		$firstNowDec = true;
-		$firstNowInc = true;
-		$firstDec = true;
-		$firstInc = true;
-		$decF=null;$incF=null;
-		$candIncCount = 0;
-		$candDecCount = 0;
-		$y0 = $this->getY($this->rowPriceArr[0]["close"]);
-		$stockA = stock_A::get();
-		for($i=0; $i<$length-1; $i++){
-			if($limit!=null && $i>=$limit) break;
-			$stockData = $this->rowPriceArr[$i];
-			$x = $this->getX($i);
-			if($x<$this->padX) break;
-			
-			/**************************************
-			if(1==1 && $this->candIMap[$i] != null){
-				if($i==120) $strokeStyle='Green';
-				if($i==10) $strokeStyle='Purple';
-				if($i==20) $strokeStyle='Teal';
-				if($i==60) $strokeStyle='Sienna';
-				
-				$strokeStyle=imagecolorallocate($this->image, 190, 190, 190);//'Gray';
-				//$strokeStyle = ImageColorAllocate($this->image, 165, 42, 42);//brown
-				//$strokeStyle = ImageColorAllocate($this->image, 255, 0, 0);
-				//$strokeStyle = ImageColorAllocate($this->image, 0, 0, 0);
-				
-				if($this->candIMap[$i]["inc"] >= 2 && $this->candIMap[$i]["inc"]>$this->candIMap[$i]["dec"]) {
-				//if($this->candIMap[$i]["inc"] >= 2 || $this->candIMap[$i]["dec"]>=2) {
-				//if($this->candIMap[$i]["inc"] >= 2){
-					$candCount ++;
-					$strokeStyle=imagecolorallocate($this->image,0,0,0);//'Black';
-					//$strokeStyle=ImageColorAllocate($this->image, 160, 82, 45);//sienna
-					//$strokeStyle = ImageColorAllocate($this->image, 255, 0, 0);
-					if($candCount <= 300){
-						$font_path = 'arial.ttf';
-						$red = imagecolorallocate($this->image, 255, 0, 0);
-						$blue = imagecolorallocate($this->image, 0, 0, 255);
-						imagettftext($this->image, 14, 0, $x - 5, 80+(($candCount - 1) % 10)*30, $blue, $font_path, $this->candIMap[$i]["inc"]);
-						imagettftext($this->image, 14, 0, $x - 5, 80+(($candCount - 1) % 10)*30 + 15, $red, $font_path, $this->candIMap[$i]["dec"]);
-					}
-					
-					if( $this->candIMap[$i]["inc"]>=$this->candIMap[$i]["dec"]){
-						$y = $this->getY($stockData["high"]);
-						imageline($this->image, $x, $y - 20, $x, $y - 130, $strokeStyle);
-					} else {
-						$y = $this->getY($stockData["low"]);
-						//$strokeStyle=imagecolorallocate($this->image, 190, 190, 190);//'Gray';
-						imageline($this->image, $x, $y + 20, $x, $y + 130, $strokeStyle);
-					}
-				}
-			}
-			*******************************************/
-			/******************************
-			if(1==1 && $this->candIMap[$i] != null){
-				if($i==120) $strokeStyle='Green';
-				if($i==10) $strokeStyle='Purple';
-				if($i==20) $strokeStyle='Teal';
-				if($i==60) $strokeStyle='Sienna';
-				
-				$strokeStyle=imagecolorallocate($this->image, 190, 190, 190);//'Gray';
-				//$strokeStyle = ImageColorAllocate($this->image, 165, 42, 42);//brown
-				//$strokeStyle = ImageColorAllocate($this->image, 255, 0, 0);
-				//$strokeStyle = ImageColorAllocate($this->image, 0, 0, 0);
-				
-				//if($this->candIMap[$i]["inc"] >= 2 && $this->candIMap[$i]["inc"]>$this->candIMap[$i]["dec"]) {
-				//if($this->candIMap[$i]["inc"] >= 2 || $this->candIMap[$i]["dec"]>=2) {
-				//if($this->candIMap[$i]["inc"] >= 2){
-				if($this->candIMap[$i][3] >=19
-				|| $this->candIMap[$i][4]>=19
-				|| $this->candIMap[$i][5]>=19
-				|| $this->candIMap[$i][6]>=19
-				|| $this->candIMap[$i][7]>=19
-				|| $this->candIMap[$i][8]>=19
-				|| $this->candIMap[$i][9]>=19
-				|| $this->candIMap[$i][10]>=19
-				){
-					$candCount ++;
-					$strokeStyle=imagecolorallocate($this->image,0,0,0);//'Black';
-					//$strokeStyle=ImageColorAllocate($this->image, 160, 82, 45);//sienna
-					//$strokeStyle = ImageColorAllocate($this->image, 255, 0, 0);
-				
-					if($candCount <= 10){
-						$font_path = 'arial.ttf';
-						$red = imagecolorallocate($this->image, 255, 0, 0);
-						$blue = imagecolorallocate($this->image, 0, 0, 255);
-						//imagettftext($this->image, 14, 0, $x - 5, 80+(($candCount - 1) % 10)*30, $blue, $font_path, $this->candIMap[$i]["inc"]);
-						//imagettftext($this->image, 14, 0, $x - 5, 80+(($candCount - 1) % 10)*30 + 15, $red, $font_path, $this->candIMap[$i]["dec"]);
-						$str = "";
-						foreach($this->candIMap[$i] as $key => $value){
-							$str .= $key .":". $value ."|";
-						}
-						imagettftext($this->image, 14, 0, $x - 500, 80+(($candCount - 1) % 10)*30, $red, $font_path, $str);
-					}
-					$y = $this->getY($stockData["high"]);
-					imageline($this->image, $x, $y - 20, $x, $y - 130, $strokeStyle);
-				}
-			}
-			****************************************************/
-			$fillStyle = '';
-			if($stockData["close"] >= $stockData["open"]){
-				$fillStyle = imagecolorallocate($this->image, 0, 0, 255);//'blue';
-				if($this->isIndex==true) $fillStyle = imagecolorallocatealpha ($this->image, 46, 139, 87, $this->alpha);//imagecolorallocatealpha ($this->image, 0, 0, 0, $this->alpha);
-			}
-			else{
-				$fillStyle = imagecolorallocate($this->image, 255, 0, 0);//'Red';
-				if($this->isIndex==true) $fillStyle = imagecolorallocatealpha ($this->image, 160, 32, 240, $this->alpha);//imagecolorallocatealpha ($this->image, 160, 82, 45, $this->alpha);
-			}
-			
-			if(1==0 && $this->candIMap[$i] != null){
-				if($i==120) $strokeStyle='Green';
-				if($i==10) $strokeStyle='Purple';
-				if($i==20) $strokeStyle='Teal';
-				if($i==60) $strokeStyle='Sienna';
-				
-				$strokeStyle=imagecolorallocate($this->image, 190, 190, 190);//'Gray';
-				//$strokeStyle = ImageColorAllocate($this->image, 165, 42, 42);//brown
-				//$strokeStyle = ImageColorAllocate($this->image, 255, 0, 0);
-				//$strokeStyle = ImageColorAllocate($this->image, 0, 0, 0);
-				
-				//if($this->candIMap[$i]["inc"] >= 2 && $this->candIMap[$i]["inc"]>$this->candIMap[$i]["dec"]) {
-				if( $candCount < 10){
-					if($this->candIMap[$i]["inc"] >= 2 || 
-						//$this->candIMap[$i]["dec"]>=2 ||
-						($this->candIMap[$i]["inc"] >= 1 && $i <=5)
-						//|| ($i == 0)
-					) {
-						//if($this->candIMap[$i]["inc"] >= 2){
-							$candCount ++;
-							$strokeStyle=imagecolorallocate($this->image,0,0,0);//'Black';
-							//$strokeStyle=ImageColorAllocate($this->image, 160, 82, 45);//sienna
-							//$strokeStyle = ImageColorAllocate($this->image, 255, 0, 0);
-							if($candCount <= 5){
-								$font_path = 'arial.ttf';
-								$red = imagecolorallocate($this->image, 255, 0, 0);
-								$blue = imagecolorallocate($this->image, 0, 0, 255);
-								$black = imagecolorallocate($this->image, 0, 0, 0);//'Gray' imagecolorallocate($this->image, 0, 255, 0);
-								$dec="";$inc="";$equal="";
-								if($this->candIMap[$i]["dec"] >0) {
-									$candDecCount ++;
-									$dec = $this->candIMap[$i]["dec"];
-									if($decF == null) {
-										$decF = $dec;
-										$dec = "".$dec;
-									}
-									//imagettftext($this->image, 14, 0, $this->width - 30, $y0- 10 -($candDecCount - 1)*30, $black, $font_path, $dec);
-								}
-								if($this->candIMap[$i]["inc"] >0) {
-									$candIncCount ++;
-									$inc = $this->candIMap[$i]["inc"];
-									if($incF == null) {
-										$incF = $inc;
-										$inc = "*".$inc;
-									}
-									//imagettftext($this->image, 14, 0, $this->width - 30, $y0+ 10 + 14 +($candIncCount - 1)*30, $black, $font_path, $inc);
-								}
-								if($this->candIMap[$i]["equal"] >=0) $equal = $this->candIMap[$i]["equal"];
-								imagettftext($this->image, 14, 0, $this->width - 90 - ($candCount - 1)*40, 60, $red, $font_path, $dec);
-								imagettftext($this->image, 14, 0, $this->width - 90 - ($candCount - 1)*40, 60+ 15, $black, $font_path, $equal);
-								imagettftext($this->image, 14, 0, $this->width - 90 - ($candCount - 1)*40, 60+ 30, $blue, $font_path, $inc);
-								/*
-								$_key = substr($this->candIMap[$i]["_key"],0,4);
-								if($this->candMap[$_key]["dec"] >0) $decPer = $this->candMap[$_key]["dec"];
-								if($this->candMap[$_key]["inc"] >0) $incPer = $this->candMap[$_key]["inc"];
-								imagettftext($this->image, 14, 0, $this->width - 90 - ($candCount - 1)*40, 60+ 45, $red, $font_path, $decPer);
-								imagettftext($this->image, 14, 0, $this->width - 90 - ($candCount - 1)*40, 60+ 60, $blue, $font_path, $incPer);
-								
-								$_key = substr($this->candIMap[$i]["_key"],0,3);
-								if($this->candMap[$_key]["dec"] >0) $decPer = $this->candMap[$_key]["dec"];
-								if($this->candMap[$_key]["inc"] >0) $incPer = $this->candMap[$_key]["inc"];
-								imagettftext($this->image, 14, 0, $this->width - 90 - ($candCount - 1)*40, 60+ 75, $red, $font_path, $decPer);
-								imagettftext($this->image, 14, 0, $this->width - 90 - ($candCount - 1)*40, 60+ 90, $blue, $font_path, $incPer);
-								*/
-							}
-						//}
-						
-						if( 1==0 
-							//|| ($this->candIMap[$i]["inc"] == 0 && $this->candIMap[$i]["dec"] != 0) ||
-							//($this->candIMap[$i]["inc"] != 0 && $this->candIMap[$i]["dec"] != 0)
-						){
-							$strokeStyle=imagecolorallocate($this->image,0,0,0);//'Black';
-							$size = 6;
-							$y = $this->getY($stockData["high"]);
-							if($firstNowDec == true){
-								//if($perNow<=0){
-									//$strokeStyle=imagecolorallocate($this->image,190, 190, 190);//'Black';
-									//imageellipse($this->image, $x - 1, $y - 30 - ($candCount - 1)*50/4, $size + 4, $size + 4, $strokeStyle);
-									$firstNowDec = false;
-								//}
-							} 
-							
-							if($firstDec == true){
-								imagettftext($this->image, 14, 0, $x + 4, $y - 10, $black, $font_path, $this->candIMap[$i]["dec"]);
-								$firstDec = false;
-								//imagefilledellipse($this->image, $x - 1, $y - 30 - ($candCount - 1)*50/4, $size, $size, $strokeStyle);
-							} 
-								
-							//if($candCount <= 5) imagefilledellipse($this->image, $x - 1, $y - 30 - ($candCount - 1)*50/4, $size, $size, $strokeStyle);
-							//if($candCount == 1) $strokeStyle=imagecolorallocate($this->image,255,0,0);//'Black';
-							imageline($this->image, $x - 1, $y - 30, $x - 1, $y - 80, $strokeStyle);
-							//$fillStyle = imagecolorallocate($this->image, 160, 32, 240);//'hotpink'
-						} 
-						
-						if( 
-							//($this->candIMap[$i]["inc"] != 0 && $this->candIMap[$i]["dec"] == 0) ||
-							//($this->candIMap[$i]["inc"] != 0 && $this->candIMap[$i]["dec"] != 0)
-							1==1
-						){
-							$strokeStyle=imagecolorallocate($this->image,0,0,0);//'Black';
-							$size = 6;
-							$y = $this->getY($stockData["low"]);
-							if($firstNowInc == true){
-								//if($perNow>=0){
-									//$strokeStyle=imagecolorallocate($this->image,190, 190, 190);//'Black';
-									//imageellipse($this->image, $x - 1, $y + 30 + ($candCount - 1)*50/4, $size + 4, $size + 4, $strokeStyle);
-									$firstNowInc = false;
-								//}
-							} 
-							if($firstInc == true){
-								imagettftext($this->image, 14, 0, $x + 4, $y + 14 + 10, $black, $font_path, $this->candIMap[$i]["inc"]);
-								$firstInc = false;
-								//imagefilledellipse($this->image, $x - 1, $y + 30 + ($candCount - 1)*50/4, $size, $size, $strokeStyle);
-							} 
-							
-							//if($candCount <= 5) imagefilledellipse($this->image, $x - 1, $y + 30 + ($candCount - 1)*50/4, $size, $size, $strokeStyle);
-							//if($candCount == 1) $strokeStyle=imagecolorallocate($this->image,255,0,0);//'Black';
-							imageline($this->image, $x - 1, $y + 30, $x - 1, $y + 80, $strokeStyle);
-							//$fillStyle = imagecolorallocate($this->image, 0, 255, 0);//'green
-						}
-					}
-				} else if(1==0){
-					if($this->candIMap[$i]["inc"] >= 2){
-						if( //($this->candIMap[$i]["inc"] == 0 && $this->candIMap[$i]["dec"] != 0) ||
-							($this->candIMap[$i]["inc"] != 0 && $this->candIMap[$i]["dec"] != 0)
-						){
-							$strokeStyle=imagecolorallocate($this->image,0,0,0);//'Black';
-							$size = 6;
-							$y = $this->getY($stockData["high"]);
-							if($firstNowDec == true){
-								//if($perNow<=0){
-									//$strokeStyle=imagecolorallocate($this->image,190, 190, 190);//'Black';
-									imageellipse($this->image, $x - 1, $y - 20 - ($candCount - 1)*50/4, $size + 4, $size + 4, $strokeStyle);
-									$firstNowDec = false;
-								//}
-							} 
-							
-							if($firstDec == true){
-								imagettftext($this->image, 14, 0, $x + 4, $y - 10, $black, $font_path, $this->candIMap[$i]["dec"]);
-								$firstDec = false;
-							} 
-								
-							//if($candCount <= 5) imagefilledellipse($this->image, $x - 1, $y - 20 - ($candCount - 1)*50/4, $size, $size, $strokeStyle);
-							//if($candCount == 1) $strokeStyle=imagecolorallocate($this->image,255,0,0);//'Black';
-							imageline($this->image, $x - 1, $y - 20, $x - 1, $y - 70, $strokeStyle);
-							//$fillStyle = imagecolorallocate($this->image, 160, 32, 240);//'hotpink'
-						} 
-						
-						if( ($this->candIMap[$i]["inc"] != 0 && $this->candIMap[$i]["dec"] == 0) ||
-							($this->candIMap[$i]["inc"] != 0 && $this->candIMap[$i]["dec"] != 0)
-						){
-							$strokeStyle=imagecolorallocate($this->image,0,0,0);//'Black';
-							$size = 6;
-							$y = $this->getY($stockData["low"]);
-							if($firstNowInc == true){
-								//if($perNow>=0){
-									//$strokeStyle=imagecolorallocate($this->image,190, 190, 190);//'Black';
-									imageellipse($this->image, $x - 1, $y + 20 + ($candCount - 1)*50/4, $size + 4, $size + 4, $strokeStyle);
-									$firstNowInc = false;
-								//}
-							} 
-							if($firstInc == true){
-								imagettftext($this->image, 14, 0, $x + 4, $y + 14 + 10, $black, $font_path, $this->candIMap[$i]["inc"]);
-								$firstInc = false;
-							} 
-							
-							//if($candCount <= 5) imagefilledellipse($this->image, $x - 1, $y + 20 + ($candCount - 1)*50/4, $size, $size, $strokeStyle);
-							//if($candCount == 1) $strokeStyle=imagecolorallocate($this->image,255,0,0);//'Black';
-							imageline($this->image, $x - 1, $y + 20, $x - 1, $y + 70, $strokeStyle);
-							//$fillStyle = imagecolorallocate($this->image, 0, 255, 0);//'green
-						}
-					}
-				}
-			}
-			
-			if(1==0 && $i==10){
-			//if(1==0 && $i == $this->rowPriceArr[0]["imax20"]){
-				$strokeStyle=imagecolorallocate($this->image,0,0,0);//'Black';
-				$y = $this->getY($stockData["high"]);
-				$size = 7;
-				imageline($this->image, $x - 1, $this->getY($this->minStockDataY), $x - 1, $this->getY($this->maxStockDataY), $strokeStyle);
-				
-				//imagefilledellipse($this->image, $x -1, $y - 6, $size, $size, $strokeStyle);
-				//imageellipse($this->image, $x -1, $y - 6, $size + 4, $size + 4, $strokeStyle);
-			}
-			if(1==0&&$i == $this->rowPriceArr[0]["imin20"]){
-				$strokeStyle=imagecolorallocate($this->image,0,0,0);//'Black';
-				$y = $this->getY($stockData["low"]);
-				$size = 7;
-				//imageline($this->image, $x - 1, $y - 10, $x - 1, $this->getY($this->maxStockDataY), $strokeStyle);
-				
-				//imagefilledellipse($this->image, $x -1, $y + 6, $size, $size, $strokeStyle);
-				imageellipse($this->image, $x -1, $y + 16, $size + 4, $size + 4, $strokeStyle);
-			}
-			if($i == $this->rowPriceArr[0]["imin20"]){
-				//$fillStyle = imagecolorallocate($this->image, 0, 0, 0);//'Black';
-			}
-			//continue;
-			/*
-			$percent = null;
-			if($this->rowPriceArr[$i]["ref"] != null && $this->rowPriceArr[$i]["ref"] != 0) {
-				$percent = 100*($stockData["close"] - $this->rowPriceArr[$i]["ref"])/ $this->rowPriceArr[$i]["ref"];
-			} else if($this->rowPriceArr[$i+1] != null && $this->rowPriceArr[$i+1]["close"] !=0) {
-				$percent = 100*($stockData["close"] - $this->rowPriceArr[$i+1]["close"])/ $this->rowPriceArr[$i+1]["close"];
-			}
-			if($percent != null) {
-				//if($percent >= 3) $this->context->fillStyle = 'Black';
-				//if(abs($percent) <= 2) $fillStyle = imagecolorallocate($this->image,0,0,0);//'Black';
-			}
-			*/
-
-			$deltaClose = $this->getY($stockData["close"]) - $this->getY($stockData["open"]);
-			$deltaHigh = $this->getY($stockData["high"]) - $this->getY($stockData["low"]);
-			//if($deltaClose==0) $deltaClose = 1;
-			//if($deltaHigh==0) $deltaHigh = 1;
-			//$this->context->fillRect($x - ($this->w+1)/2, $this->getY($stockData["open"]), $this->w, $deltaClose );
-			$x1 = $x - ($this->w+1)/2;
-			$y1 = $this->getY($stockData["open"]);
-			imagefilledrectangle($this->image, $x1, $y1, $x1 + $this->w - $stupid, $y1 + $deltaClose - $stupid, $fillStyle );
-			//$this->context->fillRect($x-1, $this->getY($stockData["low"]), 1, $deltaHigh );
-			$x1 = $x-1;
-			$y1 = $this->getY($stockData["low"]);
-			imagefilledrectangle($this->image, $x1, $y1, $x1 + 1 - $stupid, $y1 + $deltaHigh - $stupid, $fillStyle );
-			if(1==0 && $i==0 && $this->w!=1){
-				$x = $this->getX(-1);
-					
-				$fillStyle = imagecolorallocate($this->image, 0, 0, 255);//'blue';
-				$PERCENT = 1.05;
-				if($this->symbol == "VNINDEX") $PERCENT = 1.01;
-				else if($this->symbol == "HAINDEX") $PERCENT = 1.02;
-				$deltaClose = $this->getY($PERCENT * $stockData["close"]) - $this->getY($stockData["close"]);
-				$deltaHigh = $this->getY($PERCENT * $stockData["close"]) - $this->getY($stockData["close"]);
-				//$this->context->fillRect($x - ($this->w+1)/2, $this->getY($stockData["close"]), $this->w, $deltaClose );
-				$x1 = $x - ($this->w+1)/2;
-				$y1 = $this->getY($stockData["close"]);
-				imagefilledrectangle($this->image, $x1, $y1, $x1 + $this->w  - $stupid, $y1 + $deltaClose  - $stupid, $fillStyle );
-				//$this->context->fillRect($x-1, $this->getY($stockData["close"]), 1, $deltaHigh );
-				$x1 = $x-1;
-				$y1 = $this->getY($stockData["close"]);
-				imagefilledrectangle($this->image, $x1, $y1, $x1 + 1  - $stupid, $y1 + $deltaHigh  - $stupid, $fillStyle );
-			
-				$fillStyle = imagecolorallocate($this->image, 255, 0, 0);//'Red';
-				$PERCENT = 1 - ($PERCENT - 1);
-				$deltaClose = $this->getY($PERCENT * $stockData["close"]) - $this->getY($stockData["close"]);
-				$deltaHigh = $this->getY($PERCENT * $stockData["close"]) - $this->getY($stockData["close"]);
-				//$this->context->fillRect($x - ($this->w+1)/2, $this->getY($stockData["close"]), $this->w, $deltaClose );
-				$x1 = $x - ($this->w+1)/2;
-				$y1 = $this->getY($stockData["close"]);
-				imagefilledrectangle($this->image, $x1, $y1, $x1 + $this->w  - $stupid, $y1 + $deltaClose  - $stupid, $fillStyle );
-				//$this->context->fillRect($x-1, $this->getY($stockData["close"]), 1, $deltaHigh );
-				$x1 = $x-1;
-				$y1 = $this->getY($stockData["close"]);
-				imagefilledrectangle($this->image, $x1, $y1, $x1 + 1  - $stupid, $y1 + $deltaHigh  - $stupid, $fillStyle );
-			}
-			//imagecolordeallocate($this->image, $fillStyle);
-		}
-	}
 	
 	public $color = array(
 	);
-	public function paintWeb($symbol, $height){
-	//<@
-		//ob_clean();
-		$stockA = stock_A::get();
-		$this->conWeb();
-		$this->height = $height;
-		
-		header('Content-type: image/png');
-		$this->image = imagecreatetruecolor($this->width, $this->height);
-		
-		//Set up some colors, use a dark gray as the background color
-		//$dark_grey = imagecolorallocate($this->image, 102, 102, 102);
-		$this->color["white"] = imagecolorallocate($this->image, 255, 255, 255);
-		$this->color["black"] = imagecolorallocate($this->image, 0, 0, 0);
-		$this->color["sienna"] = ImageColorAllocate($this->image, 160, 82, 45);
-		$this->color["red"] = imagecolorallocate($this->image, 255, 0, 0);
-		$this->color["green"] = imagecolorallocate($this->image, 0, 255, 0);
-		$this->color["blue"] = imagecolorallocate($this->image, 0, 0, 255);
-		
-		imagefilledrectangle($this->image, 0, 0, $this->width, $this->height, $this->color["white"]);
-		
-		////////////////////////////////HA
-		if($symbol != "HAINDEX"){
-			$this->rowPriceArr = $stockA->getRowArrayPrice("HAINDEX");
-			$this->isIndex = true;
-			
-			$this->w = 3;
-			$this->saveDtParams();
-			$this->paintCandleStickWeb(null);
-			
-			$this->isIndex = false;
-			//$this->w = 0;
-			//$this->saveDtParams();
-			//$this->paintCloseWeb();
-			
-		}
-		////////////////////
-		
-		$this->rowPriceArr = $stockA->getRowArrayPrice($symbol);
-		$this->conWeb();
-		$this->saveDtParams();
-		$this->candIMap = array(
-		);
-		/************************************
-		if($symbol != "HAINDEX" && $symbol != "VNINDEX"){
-			$candMap = jsml_A::get()->loadJson("candMap", "");
-			$candModMap = $stockA->getCandModMap(&$candMap);
-			$len = count($this->rowPriceArr);
-			for($i=0; $i<$len; $i++){
-				$x = $this->getX($i);
-				if($x<$this->padX) break;
-				
-				$perCandArr = $stockA->getPerCandArr($this->rowPriceArr, $i);
-				if($perCandArr == null) break;
-				$key = $stockA->getCandMod($perCandArr);
-				if($candModMap[$key]!=null){
-					$this->candIMap[$i] = $candModMap[$key];
-				}
-			}
-		}
-		******************************************************/
-		if($symbol != "HAINDEX" && $symbol != "VNINDEX"){
-			$this->candMap = jsml_A::get()->loadJson("cand2Map", "");
-			$len = count($this->rowPriceArr);
-			for($i=0; $i<$len; $i++){
-				$x = $this->getX($i);
-				if($x<$this->padX) break;
-				
-				$perCandArr = $stockA->getPerCandArr($this->rowPriceArr, $i);
-				if($perCandArr == null) break;
-				$key = $stockA->getCandMod($perCandArr);
-				if($this->candMap[$key]!=null){
-					$this->candIMap[$i] = $this->candMap[$key];
-					$this->candIMap[$i]["_key"] = $key;
-				}
-			}
-		}
-		
-		$this->makeFirst();
-		$this->paintTableWeb();
-		$this->paintValueWeb();
-		
-		//$this->makeMa(null);
-		//$this->paintMaWeb(null);
-		
-		$this->conWeb();
-		$this->w = 3;
-		$this->saveDtParams();
-		$this->paintCandleStickWeb(null);
-		
-		$this->conWeb();
-		$this->padX = 171;
-		$this->w = 0;
-		$this->saveDtParams();		
-		$this->paintCloseWeb();
-		
-		//Create our final image 
-		imagepng($this->image);
-		 
-		//Clear up memory 
-		imagedestroy($this->image);
-
-	//@>
-	}
-	
 	public function paintClose(){
 		$vo1=$this->voPrice1;
 		/*
@@ -1652,95 +1196,6 @@ cpchiacho max = 2
 	}
 	public function paintStat(){
 		$vo1=$this->voPrice1;
-		/*
-		if($this->viewStock->tradeFullMap!=null){
-			$tradeFullMap=$this->viewStock->tradeFullMap;
-			$capMap=$tradeFullMap["capMap"];
-			$indexArr=$tradeFullMap["indexArr"];
-		}
-		if($this->viewStock->tradeFullMap!=null){
-			$tradeFullMap=$this->viewStock->tradeFullMap;
-			
-			$n=0;
-			foreach($tradeFullMap["capMap"] as $m=>$vArr){
-				$this->context->restore();
-				$this->context->beginPath();
-				if($n==0) $this->context->strokeStyle = 'purple';
-				if($n==1) $this->context->strokeStyle = 'purple';//'Teal';
-				if($n==2) $this->context->strokeStyle = 'Red';
-				if($n==3) $this->context->strokeStyle = 'Red';//'orchid';
-				if($n==4) $this->context->strokeStyle = 'Teal';
-				if($n==5) $this->context->strokeStyle = 'Teal';//'HotPink';
-				
-				$this->context->lineWidth=1;
-				if($n==0||$n==2) $this->context->lineWidth=1;
-				$this->context->globalAlpha=1;
-				foreach($vArr as $i => $value){
-					$x = $this->getX($i);
-					if($x<0) break;
-					//$value = $vArr[$i];
-					if($value==null || $value == 0) continue;
-					$y = $this->getY3($value);
-					if($i==0){
-						$this->context->moveTo($x, $y);
-						//$this->paintText("1/".$m ,$x+5,$y-8);
-					} else{
-						$this->context->lineTo($x, $y);
-					}
-				}
-				$this->context->stroke();
-				$this->context->globalAlpha=1;
-				$n++;
-			}
-		
-		}
-		$flag=1;
-		for($i=0; $i<$this->rowPriceArr->length; $i++){
-			$x = $this->getX($i) - 0*50;
-			if($x<0) break;
-			$value = $this->rowPriceArr[$i][$vo1->close];
-			if($value==null || $value == 0) continue;
-			$y = $this->getY($value);
-			
-			if($indexArr!=null && $indexArr[$i]!=null){
-				$indexCount=$indexArr[$i]["count"];
-				$indexInc=$indexArr[$i]["inc"];
-				if($indexInc<=50) $color="red";
-				else $color="blue";
-			}
-
-			if($this->rowPriceArr[$i][$vo1->avg]>=1.0000 && $this->rowPriceArr[$i][$vo1->count]>=50){
-			//if($this->rowPriceArr[$i]["prop"]>=0.40){
-				//if($i%10==0){
-				if($i==0){
-					$x1=$this->getX($i+6);
-					$y1=$this->getY($this->rowPriceArr[$i][$vo1->high])+0;
-				}
-				//}
-				//if($flag==0){
-				if($i==1){
-					$this->paintText($this->rowPriceArr[$i][$vo1->codeFull] ,$x1+5,$y1-30-75);
-					$this->paintText($this->viewStock->formatAvg($this->rowPriceArr[$i][$vo1->avg])." ".round($this->rowPriceArr[$i][$vo1->count]/10) ,$x1+5,$y1-20-75);
-					if($indexInc!=null) $this->paintText($this->viewStock->formatInc($indexInc)." ".round($indexCount/10) ,$x1+5,$y1-10-75);
-					$flag=1;
-				}
-				//} else {
-				if($i==0){
-					if($indexInc!=null) $this->paintText($this->viewStock->formatInc($indexInc)." ".round($indexCount/10) ,$x1+5,$y1-70);
-					$this->paintText($this->viewStock->formatAvg($this->rowPriceArr[$i][$vo1->avg])." ".round($this->rowPriceArr[$i][$vo1->count]/10) ,$x1+5,$y1-60);
-					$this->paintText($this->rowPriceArr[$i][$vo1->codeFull] ,$x1+5,$y1-50);
-					$flag=0;
-				}
-				//}
-			//}
-			//if($i%10==0) {
-				$this->context->beginPath();
-				$this->context->fillStyle = 'Black';
-				$this->context->arc($x-1, $this->getY($this->rowPriceArr[$i][$vo1->low])+5, 3, 0, 1 * Math::PI, false);
-				$this->context->fill();
-			}
-		}
-		*/
 		
 		$symbol=$this->symbol;
 		$status = "";
@@ -1754,30 +1209,6 @@ cpchiacho max = 2
 		$this->paintText("<div style='width:350px;color:black'><b>".$status."</b></div>", 20 , 30);////// 850 485
 		
 		return;
-		$intervalArr=$this->viewStock->intervalArr;
-		$percentArr=$this->viewStock->percentArr;
-		for($k=0;$k<count($intervalArr)-1;$k++){
-			$interval=$intervalArr[$k];
-			$interval0=0;
-			if($k!=0)$interval0=$intervalArr[$k-1];
-			$x1 = $this->getX($interval0);
-			$x2 = $this->getX($interval);
-			$min=parseFloat($this->rowPriceArr[0]["min".$interval]);
-			$max=parseFloat($this->rowPriceArr[0]["max".$interval]);
-			for($i=-1;$i<count($percentArr);$i++){
-				$this->context->beginPath();
-				$this->context->strokeStyle = 'Black';
-				$this->context->lineWidth=1;
-				$f=($max - $min)/100;
-				if($i==-1)$yyy=$min;
-				else $yyy=$min+$f*$percentArr[$i];
-				$y = $this->getY($yyy);
-				//fb($yyy);
-				$this->context->moveTo($x1, $y);
-				$this->context->lineTo($x2, $y);
-				$this->context->stroke();
-			}
-		}
 	}
 	public function setOnePrice(){
 		$jSymbol=$this->viewDetail->divStock->find("[_tag2='symbolLeft'],[_tag2='symbolRight'],[_tag2='symbolLeft0'],[_tag2='symbolRight0']");
@@ -1795,30 +1226,6 @@ cpchiacho max = 2
 	}
 	
 	public $alpha = 70;
-	public function paintCloseWeb(){ //return;
-		$vo = new stock_VoPrice();
-			
-			$strokeStyle=imagecolorallocatealpha ($this->image, 0, 0, 0, 0);
-			//if($this->isIndex==true) 
-			//$strokeStyle = imagecolorallocatealpha ($this->image, 160, 32, 240,0);//'blue';
-			$x0=null;$y0=null;
-			$length = count($this->rowPriceArr);
-			for($i=0; $i<$length; $i++){
-				$x = $this->getX($i);
-				if($x<10) break;
-				$stockData = $this->rowPriceArr[$i];
-				if($stockData["close"]==null || $stockData["close"] == 0) continue;
-				$y = $stockData["close"];
-				$y = $this->getY($y);
-				if($i==0){
-					//$this->context->moveTo($x, $y);
-				} else{
-					//$this->context->lineTo($x, $y);
-					imageline($this->image, $x0, $y0, $x, $y, $strokeStyle);
-				}
-				$x0 = $x; $y0=$y;
-			}
-	}
 	
 	public function paintValue(){
 		$vo1=$this->voPrice1;
@@ -1884,55 +1291,26 @@ cpchiacho max = 2
 			if($limit!= null && $k!=1 && $k!=2 && $k!=3 && $k!=4 && $k!=5 && $k!=6) continue;
 			if($k==1){
 				//continue;
-				$this->context->strokeStyle='Black';
-				
-				$this->context->strokeStyle='purple';
-				$this->context->strokeStyle='hotpink';
-				$this->context->strokeStyle='green';
-				$this->context->strokeStyle='sienna';
-				
-				$this->context->strokeStyle='Red';
 				$this->context->strokeStyle='blue';
 			}
 			else if($k==2){
 				//continue;
-				$this->context->strokeStyle='Olive ';
-				$this->context->strokeStyle='blue';
-				$this->context->strokeStyle='sienna';
-				
-				$this->context->strokeStyle='Red';
 				$this->context->strokeStyle='blue';
 			}
 			else if($k==3){
 				//continue;s
-				$this->context->strokeStyle='blue';
-				$this->context->strokeStyle='Red';
-				$this->context->strokeStyle='Teal';
-				
-				$this->context->strokeStyle='blue';
 				$this->context->strokeStyle='Red';
 			}
 			else if($k==4){
 				//continue;
-				$this->context->strokeStyle='black';
-				$this->context->strokeStyle='Red';
-				$this->context->strokeStyle='blue';
-				$this->context->strokeStyle='Teal';
-				
-				$this->context->strokeStyle='blue';
 				$this->context->strokeStyle='Red';
 			}
 			else if($k==5){
 				//continue;
-				$this->context->strokeStyle='black';
-				$this->context->strokeStyle='purple';
-				//$this->context->strokeStyle='sienna';
 				$this->context->strokeStyle='Black';
 			}
 			else if($k==6){
 				//continue;
-				$this->context->strokeStyle='black';
-				//$this->context->strokeStyle='sienna';
 				$this->context->strokeStyle='black';
 				
 			}
@@ -1986,7 +1364,7 @@ cpchiacho max = 2
 			
 			$this->context->globalAlpha=1;
 			$this->context->beginPath();
-			$this->context->lineWidth=2;
+			$this->context->lineWidth=3;
 			///////if($this->w>=3) $this->context->lineWidth=2;
 			
 			for($i=0; $i<$this->rowPriceArr->length; $i++){

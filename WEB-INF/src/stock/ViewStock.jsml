@@ -39,7 +39,7 @@ class stock_ViewStock{
 		$this->intervalArr = array(8,21,34,55);//5 8 13 21 34 55 89
 		//$this->percentArr = array(30,70,100,100);
 		$this->percentArr = array(20,50,80,100);
-		$this->valueOff=100000;
+		$this->valueOff=300000;
 		$this->stockMap=array(
 		);
 		$this->_stockMap=array(
@@ -297,6 +297,25 @@ class stock_ViewStock{
 		$stm = $this->ao->pdo->prepare($sql);
 		$stm->execute(array("symbol"=>$symbol));
 		$rowPriceArr = $stm->fetchAll(PDO::FETCH_NUM);
+		
+		$rat=1;
+		$len=count($rowPriceArr);
+		for($i=0; $i<$len; $i++){
+			$rowPriceArr[$i][$vo->open] = $rat*$rowPriceArr[$i][$vo->open];
+			$rowPriceArr[$i][$vo->high] = $rat*$rowPriceArr[$i][$vo->high];
+			$rowPriceArr[$i][$vo->low] = $rat*$rowPriceArr[$i][$vo->low];
+			$rowPriceArr[$i][$vo->close] = $rat*$rowPriceArr[$i][$vo->close];
+			$rowPriceArr[$i][$vo->volume] = (int)$rowPriceArr[$i][$vo->volume];
+			
+			if($this->isNull0($rowPriceArr[$i][$vo->close])) break;
+			if($this->isNull0($rowPriceArr[$i+1][$vo->close])) break;
+			
+			$per = $rowPriceArr[$i+1][$vo->low]/$rowPriceArr[$i][$vo->high];
+			if($rat==1 && $per >= 1.15 ){
+				$rat=1.03*$rowPriceArr[$i][$vo->open]/$rowPriceArr[$i+1][$vo->close];
+			}
+		}
+		
 		return $rowPriceArr;
 //@>
 	}
@@ -660,7 +679,7 @@ class stock_ViewStock{
 				}
 
 				$per = 100*($rowPriceArr[$x][$vo->close] - $rowPriceArr[$x+1][$vo->close])/$rowPriceArr[$x+1][$vo->close];
-				if(abs($per) <= 10 )$delta += abs($per);
+				if(abs($per) <= 20 )$delta += abs($per);
 				
 				$maC+=$rowPriceArr[$x+1][$vo->close];
 				
@@ -2094,6 +2113,7 @@ try{
 						//else {
 							if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
 							//else $rate+= -100*$reRowPriceArr[$i][$voRe->minC1] + 100000*$perHigh;
+							//else $rate+= -100000*$reRowPriceArr[$i][$voRe->minC1] + 100*$perHigh;
 							else $rate+= -round($perValue*100) + 100000*$perHigh;
 						//}
 						

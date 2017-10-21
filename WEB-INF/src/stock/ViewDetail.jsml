@@ -32,7 +32,8 @@ class stock_ViewDetail{
 		<div id="divChart"></div>
 		
 		<div style="text-align:right; width:<?= $this->viewChart->width ?>px;">
-			
+			<button id='buttonHA'   style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;display:none">HA</button>
+			<button id='buttonCand1' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;display:none">Ca8</button>
 			<button id='buttonLink' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;display:">Link</button>
 			<button id='buttonOverview' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;display:">View</button>
 			<button id='buttonCap' style="display:none;font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Cap</button>
@@ -41,11 +42,11 @@ class stock_ViewDetail{
 				<option selected>VN30INDEX</option>
 				<option >VNINDEX</option>
 			</select>
+			
+			<button id='buttonCand' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Ca</button>
+			<button id='buttonRun' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;color:Blue">Run</button>
 			<input id='textStock' type='text' size='7' style='width: <?=$w1?>px;height: <?=$h1-4?>px'></input>
 			<button id='buttonList' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">List</button>
-			<button id='buttonCand1' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Ca8</button>
-			<button id='buttonCand' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Ca</button>
-			<button id='buttonHA'   style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;display:none">HA</button>
 			<button id='buttonVN'   style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">VN</button>
 		</div>
 		<div id="divTrade"></div>
@@ -57,7 +58,7 @@ class stock_ViewDetail{
 			<button id='buttonConf' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;display:">Conf</button>
 			<button id='buttonClean' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Clean</button>
 			<button id='buttonMstock' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">Mstk</button>
-			<button id='buttonRun' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;color:Blue">Run</button>
+			
 			<br/>
 		</div>
 		<div>
@@ -315,7 +316,7 @@ class stock_ViewDetail{
 		}
 	}
 	public function onclickButtonCand($event){
-		if($this->ao->conf["combineDay"]==2) $this->ao->conf["combineDay"]=1;
+		if($this->ao->conf["combineDay"]==2) $this->ao->conf["combineDay"]=3;
 		else $this->ao->conf["combineDay"]=2;
 		$this->conPaint()->viewPaint();
 		$this->buttonCand->text("Ca".$this->ao->conf["combineDay"]);
@@ -658,7 +659,7 @@ class stock_ViewDetail{
 		$vo=$this->voPrice1;
 		if($mode=="get1") $rowPriceArr=$this->viewStock->getRowPriceArr($vo,$symbol,1);//450
 		else if($mode=="getAll" || $mode=="preload") $rowPriceArr=$this->viewStock->getRowPriceArr($vo,$symbol,$day);// 390 736
-		
+		/*
 		$len=count($rowPriceArr);
 		for($i=0; $i<$len; $i++){
 			$rowPriceArr[$i][$vo->open] = (double)$rowPriceArr[$i][$vo->open];
@@ -667,6 +668,7 @@ class stock_ViewDetail{
 			$rowPriceArr[$i][$vo->close] = (double)$rowPriceArr[$i][$vo->close];
 			$rowPriceArr[$i][$vo->volume] = (int)$rowPriceArr[$i][$vo->volume];
 		}
+		*/
 		$detail=array(
 			"rowPriceArr"=>$rowPriceArr
 			//,"rowPriceArrEx"=>$rowPriceArrEx
