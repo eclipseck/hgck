@@ -135,31 +135,50 @@ class stock_ViewChart{
 		
 		
 		if($this->ao->conf["combineDay"]==1){
-			$ma01=5;
-			$ma02=8;
-			$ma0=13;
-			$ma1=21;
-			$ma2=34;
-			$ma3=55;
-			/*
-			$ma01=5;
-			$ma02=9;
-			$ma0=13;
-			$ma1=17;
-			$ma2=21;
-			$ma3=25;*/
-		} else if($this->ao->conf["combineDay"]==2 || $this->ao->conf["combineDay"]==8){ ///5 8 13 21 34 55 89
-			$ma01=5;
-			$ma02=8;
-			$ma0=13;
-			$ma1=21;
-			$ma2=34;
-			$ma3=55;
 			
-			//$ma0=4;
-			//$ma1=11;
-			//$ma2=17;//23
-			//$ma3=55;
+			
+			$ma01=8;
+			$ma02=13;
+			$ma0=21;
+			$ma1=34;
+			$ma2=55;
+			$ma3=89;
+			
+			$ma01=5;
+			$ma02=10;
+			$ma0=15;
+			$ma1=20;
+			$ma2=25;
+			$ma3=30;
+			
+			$ma01=5;
+			$ma02=8;
+			$ma0=13;
+			$ma1=21;
+			$ma2=34;
+			$ma3=55;
+		} else if($this->ao->conf["combineDay"]==2 || $this->ao->conf["combineDay"]==8){ ///5 8 13 21 34 55 89
+
+			$ma01=8;
+			$ma02=13;
+			$ma0=21;
+			$ma1=34;
+			$ma2=55;
+			$ma3=89;
+			
+			$ma01=5;
+			$ma02=10;
+			$ma0=15;
+			$ma1=20;
+			$ma2=25;
+			$ma3=30;
+			
+			$ma01=5;
+			$ma02=8;
+			$ma0=13;
+			$ma1=21;
+			$ma2=34;
+			$ma3=55;
 		} else {
 			$ma01=5;
 			$ma02=8;
@@ -197,16 +216,14 @@ class stock_ViewChart{
 				if($j==$ma0-1 || $j==$ma1-1 || $j==$ma2-1 || $j==$ma3-1  || $j==$ma01-1 || $j==$ma02-1){
 					if($j==$ma0-1) {
 						$re[$i][$voRe->maC1]=$maC/($j+1);
-						/*
-						$close=$rowPriceArr[$i][$vo->close];
+						//$re[$i]["maP1"]=round(100*($rowPriceArr[$i][$vo->close]-$re[$i][$voRe->maC1])/$re[$i][$voRe->maC1]);
 						
-						if(abs($close-$re[$i][$voRe->maC1])<abs($re[$i]["ma01"]-$re[$i][$voRe->maC1])) $close=$re[$i]["ma01"];
-						if(abs($close-$re[$i][$voRe->maC1])<abs($re[$i]["ma02"]-$re[$i][$voRe->maC1])) $close=$re[$i]["ma02"];
-						
-						//if($close<$re[$i]["ma01"]) $close=$re[$i]["ma01"];
-						//if($close<$re[$i]["ma02"]) $close=$re[$i]["ma02"];
-						//////////$close=$re[$i]["ma01"];
-						$re[$i]["maP1"]=round(100*($close-$re[$i][$voRe->maC1])/$re[$i][$voRe->maC1]);*/
+						////$ma=$rowPriceArr[$i+1][$vo->close];
+						//$ma=$re[$i][$voRe->maC1];
+						//if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$re[$i]["ma01"]) $ma=$re[$i]["ma01"];
+						//if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$re[$i]["ma02"]) $ma=$re[$i]["ma02"];
+						////if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$re[$i][$voRe->maC1]) $ma=$re[$i][$voRe->maC1];
+						//$re[$i]["maP1"]=round(100*($rowPriceArr[$i][$vo->close]-$ma)/$ma);
 					}
 					if($j==$ma1-1){ 
 						$re[$i][$voRe->maC2]=$maC/($j+1);
@@ -223,14 +240,28 @@ class stock_ViewChart{
 					if($j==$ma02-1) {
 						$re[$i]["ma02"]=$maC/($j+1);
 						
-						//$close=$rowPriceArr[$i][$vo->close];
-						//if(abs($close-$re[$i]["ma02"])<abs($re[$i]["ma01"]-$re[$i]["ma02"])) $close=$re[$i]["ma01"];
-						//$re[$i]["maP02"]=round(100*($close-$re[$i]["ma02"])/$re[$i]["ma02"]);
-						//$re[$i]["maP02"]=round(100*($rowPriceArr[$i][$vo->close]-$re[$i]["ma02"])/$re[$i]["ma02"]);
+						$ma=$re[$i]["ma02"];
+						//$ma=$rowPriceArr[$i+1][$vo->close];
+						if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$re[$i]["ma01"]) $ma=$re[$i]["ma01"];
+						//if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$re[$i]["ma02"]) $ma=$re[$i]["ma02"];
+						$re[$i]["maP02"]=round(100*($rowPriceArr[$i][$vo->close]-$ma)/$ma);
 					}
 					if($j==$ma3-1) {
 						$re[$i][$voRe->maC4]=$maC/($j+1);
+						//if(abs($rowPriceArr[$i][$vo->close]-$ma) < abs($rowPriceArr[$i][$vo->close]-$re[$i][$voRe->maC1])) $ma=$re[$i][$voRe->maC1];
 						//$re[$i]["maP4"]=round(100*($rowPriceArr[$i][$vo->close]-$re[$i][$voRe->maC4])/$re[$i][$voRe->maC4]);
+						
+						$ma=$re[$i][$voRe->maC4];
+						//$ma=$rowPriceArr[$i+1][$vo->close];
+						
+						//if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$re[$i]["ma01"]) $ma=$re[$i]["ma01"];
+						//if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$re[$i]["ma02"]) $ma=$re[$i]["ma02"];
+						if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$re[$i][$voRe->maC1]) $ma=$re[$i][$voRe->maC1];
+						if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$re[$i][$voRe->maC2]) $ma=$re[$i][$voRe->maC2];
+						if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$re[$i][$voRe->maC3]) $ma=$re[$i][$voRe->maC3];
+						//if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$re[$i][$voRe->maC4]) $ma=$re[$i][$voRe->maC4];
+						$re[$i]["maP4"]=round(100*($rowPriceArr[$i][$vo->close]-$ma)/$ma);
+						
 						$dev=0;
 						for($k=0 ; $k < $ma3 ; $k++){
 							$y=$i+$k;
@@ -435,16 +466,16 @@ class stock_ViewChart{
 		//$this->scaleX = ($this->width - $this->ox - $this->padX) / $this->rangeX;
 
 		$this->rangeY = $this->maxStockDataY - $this->minStockDataY;
-		$this->scaleY = (0.5*$this->height) / $this->rangeY;
+		$this->scaleY = (0.40*$this->height) / $this->rangeY;
 
 		$this->rangeY2 = $this->maxStockDataY2 - $this->minStockDataY2;
-		$this->scaleY2 = (0.5*$this->height) / $this->rangeY2;
+		$this->scaleY2 = (0.40*$this->height) / $this->rangeY2;
 
 		$this->maxStockDataY3=5;
 		$this->minStockDataY3=-5;
 		
 		$this->rangeY3 = $this->maxStockDataY3 - $this->minStockDataY3;
-		$this->scaleY3 = (0.2*$this->height) / $this->rangeY3;
+		$this->scaleY3 = (0.10*$this->height) / $this->rangeY3;
 		
 		$this->maxStockDataY4=7;
 		$this->minStockDataY4=-7;
@@ -453,14 +484,14 @@ class stock_ViewChart{
 		$this->scaleY4 = (0.2*$this->height) / $this->rangeY4;
 	}
 	public function getY($y){
-		return (0.5*$this->height+$this->oy) - ($y- $this->minStockDataY) * $this->scaleY;
+		return (0.40*$this->height+$this->oy) - ($y- $this->minStockDataY) * $this->scaleY;
 	}
 	public function getY2($y){
-		return (0.5*$this->height+$this->oy) - ($y- $this->minStockDataY2) * $this->scaleY2;
+		return (0.40*$this->height+$this->oy) - ($y- $this->minStockDataY2) * $this->scaleY2;
 	}
 	public function getY3($y){
 		//return ($this->height - $this->oy - $this->padY) - ($y- $this->minStockDataY3) * $this->scaleY3;
-		return (1*$this->height) - ($y- $this->minStockDataY3) * $this->scaleY3;
+		return (0.5*$this->height+$this->oy) - ($y- $this->minStockDataY3) * $this->scaleY3;
 	}
 	public function getY4($y){
 		//return ($this->height - $this->oy - $this->padY) - ($y- $this->minStockDataY3) * $this->scaleY3;
@@ -484,7 +515,8 @@ class stock_ViewChart{
 				$minStockDataY = $stockData[$vo1->low];
 				$iMin = $i;
 			}
-			//if($this->ao->conf["combineDay"]==1) if($i>=$DAY_BREAK) break;
+			//if($this->ao->conf["combineDay"]==1) 
+			//if($i>=$DAY_BREAK) break;
 		}
 		$this->_minStockDataY=$minStockDataY;
 			
@@ -501,7 +533,8 @@ class stock_ViewChart{
 			if($stockData[$vo1->high] > $maxStockDataY) {
 				$maxStockDataY = $stockData[$vo1->high];
 			}
-			//if($this->ao->conf["combineDay"]==1) if($i>=$DAY_BREAK) break;
+			//if($this->ao->conf["combineDay"]==1) 
+			//if($i>=$DAY_BREAK) break;
 		}
 		$this->_maxStockDataY=$maxStockDataY;
 		
@@ -529,7 +562,7 @@ class stock_ViewChart{
 				$this->minMaxPadFactor = 1.05;
 			}
 			else {
-				$this->minMaxPadFactor = 1.75;
+				$this->minMaxPadFactor = 1.6;//1.75;
 			}
 		}
 
@@ -628,7 +661,7 @@ class stock_ViewChart{
 		$this->paintCandleStick();
 		//$this->paintClose();
 		$this->setOnePrice();
-		
+		$this->paintIndicator();
 		
 		$this->rowPriceArrMap=array(
 		);
@@ -647,8 +680,7 @@ class stock_ViewChart{
 		//$this->makeMa();
 		$this->paintMa();
 		$this->paintCandleStick();
-		
-		//$this->paintIndicator();
+		$this->paintIndicator();
 	}
 
 	public function paintCandleStick($limit){
@@ -877,12 +909,14 @@ class stock_ViewChart{
 			if($deltaHigh>=0 && $deltaHigh<=2) $deltaHigh = 2;
 			if($deltaHigh<0 && $deltaHigh>=-2) $deltaHigh = -2;
 			if($this->w%2==0) {
-				$this->context->fillRect($x- ($this->w)/2, $this->getY($stockData[$vo1->open]), $this->w, $deltaClose );
-				$this->context->fillRect($x-1, $this->getY($stockData[$vo1->low]), 2, $deltaHigh );
+				//$this->context->fillRect($x- ($this->w)/2, $this->getY($stockData[$vo1->open]), $this->w, $deltaClose );
+				//$this->context->fillRect($x-1, $this->getY($stockData[$vo1->low]), 2, $deltaHigh );
+				$this->context->fillRect($x, $this->getY($stockData[$vo1->open]), $this->w, $deltaClose );
+				$this->context->fillRect($x+2, $this->getY($stockData[$vo1->low]), 2, $deltaHigh );
 			} else if($this->w%2==1){
 				$this->context->fillRect($x - ($this->w+1)/2, $this->getY($stockData[$vo1->open]), $this->w, $deltaClose );
-				if($this->w==5) $this->context->fillRect($x-1, $this->getY($stockData[$vo1->low]), 1, $deltaHigh );
-				else $this->context->fillRect($x-1, $this->getY($stockData[$vo1->low]), 1, $deltaHigh );
+				//if($this->w==5) $this->context->fillRect($x-1, $this->getY($stockData[$vo1->low]), 1, $deltaHigh ); else 
+				$this->context->fillRect($x-1, $this->getY($stockData[$vo1->low]), 1, $deltaHigh );
 			}
 			//$this->w=$thisw;
 			/*
@@ -944,6 +978,20 @@ class stock_ViewChart{
 		$this->context->globalAlpha=1;
 		$vo = new stock_VoPrice();
 		
+		$this->context->globalAlpha=1;
+		$this->context->lineWidth=1;
+		$this->context->beginPath();
+		$this->context->strokeStyle='Blue';
+		$this->context->moveTo($this->getX(0), $this->getY3(2));
+		$this->context->lineTo($this->getX($this->rowPriceArr->length), $this->getY3(2));
+		$this->context->stroke();
+		
+		$this->context->beginPath();
+		$this->context->strokeStyle='Red';
+		$this->context->moveTo($this->getX(0), $this->getY3(-2));
+		$this->context->lineTo($this->getX($this->rowPriceArr->length), $this->getY3(-2));
+		$this->context->stroke();
+		
 		for($i=0; $i<$this->rowPriceArr->length-1; $i++){ break;
 			$stockData = $this->rowPriceArr[$i];
 			$vo->row = $stockData;
@@ -959,8 +1007,8 @@ class stock_ViewChart{
 			$this->context->fillRect($x- ($this->w+1)/2, $this->getY3(0), $this->w , -$y3*$this->scaleY3);
 		}
 		
-		//for($k=6; $k>=1; $k--){
-		for($k=1; $k<=6; $k++){
+		for($k=6; $k>=1; $k--){
+		//for($k=1; $k<=6; $k++){
 			if($limit!= null && $k!=1 && $k!=2 && $k!=3 && $k!=4 && $k!=5 && $k!=6) continue;
 			if($k==1){
 				//continue;
@@ -970,14 +1018,17 @@ class stock_ViewChart{
 			else if($k==2){
 				continue;
 				$this->context->strokeStyle='blue';
+				$this->context->strokeStyle='Black';
 			}
 			else if($k==3){
 				continue;
 				$this->context->strokeStyle='Red';
+				$this->context->strokeStyle='Black';
 			}
 			else if($k==4){
-				continue;
+				//continue;
 				$this->context->strokeStyle='Red';
+				$this->context->strokeStyle='Black';
 			}
 			else if($k==5){
 				//continue;
@@ -993,7 +1044,7 @@ class stock_ViewChart{
 			$this->context->beginPath();
 			$this->context->lineWidth=3;
 			///////if($this->w>=3) $this->context->lineWidth=2;
-			
+			$w2=floor($this->w/2)+1;
 			for($i=0; $i<$this->rowPriceArr->length; $i++){
 				if($limit!=null && $i>=$limit) break;
 				$x = $this->getX($i) - 0*50;
@@ -1018,25 +1069,25 @@ class stock_ViewChart{
 				//$y2 = $vo->getLiveVolume();
 				if($x<$this->padX) break;
 					
-				if($k==5 || $k==6){
+				if($k==5 || $k==6 || $k==1){
 					if( $y>=0) $this->context->fillStyle = 'blue';
 					else $this->context->fillStyle = 'red';
 					
-					$this->context->fillRect($x- ($this->w+1)/2, $this->getY3(0), $this->w , -$delta);
-				}
-				if($k==1) {
-					if( $y>=0) $this->context->fillStyle = 'green';
+					$this->context->fillRect($x, $this->getY3(0), $this->w , -$delta);
+				} else {
+					/*if( $y>=0) $this->context->fillStyle = 'green';
 					else $this->context->fillStyle = 'brown';
 					$this->context->fillStyle = 'black';
-					$this->context->fillRect($x- ($this->w+1)/2, $this->getY3(0), $this->w , -$delta);
-					/*
+					$y=$this->getY3(0)-$delta+3;
+					$delta=3;
+					$this->context->fillRect($x, $y, $this->w , -$delta);*/
+					
 					$y = $this->getY3($y);
 					if($i==0){
-						$this->context->moveTo($x, $y);
+						$this->context->moveTo($x+$w2, $y);
 					} else{
-						$this->context->lineTo($x, $y);
+						$this->context->lineTo($x+$w2, $y);
 					}
-					*/
 				}
 			}
 			$this->context->stroke();
@@ -1247,8 +1298,8 @@ class stock_ViewChart{
 			if($x<$this->padX) break;
 			if( $stockData[$vo1->close] >= $stockData[$vo1->open]) $this->context->fillStyle = 'Green';
 			else $this->context->fillStyle = 'brown';
-			if($this->w==2)$this->context->fillRect($x- 1, $this->getY2(0), $this->w , -$y2*$this->scaleY2);
-			else $this->context->fillRect($x- ($this->w+1)/2, $this->getY2(0), $this->w , -$y2*$this->scaleY2);
+			if($this->w==2)$this->context->fillRect($x, $this->getY2(0), $this->w , -$y2*$this->scaleY2);
+			else $this->context->fillRect($x, $this->getY2(0), $this->w , -$y2*$this->scaleY2);
 
 			if($i==0){
 				//$buyValue = $stockData->buyPrice3*$stockData->buyVolume3 + $stockData->buyPrice2*$stockData->buyVolume2 + $stockData->buyPrice1*$stockData->buyVolume1;
@@ -1367,9 +1418,10 @@ class stock_ViewChart{
 			$this->context->lineWidth=3;
 			///////if($this->w>=3) $this->context->lineWidth=2;
 			
+			$w2=floor($this->w/2)+1;
 			for($i=0; $i<$this->rowPriceArr->length; $i++){
 				if($limit!=null && $i>=$limit) break;
-				$x = $this->getX($i) - 0*50;
+				$x = $this->getX($i) +$w2;
 				if($this->padX == $this->padX1 && $x<0) break;
 				if($this->padX != $this->padX1 && $x< 0*(911-$this->padX1 + 20)) break;
 				$stockData = $this->rowPriceExArr[$i];
@@ -1377,7 +1429,6 @@ class stock_ViewChart{
 				else if($k==2) $y = $stockData[$voRe->maC2];
 				else if($k==3) $y = $stockData[$voRe->maC3];
 				else if($k==4) {
-					$this->context->lineWidth=2;
 					$y = $stockData[$voRe->maC4];
 				}
 				else if($k==5) $y = $stockData["ma01"];

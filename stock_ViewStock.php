@@ -654,7 +654,7 @@ $html = $__htmlArray.join("");
 		return $this;
 	}
 stock_ViewChart.prototype.makeRowPriceArr = function($vo, $rowPriceArr ,$limit){
-var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null; var $len = null; var $i = null;if($limit==null) $limit=null; var $len2 = null; var $ma01 = null; var $ma02 = null; var $ma0 = null; var $ma1 = null; var $ma2 = null; var $ma3 = null; var $min1 = null; var $max1 = null; var $maC = null; var $j = null; var $x = null; var $dev = null; var $k = null; var $y = null; var $close = null;
+var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null; var $len = null; var $i = null;if($limit==null) $limit=null; var $len2 = null; var $ma01 = null; var $ma02 = null; var $ma0 = null; var $ma1 = null; var $ma2 = null; var $ma3 = null; var $min1 = null; var $max1 = null; var $maC = null; var $j = null; var $x = null; var $ma = null; var $dev = null; var $k = null; var $y = null; var $close = null;
 				$re=[];
 		$voRe=$this.voRowPriceArr;
 		$len=count($rowPriceArr);
@@ -667,21 +667,50 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 		
 		
 		if($this.ao.conf["combineDay"]==1){
+			
+			
+			$ma01=8;
+			$ma02=13;
+			$ma0=21;
+			$ma1=34;
+			$ma2=55;
+			$ma3=89;
+			
+			$ma01=5;
+			$ma02=10;
+			$ma0=15;
+			$ma1=20;
+			$ma2=25;
+			$ma3=30;
+			
 			$ma01=5;
 			$ma02=8;
 			$ma0=13;
 			$ma1=21;
 			$ma2=34;
 			$ma3=55;
+		} else if($this.ao.conf["combineDay"]==2 || $this.ao.conf["combineDay"]==8){ 
+			$ma01=8;
+			$ma02=13;
+			$ma0=21;
+			$ma1=34;
+			$ma2=55;
+			$ma3=89;
 			
-		} else if($this.ao.conf["combineDay"]==2 || $this.ao.conf["combineDay"]==8){ 			$ma01=5;
+			$ma01=5;
+			$ma02=10;
+			$ma0=15;
+			$ma1=20;
+			$ma2=25;
+			$ma3=30;
+			
+			$ma01=5;
 			$ma02=8;
 			$ma0=13;
 			$ma1=21;
 			$ma2=34;
 			$ma3=55;
-			
-														} else {
+		} else {
 			$ma01=5;
 			$ma02=8;
 			$ma0=13;
@@ -716,8 +745,8 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 								if($j==$ma0-1 || $j==$ma1-1 || $j==$ma2-1 || $j==$ma3-1  || $j==$ma01-1 || $j==$ma02-1){
 					if($j==$ma0-1) {
 						$re[$i][$voRe.maC1]=$maC/($j+1);
-						
-					}
+												
+																																									}
 					if($j==$ma1-1){ 
 						$re[$i][$voRe.maC2]=$maC/($j+1);
 											}
@@ -730,10 +759,21 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 					if($j==$ma02-1) {
 						$re[$i]["ma02"]=$maC/($j+1);
 						
-																													}
+						$ma=$re[$i]["ma02"];
+												if($rowPriceArr[$i][$vo.close]-$ma > $rowPriceArr[$i][$vo.close]-$re[$i]["ma01"]) $ma=$re[$i]["ma01"];
+												$re[$i]["maP02"]=round(100*($rowPriceArr[$i][$vo.close]-$ma)/$ma);
+					}
 					if($j==$ma3-1) {
 						$re[$i][$voRe.maC4]=$maC/($j+1);
-												$dev=0;
+																		
+						$ma=$re[$i][$voRe.maC4];
+												
+																		if($rowPriceArr[$i][$vo.close]-$ma > $rowPriceArr[$i][$vo.close]-$re[$i][$voRe.maC1]) $ma=$re[$i][$voRe.maC1];
+						if($rowPriceArr[$i][$vo.close]-$ma > $rowPriceArr[$i][$vo.close]-$re[$i][$voRe.maC2]) $ma=$re[$i][$voRe.maC2];
+						if($rowPriceArr[$i][$vo.close]-$ma > $rowPriceArr[$i][$vo.close]-$re[$i][$voRe.maC3]) $ma=$re[$i][$voRe.maC3];
+												$re[$i]["maP4"]=round(100*($rowPriceArr[$i][$vo.close]-$ma)/$ma);
+						
+						$dev=0;
 						for($k=0 ; $k < $ma3 ; $k++){
 							$y=$i+$k;
 							$close=$rowPriceArr[$y+1][$vo.close];
@@ -915,16 +955,16 @@ stock_ViewChart.prototype.saveScale = function(){
 var $this = this; var $__arguments = arguments;
 				
 		$this.rangeY = $this.maxStockDataY - $this.minStockDataY;
-		$this.scaleY = (0.5*$this.height) / $this.rangeY;
+		$this.scaleY = (0.40*$this.height) / $this.rangeY;
 
 		$this.rangeY2 = $this.maxStockDataY2 - $this.minStockDataY2;
-		$this.scaleY2 = (0.5*$this.height) / $this.rangeY2;
+		$this.scaleY2 = (0.40*$this.height) / $this.rangeY2;
 
 		$this.maxStockDataY3=5;
 		$this.minStockDataY3=-5;
 		
 		$this.rangeY3 = $this.maxStockDataY3 - $this.minStockDataY3;
-		$this.scaleY3 = (0.2*$this.height) / $this.rangeY3;
+		$this.scaleY3 = (0.10*$this.height) / $this.rangeY3;
 		
 		$this.maxStockDataY4=7;
 		$this.minStockDataY4=-7;
@@ -934,15 +974,15 @@ var $this = this; var $__arguments = arguments;
 	}
 stock_ViewChart.prototype.getY = function($y){
 var $this = this; var $__arguments = arguments;
-		return (0.5*$this.height+$this.oy) - ($y- $this.minStockDataY) * $this.scaleY;
+		return (0.40*$this.height+$this.oy) - ($y- $this.minStockDataY) * $this.scaleY;
 	}
 stock_ViewChart.prototype.getY2 = function($y){
 var $this = this; var $__arguments = arguments;
-		return (0.5*$this.height+$this.oy) - ($y- $this.minStockDataY2) * $this.scaleY2;
+		return (0.40*$this.height+$this.oy) - ($y- $this.minStockDataY2) * $this.scaleY2;
 	}
 stock_ViewChart.prototype.getY3 = function($y){
 var $this = this; var $__arguments = arguments;
-				return (1*$this.height) - ($y- $this.minStockDataY3) * $this.scaleY3;
+				return (0.5*$this.height+$this.oy) - ($y- $this.minStockDataY3) * $this.scaleY3;
 	}
 stock_ViewChart.prototype.getY4 = function($y){
 var $this = this; var $__arguments = arguments;
@@ -965,7 +1005,7 @@ var $this = this; var $__arguments = arguments; var $vo1 = null; var $minStockDa
 				$minStockDataY = $stockData[$vo1.low];
 				$iMin = $i;
 			}
-					}
+								}
 		$this._minStockDataY=$minStockDataY;
 			
 		$maxStockDataY = 0;
@@ -979,7 +1019,7 @@ var $this = this; var $__arguments = arguments; var $vo1 = null; var $minStockDa
 			if($stockData[$vo1.high] > $maxStockDataY) {
 				$maxStockDataY = $stockData[$vo1.high];
 			}
-					}
+								}
 		$this._maxStockDataY=$maxStockDataY;
 		
 				$isFuture=false;
@@ -1005,8 +1045,7 @@ var $this = this; var $__arguments = arguments; var $vo1 = null; var $minStockDa
 				$this.minMaxPadFactor = 1.05;
 			}
 			else {
-				$this.minMaxPadFactor = 1.75;
-			}
+				$this.minMaxPadFactor = 1.6;			}
 		}
 
 		if($minStockDataY==null || $minStockDataY==0) $minStockDataY = 10;
@@ -1085,7 +1124,7 @@ var $this = this; var $__arguments = arguments;
 				$this.paintMa();
 		$this.paintCandleStick();
 				$this.setOnePrice();
-		
+		$this.paintIndicator();
 		
 		$this.rowPriceArrMap={
 		};
@@ -1101,8 +1140,8 @@ var $this = this; var $__arguments = arguments;
 		$this.paintValue();
 				$this.paintMa();
 		$this.paintCandleStick();
-		
-			}
+		$this.paintIndicator();
+	}
 stock_ViewChart.prototype.paintCandleStick = function($limit){
 var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = null; var $x1 = null; var $x2 = null; var $candCount = null; var $i = null; var $stockData = null; var $x = null; var $_i = null; var $xm1 = null; var $PERCENT = null; var $deltaClose = null; var $deltaHigh = null; var $percent = null;
 		$voRe=$this.voRowPriceArr;
@@ -1253,12 +1292,11 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 			if($deltaHigh>=0 && $deltaHigh<=2) $deltaHigh = 2;
 			if($deltaHigh<0 && $deltaHigh>=-2) $deltaHigh = -2;
 			if($this.w%2==0) {
-				$this.context.fillRect($x- ($this.w)/2, $this.getY($stockData[$vo1.open]), $this.w, $deltaClose );
-				$this.context.fillRect($x-1, $this.getY($stockData[$vo1.low]), 2, $deltaHigh );
+												$this.context.fillRect($x, $this.getY($stockData[$vo1.open]), $this.w, $deltaClose );
+				$this.context.fillRect($x+2, $this.getY($stockData[$vo1.low]), 2, $deltaHigh );
 			} else if($this.w%2==1){
 				$this.context.fillRect($x - ($this.w+1)/2, $this.getY($stockData[$vo1.open]), $this.w, $deltaClose );
-				if($this.w==5) $this.context.fillRect($x-1, $this.getY($stockData[$vo1.low]), 1, $deltaHigh );
-				else $this.context.fillRect($x-1, $this.getY($stockData[$vo1.low]), 1, $deltaHigh );
+								$this.context.fillRect($x-1, $this.getY($stockData[$vo1.low]), 1, $deltaHigh );
 			}
 						
 			
@@ -1280,12 +1318,26 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 		$this.context.globalAlpha=1;
 	}
 stock_ViewChart.prototype.paintIndicator = function(){
-var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = null; var $vo = null; var $i = null; var $stockData = null; var $x = null; var $y3 = null; var $k = null; var $limit = null; var $y = null; var $delta = null; var $x1 = null; var $x2 = null;
+var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = null; var $vo = null; var $i = null; var $stockData = null; var $x = null; var $y3 = null; var $k = null; var $limit = null; var $w2 = null; var $y = null; var $delta = null; var $x1 = null; var $x2 = null;
 		$voRe=$this.voRowPriceArr;
 		$vo1=$this.voPrice1;
 		$this.context.restore();
 		$this.context.globalAlpha=1;
 		$vo = new stock_VoPrice();
+		
+		$this.context.globalAlpha=1;
+		$this.context.lineWidth=1;
+		$this.context.beginPath();
+		$this.context.strokeStyle='Blue';
+		$this.context.moveTo($this.getX(0), $this.getY3(2));
+		$this.context.lineTo($this.getX($this.rowPriceArr.length), $this.getY3(2));
+		$this.context.stroke();
+		
+		$this.context.beginPath();
+		$this.context.strokeStyle='Red';
+		$this.context.moveTo($this.getX(0), $this.getY3(-2));
+		$this.context.lineTo($this.getX($this.rowPriceArr.length), $this.getY3(-2));
+		$this.context.stroke();
 		
 		for($i=0; $i<$this.rowPriceArr.length-1; $i++){ break;
 			$stockData = $this.rowPriceArr[$i];
@@ -1301,8 +1353,8 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 			$this.context.fillRect($x- ($this.w+1)/2, $this.getY3(0), $this.w , -$y3*$this.scaleY3);
 		}
 		
-				for($k=1; $k<=6; $k++){
-			if($limit!= null && $k!=1 && $k!=2 && $k!=3 && $k!=4 && $k!=5 && $k!=6) continue;
+		for($k=6; $k>=1; $k--){
+					if($limit!= null && $k!=1 && $k!=2 && $k!=3 && $k!=4 && $k!=5 && $k!=6) continue;
 			if($k==1){
 								$this.context.strokeStyle='blue';
 				$this.context.strokeStyle='Black';
@@ -1310,14 +1362,16 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 			else if($k==2){
 				continue;
 				$this.context.strokeStyle='blue';
+				$this.context.strokeStyle='Black';
 			}
 			else if($k==3){
 				continue;
 				$this.context.strokeStyle='Red';
+				$this.context.strokeStyle='Black';
 			}
 			else if($k==4){
-				continue;
-				$this.context.strokeStyle='Red';
+								$this.context.strokeStyle='Red';
+				$this.context.strokeStyle='Black';
 			}
 			else if($k==5){
 								$this.context.strokeStyle='Black';
@@ -1330,7 +1384,7 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 			$this.context.globalAlpha=1;
 			$this.context.beginPath();
 			$this.context.lineWidth=3;
-						
+						$w2=floor($this.w/2)+1;
 			for($i=0; $i<$this.rowPriceArr.length; $i++){
 				if($limit!=null && $i>=$limit) break;
 				$x = $this.getX($i) - 0*50;
@@ -1354,18 +1408,20 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 				
 								if($x<$this.padX) break;
 					
-				if($k==5 || $k==6){
+				if($k==5 || $k==6 || $k==1){
 					if( $y>=0) $this.context.fillStyle = 'blue';
 					else $this.context.fillStyle = 'red';
 					
-					$this.context.fillRect($x- ($this.w+1)/2, $this.getY3(0), $this.w , -$delta);
-				}
-				if($k==1) {
-					if( $y>=0) $this.context.fillStyle = 'green';
-					else $this.context.fillStyle = 'brown';
-					$this.context.fillStyle = 'black';
-					$this.context.fillRect($x- ($this.w+1)/2, $this.getY3(0), $this.w , -$delta);
+					$this.context.fillRect($x, $this.getY3(0), $this.w , -$delta);
+				} else {
 					
+					
+					$y = $this.getY3($y);
+					if($i==0){
+						$this.context.moveTo($x+$w2, $y);
+					} else{
+						$this.context.lineTo($x+$w2, $y);
+					}
 				}
 			}
 			$this.context.stroke();
@@ -1532,8 +1588,8 @@ var $this = this; var $__arguments = arguments; var $vo1 = null; var $vo = null;
 			if($x<$this.padX) break;
 			if( $stockData[$vo1.close] >= $stockData[$vo1.open]) $this.context.fillStyle = 'Green';
 			else $this.context.fillStyle = 'brown';
-			if($this.w==2)$this.context.fillRect($x- 1, $this.getY2(0), $this.w , -$y2*$this.scaleY2);
-			else $this.context.fillRect($x- ($this.w+1)/2, $this.getY2(0), $this.w , -$y2*$this.scaleY2);
+			if($this.w==2)$this.context.fillRect($x, $this.getY2(0), $this.w , -$y2*$this.scaleY2);
+			else $this.context.fillRect($x, $this.getY2(0), $this.w , -$y2*$this.scaleY2);
 
 			if($i==0){
 																							}
@@ -1561,7 +1617,7 @@ var $this = this; var $__arguments = arguments; var $vo1 = null; var $vo = null;
 		
 	}
 stock_ViewChart.prototype.paintMa = function($limit){
-var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = null; var $vo = null; var $k = null; var $j = null; var $i = null; var $x = null; var $stockData = null; var $y = null;
+var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = null; var $vo = null; var $k = null; var $j = null; var $i = null; var $x = null; var $stockData = null; var $y = null; var $w2 = null;
 		$voRe=$this.voRowPriceArr;
 		$vo1=$this.voPrice1;
 		$this.context.restore();
@@ -1640,9 +1696,10 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 			$this.context.beginPath();
 			$this.context.lineWidth=3;
 						
+			$w2=floor($this.w/2)+1;
 			for($i=0; $i<$this.rowPriceArr.length; $i++){
 				if($limit!=null && $i>=$limit) break;
-				$x = $this.getX($i) - 0*50;
+				$x = $this.getX($i) +$w2;
 				if($this.padX == $this.padX1 && $x<0) break;
 				if($this.padX != $this.padX1 && $x< 0*(911-$this.padX1 + 20)) break;
 				$stockData = $this.rowPriceExArr[$i];
@@ -1650,7 +1707,6 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 				else if($k==2) $y = $stockData[$voRe.maC2];
 				else if($k==3) $y = $stockData[$voRe.maC3];
 				else if($k==4) {
-					$this.context.lineWidth=2;
 					$y = $stockData[$voRe.maC4];
 				}
 				else if($k==5) $y = $stockData["ma01"];
