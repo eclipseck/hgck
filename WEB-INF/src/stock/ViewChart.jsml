@@ -34,7 +34,7 @@ class stock_ViewChart{
 <div>
 	<div id="divCanvasText" style='position:relative'>
 	</div>
-	<div id="divOnePrice" style='position:absolute;left:280px;top:2px'></div>
+	<div id="divOnePrice" align="right" style='position:absolute;left:230px;top:<?= 2+0.16*$this->height ?>px;border:0px solid;width:655px;'></div>
 	<canvas id="canvas"></canvas>
 </div>
 <!--/$html--><?
@@ -337,7 +337,7 @@ class stock_ViewChart{
 		//$this->rowPriceArrMap[$this->symbol]=$this->viewDetail->rowPriceArr;
 		//$this->rowPriceExArr=$this->viewStock->makeRowPriceArr2($this->voPrice1,$this->viewDetail->rowPriceArr,count($this->viewDetail->rowPriceArr));
 		$this->rowPriceArrMap[$this->symbol] = $this->changeRowPriceArr($this->viewDetail->rowPriceArrMap[$this->symbol]);
-		$this->rowPriceExArr=$this->makeRowPriceArr($this->voPrice1,$this->rowPriceArrMap[$this->symbol],1);
+		$this->rowPriceExArr=$this->makeRowPriceArr($this->voPrice1,$this->rowPriceArrMap[$this->symbol]);
 		*/
 		return $this;
 	}
@@ -466,16 +466,16 @@ class stock_ViewChart{
 		//$this->scaleX = ($this->width - $this->ox - $this->padX) / $this->rangeX;
 
 		$this->rangeY = $this->maxStockDataY - $this->minStockDataY;
-		$this->scaleY = (0.40*$this->height) / $this->rangeY;
+		$this->scaleY = (0.42*$this->height) / $this->rangeY;
 
 		$this->rangeY2 = $this->maxStockDataY2 - $this->minStockDataY2;
-		$this->scaleY2 = (0.40*$this->height) / $this->rangeY2;
+		$this->scaleY2 = (0.42*$this->height) / $this->rangeY2;
 
 		$this->maxStockDataY3=5;
 		$this->minStockDataY3=-5;
 		
 		$this->rangeY3 = $this->maxStockDataY3 - $this->minStockDataY3;
-		$this->scaleY3 = (0.10*$this->height) / $this->rangeY3;
+		$this->scaleY3 = (0.16*$this->height) / $this->rangeY3;
 		
 		$this->maxStockDataY4=7;
 		$this->minStockDataY4=-7;
@@ -484,14 +484,14 @@ class stock_ViewChart{
 		$this->scaleY4 = (0.2*$this->height) / $this->rangeY4;
 	}
 	public function getY($y){
-		return (0.40*$this->height+$this->oy) - ($y- $this->minStockDataY) * $this->scaleY;
+		return (0.58*$this->height+$this->oy) - ($y- $this->minStockDataY) * $this->scaleY;
 	}
 	public function getY2($y){
-		return (0.40*$this->height+$this->oy) - ($y- $this->minStockDataY2) * $this->scaleY2;
+		return (0.58*$this->height+$this->oy) - ($y- $this->minStockDataY2) * $this->scaleY2;
 	}
 	public function getY3($y){
 		//return ($this->height - $this->oy - $this->padY) - ($y- $this->minStockDataY3) * $this->scaleY3;
-		return (0.5*$this->height+$this->oy) - ($y- $this->minStockDataY3) * $this->scaleY3;
+		return (0.16*$this->height+$this->oy) - ($y- $this->minStockDataY3) * $this->scaleY3;
 	}
 	public function getY4($y){
 		//return ($this->height - $this->oy - $this->padY) - ($y- $this->minStockDataY3) * $this->scaleY3;
@@ -571,12 +571,12 @@ class stock_ViewChart{
 		$this->minStockDataY = 0.93 * $minStockDataY;
 		$this->maxStockDataY = $this->minMaxPadFactor * $minStockDataY;
 		
-		if(1.02*$maxStockDataY > $this->maxStockDataY){
-			$this->maxStockDataY = 1.02*$maxStockDataY;
+		if(1.04*$maxStockDataY > $this->maxStockDataY){
+			$this->maxStockDataY = 1.04*$maxStockDataY;
 		}
 		if($this->symbol == "VNINDEX" || $this->symbol == "HAINDEX" || $this->symbol == "VN30INDEX") {
 			$this->minStockDataY = 0.985 * $minStockDataY;
-			$this->maxStockDataY = 1.01*$maxStockDataY;
+			$this->maxStockDataY = 1.02*$maxStockDataY;
 		}
 
 		$maxStockDataY2 = 0;
@@ -639,13 +639,13 @@ class stock_ViewChart{
 		//$this->rowPriceArrMap[$this->symbol]=$this->viewDetail->rowPriceArr;
 		//$this->rowPriceExArr=$this->viewStock->makeRowPriceArr2($this->voPrice1,$this->viewDetail->rowPriceArr,count($this->viewDetail->rowPriceArr));
 		$this->rowPriceArrMap[$this->symbol] = $this->viewDetail->rowPriceArrMap[$this->symbol];
-		$this->rowPriceExArr=$this->makeRowPriceArr($this->voPrice1,$this->rowPriceArrMap[$this->symbol],1);
+		$this->rowPriceExArr=$this->viewStock->makeRowPriceArr($this->voPrice1,$this->rowPriceArrMap[$this->symbol]);
 		
 		$this->rowPriceArr = $this->rowPriceArrMap[$this->symbol];
 		$this->isIndex = false;
 		
 		//$this->con();
-		$this->padX = 4*5+3;
+		$this->padX = 4*5+7;
 		//$this->w = 1;
 		$this->padY = 0;
 		$this->oy=0;
@@ -653,10 +653,7 @@ class stock_ViewChart{
 		$this->saveDtParams();
 		
 		$this->paintStat();
-		//$this->makeFirst();
-		//$this->paintTable();
 		$this->paintValue();
-		//$this->makeMa();
 		$this->paintMa();
 		$this->paintCandleStick();
 		//$this->paintClose();
@@ -668,47 +665,24 @@ class stock_ViewChart{
 		//$this->rowPriceArrMap[$this->symbol]=$this->viewDetail->rowPriceArr;
 		//$this->rowPriceExArr=$this->viewStock->makeRowPriceArr2($this->voPrice1,$this->viewDetail->rowPriceArr,count($this->viewDetail->rowPriceArr));
 		$this->rowPriceArrMap[$this->symbol] = $this->changeRowPriceArr($this->viewDetail->rowPriceArrMap[$this->symbol]);
-		$this->rowPriceExArr=$this->makeRowPriceArr($this->voPrice1,$this->rowPriceArrMap[$this->symbol],1);
+		$this->rowPriceExArr=$this->viewStock->makeRowPriceArr($this->voPrice1,$this->rowPriceArrMap[$this->symbol]);
 		
 		$this->rowPriceArr = $this->rowPriceArrMap[$this->symbol];
 		
-		$this->oy = 0.5*$this->height;
+		$this->oy = 0.42*$this->height;
 		
 		$this->saveDtParams();
 		
 		$this->paintValue();
-		//$this->makeMa();
 		$this->paintMa();
 		$this->paintCandleStick();
-		$this->paintIndicator();
+		//$this->paintIndicator();
 	}
 
 	public function paintCandleStick($limit){
-		$voRe=$this->voRowPriceArr;
+		$voRe=$this->viewStock->voRowPriceArr;
 		$vo1=$this->voPrice1;
 		
-		$this->context->globalAlpha=1;
-		$x1 = $this->getX(10);
-		$x2 = $this->getX(20);
-		/*
-		if($this->rowPriceExArr[0][$voRe->min]!=null){
-			$this->context->beginPath();
-			$this->context->strokeStyle = 'Black';
-			$this->context->lineWidth=1;
-			$y = $this->getY(1.00*$this->rowPriceExArr[0][$voRe->min]);
-			$this->context->moveTo($x1, $y);
-			$this->context->lineTo($x2, $y);
-			$this->context->stroke();
-			
-			$this->context->beginPath();
-			$this->context->strokeStyle = 'Black';
-			$this->context->lineWidth=1;
-			$y = $this->getY(1.50*$this->rowPriceExArr[0][$voRe->min]);
-			$this->context->moveTo($x1, $y);
-			$this->context->lineTo($x2, $y);
-			$this->context->stroke();
-		}
-		*/
 		$this->context->restore();
 		$this->context->globalAlpha=1;
 		$this->context->lineWidth=1;
@@ -718,7 +692,7 @@ class stock_ViewChart{
 		if($bv==null) $bp="";
 		else $bp=round(100*($this->rowPriceArr[0][$vo1->close]-$bv)/$bv);
 		*/
-		$this->paintText("<div><span style='color:blue'>".round( 100*($this->_maxStockDataY-$this->_minStockDataY)/$this->_minStockDataY )."</span></div>", $this->width - 50 , 0+$this->oy);////// 850 485
+		$this->paintText("<div><span style='color:black'>".round( 100*($this->_maxStockDataY-$this->_minStockDataY)/$this->_minStockDataY )."</span></div>", $this->width - 50 , 2+0.16*$this->height+$this->oy);////// 850 485
 		for($i=0; $i<$this->rowPriceArr->length-1; $i++){
 			if($limit!=null && $i>=$limit) break;
 			$stockData = $this->rowPriceArr[$i];
@@ -734,140 +708,46 @@ class stock_ViewChart{
 				$this->context->globalAlpha=1;
 				$this->context->lineWidth=1;
 				$this->context->moveTo($x, $this->getY($this->minStockDataY));
-				$this->context->lineTo($x, $this->getY($this->maxStockDataY) );
+				$this->context->lineTo($x, $this->getY($this->maxStockDataY)+70 );
 				$this->context->closePath();
 				$this->context->stroke();
 			}
-			
 			$this->context->globalAlpha=1;
-			
-			//if(($i==10 || $i==-60) ){// || ((substr($this->rowPriceArr[$i]->stockDate,0,10) == stock_ViewChart::$startDate || substr($this->rowPriceArr[$i]->stockDate,0,10) == stock_ViewChart::$startDate2 || substr($this->rowPriceArr[$i]->stockDate,0,10) == stock_ViewChart::$startDate3 || substr($this->rowPriceArr[$i]->stockDate,0,10) == stock_ViewChart::$startDate4) )){
-			//if($i==10 || $i==20 || $i==60 || $i==120){
-			//if(1==0 && $this->candIMap[$i] != null){
-			//if($this->rowPriceExArr[$i]["less"]==0){
-			//if($this->rowPriceExArr[$i]["less"]==0 && !($this->rowPriceExArr[$i+1]["less"]==0 && $this->rowPriceExArr[$i+1]["less"]==0) && $this->rowPriceExArr[$i]["maGreat"]>=1){
-			//if($this->rowPriceExArr[$i][$voRe->status]=="great" || $this->rowPriceExArr[$i][$voRe->status]=="greatF"){
-			//if(1==0&&$this->rowPriceExArr[$i][$voRe->status]=="greatF"){
-			if($i==4){
-				/*
-				$this->context->restore();
-				$this->context->beginPath();
-				$this->context->globalAlpha=1;
-				$this->context->strokeStyle='Blue';
-				$this->context->lineWidth=1;
-				
-				$this->context->moveTo($x, $this->getY($stockData[$vo1->high]) - 40 );
-				$this->context->lineTo($x, $this->getY($stockData[$vo1->high]) - 70 );
-				
-				$this->context->closePath();
-				$this->context->stroke();
-				*/
+
+			if($i==-6-1){
 				if($this->symbol != "VNINDEX" && $this->symbol != "HAINDEX"){
 					$_i=$i;
-					//if($i==0) $_i=-1; 
 					$xm1 = $this->getX($_i);
 					
-					$this->context->beginPath();
-					$this->context->fillStyle = 'Black';
-					$this->context->arc($xm1, $this->getY($stockData[$vo1->high])-16, 7, 0, 2 * Math::PI, false);
-					$this->context->fill();
+					//$this->context->beginPath();
+					//$this->context->fillStyle = 'Black';
+					//$this->context->arc($xm1+4, $this->getY($stockData[$vo1->low])+30, 6, 0, 2 * Math::PI, false);
+					//$this->context->fill();
 					
-					$this->paintText("<span style='color:black'><b>".$this->rowPriceExArr[0][$voRe->minMax1]."</b></span>",$xm1-7,  $this->getY($stockData[$vo1->high])-52);
-					/*
-					if($i==0){
-						$this->context->fillStyle = 'blue';
-						$PERCENT = 1.04;
-						if($this->symbol == "VNINDEX") $PERCENT = 1.01;
-						else if($this->symbol == "HAINDEX") $PERCENT = 1.01;
-						$deltaClose = $this->getY($PERCENT * $stockData[$vo1->close]) - $this->getY($stockData[$vo1->close]);
-						$deltaHigh = $this->getY($PERCENT * $stockData[$vo1->close]) - $this->getY($stockData[$vo1->close]);
-						$this->context->fillRect($xm1 - ($this->w+1)/2, $this->getY($stockData[$vo1->close]), $this->w, $deltaClose );
-						$this->context->fillRect($xm1-1, $this->getY($stockData[$vo1->close]), 1, $deltaHigh );
-					}
-					*/
+					$this->paintText("<span style='color:black'><b>".$this->viewStock->formatPercentValue( $this->rowPriceExArr[0][$voRe->perValue]).$this->rowPriceExArr[0][$voRe->minClose]."</b></span>",$xm1-4,  $this->getY($stockData[$vo1->low])+50);
 				}
 			}
+
 			
-			if($i==0 && $this->w<2){
-				$this->context->restore();
+			if( $this->rowPriceExArr[$i+1]!=null && $this->rowPriceExArr[$i+1][$voRe->code]!="up" && $this->rowPriceExArr[$i][$voRe->code]=="up" ){
+				$xm1 = $this->getX($i);
 				$this->context->beginPath();
-				$this->context->globalAlpha=1;
-				$this->context->strokeStyle='Black';
-				$this->context->lineWidth=1;
-				
-				$this->context->moveTo($x, $this->getY($stockData[$vo1->close]) );
-				$this->context->lineTo($this->getX(60), $this->getY($stockData[$vo1->close]) );
-				
+				if($this->rowPriceExArr[$i][$voRe->code]=="up") $this->context->fillStyle = 'blue';
+				if($this->rowPriceExArr[$i][$voRe->code]=="pre") $this->context->fillStyle = 'green';
+				$this->context->arc($xm1+4, $this->getY($stockData[$vo1->low])+25, 6, 0, 2 * Math::PI, false);
 				$this->context->closePath();
-				$this->context->stroke();
+				$this->context->fill();
+				//$this->context->fillStyle = 'green';
 			}
-			
-			if($i==0 && $this->rowPriceExArr[$i][$voRe->status0]=="greatF"){
-				/*
-				$this->context->restore();
+			if( $this->rowPriceExArr[$i+1]!=null && $this->rowPriceExArr[$i+1][$voRe->code]=="up" && $this->rowPriceExArr[$i][$voRe->code]!="up" ){
+				$xm1 = $this->getX($i);
 				$this->context->beginPath();
-				$this->context->globalAlpha=1;
-				$this->context->strokeStyle='Blue';
-				$this->context->lineWidth=1;
-				
-				$this->context->moveTo($x, $this->getY($stockData[$vo1->high]) - 40 );
-				$this->context->lineTo($x, $this->getY($stockData[$vo1->high]) - 70 );
-				
+				$this->context->fillStyle = 'red';
+				$this->context->arc($xm1+4, $this->getY($stockData[$vo1->high])-25, 6, 0, 2 * Math::PI, false);
 				$this->context->closePath();
-				$this->context->stroke();
-				*/
-				if($this->symbol != "VNINDEX" && $this->symbol != "HAINDEX"){
-					$_i=$i;
-					if($i==0) $_i=-1; 
-					$xm1 = $this->getX($_i);
-					
-					$this->context->beginPath();
-					$this->context->fillStyle = 'Green';
-					/////$this->context->arc($xm1, $this->getY($stockData[$vo1->low])+50, 9, 0, 2 * Math::PI, false);
-					$this->context->arc($xm1-5, $this->getY($stockData[$vo1->high])-50, 9, 0, 2 * Math::PI, false);
-					/////////////$this->context->arc($xm1-20, 50, 19, 0, 2 * Math::PI, false);
-					$this->context->fill();
-					if($i==-10){
-						$this->context->fillStyle = 'blue';
-						$PERCENT = 1.03;
-						if($this->symbol == "VNINDEX") $PERCENT = 1.01;
-						else if($this->symbol == "HAINDEX") $PERCENT = 1.01;
-						$deltaClose = $this->getY($PERCENT * $stockData[$vo1->close]) - $this->getY($stockData[$vo1->close]);
-						$deltaHigh = $this->getY($PERCENT * $stockData[$vo1->close]) - $this->getY($stockData[$vo1->close]);
-						
-						
-						if($this->w%2==0) {
-							$this->context->fillRect($xm1 - ($this->w)/2, $this->getY($stockData[$vo1->close]), $this->w, $deltaClose );
-						} else if($this->w%2==1){
-							$this->context->fillRect($xm1 - ($this->w+1)/2, $this->getY($stockData[$vo1->close]), $this->w, $deltaClose );
-						}
-						
-						if($this->w<=3){
-							$this->context->fillRect($xm1-1, $this->getY($stockData[$vo1->close]), 1, $deltaHigh );
-						} else {
-							$this->context->fillRect($xm1-2, $this->getY($stockData[$vo1->close]), 2, $deltaHigh );
-						}
-					}
-				}
+				$this->context->fill();
+				//$this->context->fillStyle = 'hotpink';
 			}
-			
-			//if($i==20 || $i==40 || $i==60){
-			//if(!$this->rowPriceExArr[$i]["less"]==0 && ($this->rowPriceExArr[$i+1]["less"]==0 && $this->rowPriceExArr[$i]["maGreat"]>=1)){
-			if($this->rowPriceExArr[$i][$voRe->status]=="lessFF"){
-				$this->context->restore();
-				$this->context->beginPath();
-				$this->context->globalAlpha=1;
-				$this->context->strokeStyle='Red';
-				$this->context->lineWidth=1;
-				
-				$this->context->moveTo($x, $this->getY($stockData[$vo1->low]) + 20 );
-				$this->context->lineTo($x, $this->getY($stockData[$vo1->low]) + 50 );
-				
-				$this->context->closePath();
-				$this->context->stroke();
-			}
-			
-			//return;
 			
 			$this->context->globalAlpha=1;
 			if($stockData[$vo1->close] >= $stockData[$vo1->open]){
@@ -887,21 +767,6 @@ class stock_ViewChart{
 				}
 			}
 			
-			$percent = null;
-			if($this->rowPriceArr[$i][$vo1->ref] != null && $this->rowPriceArr[$i][$vo1->ref] != 0) {
-				$percent = 100*($stockData[$vo1->close] - $this->rowPriceArr[$i][$vo1->ref])/ $this->rowPriceArr[$i][$vo1->ref];
-			} else if($this->rowPriceArr[$i+1] != null && $this->rowPriceArr[$i+1][$vo1->close] !=0) {
-				$percent = 100*($stockData[$vo1->close] - $this->rowPriceArr[$i+1][$vo1->close])/ $this->rowPriceArr[$i+1][$vo1->close];
-			}
-			if($percent != null) {
-				/////////////if(abs($percent) <= 2) $this->context->fillStyle = 'Black';
-				//if($this->candIMap[$i] == 0) $this->context->fillStyle = 'Purple';
-				//if($this->candIMap[$i] == 1) $this->context->fillStyle = 'Black';
-			}
-			
-			//$thisw=$this->w;
-			//if($i<=20) $this->w=3;
-			
 			$deltaClose = $this->getY($stockData[$vo1->close]) - $this->getY($stockData[$vo1->open]);
 			$deltaHigh = $this->getY($stockData[$vo1->high]) - $this->getY($stockData[$vo1->low]);
 			if($deltaClose>=0 && $deltaClose<=2) $deltaClose = 2;
@@ -918,65 +783,18 @@ class stock_ViewChart{
 				//if($this->w==5) $this->context->fillRect($x-1, $this->getY($stockData[$vo1->low]), 1, $deltaHigh ); else 
 				$this->context->fillRect($x-1, $this->getY($stockData[$vo1->low]), 1, $deltaHigh );
 			}
-			//$this->w=$thisw;
-			/*
-			if($i==$this->rowPriceExArr[0][$voRe->imin] || $i==$this->rowPriceExArr[0][$voRe->imax]) {
-				
-				$this->context->beginPath();
-				$this->context->fillStyle = 'Black';
-				$this->context->arc($x-1, $this->getY($stockData[$vo1->low])+20, 5, 0, 2 * Math::PI, false);
-				$this->context->fill();
-				
-				$this->context->beginPath();
-				$this->context->fillStyle = 'Black';
-				$this->context->arc($x-1, $this->getY($stockData[$vo1->high])-20, 5, 0, 2 * Math::PI, false);
-				$this->context->fill();
-				
-			}
-			*/
-			
-			if(1==0 && $i==0 && $this->w!=1 && $this->symbol != "VNINDEX" && $this->symbol != "HAINDEX"){
-				$x = $this->getX(-1);
-					
-				$this->context->fillStyle = 'blue';
-				$PERCENT = 1.03;
-				if($this->symbol == "VNINDEX") $PERCENT = 1.01;
-				else if($this->symbol == "HAINDEX") $PERCENT = 1.02;
-				$deltaClose = $this->getY($PERCENT * $stockData[$vo1->close]) - $this->getY($stockData[$vo1->close]);
-				$deltaHigh = $this->getY($PERCENT * $stockData[$vo1->close]) - $this->getY($stockData[$vo1->close]);
-				$this->context->fillRect($x - ($this->w+1)/2, $this->getY($stockData[$vo1->close]), $this->w, $deltaClose );
-				$this->context->fillRect($x-1, $this->getY($stockData[$vo1->close]), 1, $deltaHigh );
-				/*
-				$x1 = $this->getX(0);
-				$x2 = $this->getX(120);
-				$this->context->restore();
-				$this->context->beginPath();
-				$this->context->strokeStyle = 'Black';
-				$this->context->lineWidth=1;
-				$y = $this->getY($PERCENT * $stockData->close);
-				$this->context->moveTo($x1, $y);
-				$this->context->lineTo($x2, $y);
-				$this->context->stroke();
-				*/
-				/*
-				$this->context->fillStyle = 'red';
-				$PERCENT = 1 - ($PERCENT - 1);
-				$deltaClose = $this->getY($PERCENT * $stockData[$vo1->close]) - $this->getY($stockData[$vo1->close]);
-				$deltaHigh = $this->getY($PERCENT * $stockData[$vo1->close]) - $this->getY($stockData[$vo1->close]);
-				$this->context->fillRect($x - ($this->w+1)/2, $this->getY($stockData[$vo1->close]), $this->w, $deltaClose );
-				$this->context->fillRect($x-1, $this->getY($stockData[$vo1->close]), 1, $deltaHigh );
-				*/
-			}
 		}
 		$this->context->globalAlpha=1;
 	}
 	
 	public function paintIndicator(){
-		$voRe=$this->voRowPriceArr;
+		$voRe=$this->viewStock->voRowPriceArr;
 		$vo1=$this->voPrice1;
 		$this->context->restore();
 		$this->context->globalAlpha=1;
 		$vo = new stock_VoPrice();
+		
+		$w2=floor($this->w/2)+1;
 		
 		$this->context->globalAlpha=1;
 		$this->context->lineWidth=1;
@@ -992,20 +810,56 @@ class stock_ViewChart{
 		$this->context->lineTo($this->getX($this->rowPriceArr->length), $this->getY3(-2));
 		$this->context->stroke();
 		
-		for($i=0; $i<$this->rowPriceArr->length-1; $i++){ break;
+		/*
+		//$this->context->beginPath();
+		//$this->context->lineWidth=3;
+		//$this->context->strokeStyle='Red';
+		$this->context->fillStyle = 'red';
+		for($i=0; $i<$this->rowPriceArr->length-1; $i++){break;
 			$stockData = $this->rowPriceArr[$i];
 			$vo->row = $stockData;
 			$x = $this->getX($i);
 			if($x< 0*(911-$this->padX1)) break;
 
-			//$y2 = $vo->getLiveVolume();
-			$y3=100*($stockData[$vo1->close] - $this->rowPriceArr[$i+1][$vo1->close])/$this->rowPriceArr[$i+1][$vo1->close];
-			if($y3==null) continue;
-			if($x<$this->padX) break;
-			if( $y3>=0) $this->context->fillStyle = 'blue';
-			else $this->context->fillStyle = 'red';
-			$this->context->fillRect($x- ($this->w+1)/2, $this->getY3(0), $this->w , -$y3*$this->scaleY3);
+			$y=$this->rowPriceExArr[$i][$voRe->perHigh];
+			if($y==null) break;
+			if($y>$this->maxStockDataY3) $y=$this->maxStockDataY3;
+			if($y<$this->minStockDataY3) $y=$this->minStockDataY3;
+			//$y = $this->getY3(-$y);
+			//if($i==0){
+			//	$this->context->moveTo($x+$w2, $y);
+			//} else{
+			//	$this->context->lineTo($x+$w2, $y);
+			//}
+			
+			$delta=-$y*$this->scaleY3;
+			if(abs($delta)<1) $delta=1;
+			$this->context->fillRect($x, $this->getY3(0), $this->w , -$delta);
 		}
+		//$this->context->stroke();*/
+		
+		/*
+		$this->context->beginPath();
+		$this->context->lineWidth=3;
+		$this->context->strokeStyle='Blue';
+		for($i=0; $i<$this->rowPriceArr->length-1; $i++){break;
+			$stockData = $this->rowPriceArr[$i];
+			$vo->row = $stockData;
+			$x = $this->getX($i);
+			if($x< 0*(911-$this->padX1)) break;
+
+			$y=$this->rowPriceExArr[$i][$voRe->minClose];
+			if($y==null) break;
+			if($y>$this->maxStockDataY3) $y=$this->maxStockDataY3;
+			if($y<$this->minStockDataY3) $y=$this->minStockDataY3;
+			$y = $this->getY3($y);
+			if($i==0){
+				$this->context->moveTo($x+$w2, $y);
+			} else{
+				$this->context->lineTo($x+$w2, $y);
+			}
+		}
+		$this->context->stroke();*/
 		
 		for($k=6; $k>=1; $k--){
 		//for($k=1; $k<=6; $k++){
@@ -1016,12 +870,12 @@ class stock_ViewChart{
 				$this->context->strokeStyle='Black';
 			}
 			else if($k==2){
-				continue;
+				//continue;
 				$this->context->strokeStyle='blue';
 				$this->context->strokeStyle='Black';
 			}
 			else if($k==3){
-				continue;
+				//continue;
 				$this->context->strokeStyle='Red';
 				$this->context->strokeStyle='Black';
 			}
@@ -1044,22 +898,21 @@ class stock_ViewChart{
 			$this->context->beginPath();
 			$this->context->lineWidth=3;
 			///////if($this->w>=3) $this->context->lineWidth=2;
-			$w2=floor($this->w/2)+1;
 			for($i=0; $i<$this->rowPriceArr->length; $i++){
 				if($limit!=null && $i>=$limit) break;
 				$x = $this->getX($i) - 0*50;
 				if($this->padX == $this->padX1 && $x<0) break;
 				if($this->padX != $this->padX1 && $x< 0*(911-$this->padX1 + 20)) break;
 				$stockData = $this->rowPriceExArr[$i];
-				if($k==1) $y = $stockData["maP1"];
-				else if($k==2) $y = $stockData["maP2"];
-				else if($k==3) $y = $stockData["maP3"];
+				if($k==1) $y = $stockData["perMa1"];
+				else if($k==2) $y = $stockData["perMa2"];
+				else if($k==3) $y = $stockData["perMa3"];
 				else if($k==4) {
-					$y = $stockData["maP4"];
+					$y = $stockData["perMa4"];
 				}
-				else if($k==5) $y = $stockData["maP01"];
-				else if($k==6) $y = $stockData["maP02"];
-				if($y==null) continue;
+				else if($k==5) $y = $stockData["perMa5"];
+				else if($k==6) $y = $stockData["perMa6"];
+				if($y==null) break;
 				
 				if($y>$this->maxStockDataY3) $y=$this->maxStockDataY3;
 				if($y<$this->minStockDataY3) $y=$this->minStockDataY3;
@@ -1069,7 +922,7 @@ class stock_ViewChart{
 				//$y2 = $vo->getLiveVolume();
 				if($x<$this->padX) break;
 					
-				if($k==5 || $k==6 || $k==1){
+				if($k==1 || $k==2 || $k==3){
 					if( $y>=0) $this->context->fillStyle = 'blue';
 					else $this->context->fillStyle = 'red';
 					
@@ -1092,106 +945,35 @@ class stock_ViewChart{
 			}
 			$this->context->stroke();
 		}
-		
+		$this->context->fillStyle = 'red';
+		for($i=0; $i<$this->rowPriceArr->length-1; $i++){
+			$stockData = $this->rowPriceArr[$i];
+			$vo->row = $stockData;
+			$x = $this->getX($i);
+			if($x< 0*(911-$this->padX1)) break;
+
+			if( $this->rowPriceExArr[$i+1]!=null && $this->rowPriceExArr[$i+1][$voRe->code]!="up" && $this->rowPriceExArr[$i][$voRe->code]=="up" ){
+				$xm1 = $this->getX($i);
+				$this->context->beginPath();
+				if($this->rowPriceExArr[$i][$voRe->code]=="up") $this->context->fillStyle = 'blue';
+				if($this->rowPriceExArr[$i][$voRe->code]=="pre") $this->context->fillStyle = 'green';
+				$this->context->arc($xm1+4, $this->getY3(0)+20, 6, 0, 2 * Math::PI, false);
+				$this->context->closePath();
+				$this->context->fill();
+				//$this->context->fillStyle = 'green';
+			}
+			if( $this->rowPriceExArr[$i+1]!=null && $this->rowPriceExArr[$i+1][$voRe->code]=="up" && $this->rowPriceExArr[$i][$voRe->code]!="up" ){
+				$xm1 = $this->getX($i);
+				$this->context->beginPath();
+				$this->context->fillStyle = 'red';
+				$this->context->arc($xm1+4, $this->getY3(0)-20, 6, 0, 2 * Math::PI, false);
+				$this->context->closePath();
+				$this->context->fill();
+				//$this->context->fillStyle = 'hotpink';
+			}
+		}
 		return;
 		
-		$this->context->globalAlpha=1;
-		
-		$this->context->restore();
-		$this->context->beginPath();
-		$this->context->strokeStyle = 'Black';
-		$this->context->lineWidth=1;
-		$x1 = $this->getX(0);
-		$x2 = $this->getX($this->rowPriceArr->length);
-		
-		$y = $this->getY4(7);
-		$this->context->moveTo($x1, $y);
-		$this->context->lineTo($x2, $y);
-		
-		$y = $this->getY4(0);
-		$this->context->moveTo($x1, $y);
-		$this->context->lineTo($x2, $y);
-		
-		
-		$y = $this->getY4(-3);
-		$this->context->moveTo($x1, $y);
-		$this->context->lineTo($x2, $y);
-		
-		/*
-		$y = $this->getY3(3);
-		$this->context->moveTo($x1, $y);
-		$this->context->lineTo($x2, $y);
-		
-		
-		$y = $this->getY3(-3);
-		$this->context->moveTo($x1, $y);
-		$this->context->lineTo($x2, $y);
-		*/
-		$this->context->stroke();
-		///return;
-		for($k=6; $k>=1; $k--){
-			if($limit!= null && $k!=1 && $k!=2 && $k!=3 && $k!=4 && $k!=5 && $k!=6) continue;
-			if($k==1){
-				//continue;
-				$this->context->strokeStyle='Black';
-				$this->context->fillStyle='Black';
-			}
-			else if($k==2){
-				continue;
-				$this->context->strokeStyle='Blue';
-				$this->context->fillStyle='Blue';
-			}
-			else if($k==3){
-				continue;
-				$this->context->strokeStyle='Red';
-				$this->context->fillStyle='Red';
-			}
-			else if($k==4){
-				continue;
-				$this->context->strokeStyle='hotpink';
-			}
-			else if($k==5){
-				continue;
-				$this->context->strokeStyle='Black';
-				$this->context->strokeStyle='blue';
-			}
-			else if($k==6){
-				continue;
-				$this->context->strokeStyle='hotpink';
-				$this->context->strokeStyle='blue';
-			}
-			$this->context->globalAlpha=1;
-			//$this->context->beginPath();
-			//$this->context->lineWidth=1;
-			
-			for($i=0; $i<$this->rowPriceArr->length; $i++){
-				if($limit!=null && $i>=$limit) break;
-				$x = $this->getX($i) - 0*50;
-				if($this->padX == $this->padX1 && $x<0) break;
-				if($this->padX != $this->padX1 && $x< 0*(911-$this->padX1 + 20)) break;
-				$stockData = $this->rowPriceExArr[$i];
-				/*
-				if($k==1) $y = $stockData["maPer".$this->viewStock->intervalArr[0]];
-				else if($k==2) $y = $stockData["maPer".$this->viewStock->intervalArr[1]];
-				else if($k==3) $y = $stockData["maPer".$this->viewStock->intervalArr[2]];
-				else if($k==4) $y = $stockData["maPer".$this->viewStock->intervalArr[3]];
-				else if($k==5) $y = $stockData["maPer".$this->viewStock->intervalArr[4]];
-				else if($k==6) $y = $stockData["maPer".$this->viewStock->intervalArr[5]];
-				*/
-				if($k==1) $y = $stockData[$voRe->maxC1];
-				if($y==null) continue;
-				if($y>10) $y=11;
-				$this->context->fillStyle='red';
-				$this->context->fillRect($x- ($this->w+1)/2, $this->getY4(0), $this->w, $y*$this->scaleY4);
-				
-				if($k==1) $y = $stockData[$voRe->minC1];
-				if($y==null) continue;
-				if($y>10) $y=11;
-				$this->context->fillStyle='blue';
-				$this->context->fillRect($x- ($this->w+1)/2, $this->getY4(0), $this->w , -$y*$this->scaleY4);
-			}
-			//$this->context->stroke();
-		}
 		$this->context->globalAlpha=1;
 	}
 	
@@ -1257,8 +1039,7 @@ class stock_ViewChart{
 			$status = str_replace(".chn","",$status);
 			$status = str_replace("-"," ",$status);
 		}
-		$this->paintText("<div style='width:350px;color:black'><b>".$status."</b></div>", 20 , 30);////// 850 485
-		
+		$this->paintText("<div style='width:350px;color:black'><b>".$status."</b></div>", 20 , 30+0.16*$this->height);////// 850 485
 		return;
 	}
 	public function setOnePrice(){
@@ -1342,28 +1123,27 @@ class stock_ViewChart{
 			if($limit!= null && $k!=1 && $k!=2 && $k!=3 && $k!=4 && $k!=5 && $k!=6) continue;
 			if($k==1){
 				//continue;
-				$this->context->strokeStyle='blue';
+				$this->context->strokeStyle='Black';
 			}
 			else if($k==2){
 				//continue;
-				$this->context->strokeStyle='blue';
+				$this->context->strokeStyle='black';
 			}
 			else if($k==3){
 				//continue;s
-				$this->context->strokeStyle='Red';
+				$this->context->strokeStyle='Blue';
 			}
 			else if($k==4){
 				//continue;
-				$this->context->strokeStyle='Red';
+				$this->context->strokeStyle='Blue';
 			}
 			else if($k==5){
 				//continue;
-				$this->context->strokeStyle='Black';
+				$this->context->strokeStyle='Red';
 			}
 			else if($k==6){
 				//continue;
-				$this->context->strokeStyle='black';
-				
+				$this->context->strokeStyle='Red';
 			}
 						
 			if($k==-4){
@@ -1425,14 +1205,14 @@ class stock_ViewChart{
 				if($this->padX == $this->padX1 && $x<0) break;
 				if($this->padX != $this->padX1 && $x< 0*(911-$this->padX1 + 20)) break;
 				$stockData = $this->rowPriceExArr[$i];
-				if($k==1) $y = $stockData[$voRe->maC1];
-				else if($k==2) $y = $stockData[$voRe->maC2];
-				else if($k==3) $y = $stockData[$voRe->maC3];
+				if($k==1) $y = $stockData["ma1"];
+				else if($k==2) $y = $stockData["ma2"];
+				else if($k==3) $y = $stockData["ma3"];
 				else if($k==4) {
-					$y = $stockData[$voRe->maC4];
+					$y = $stockData["ma4"];
 				}
-				else if($k==5) $y = $stockData["ma01"];
-				else if($k==6) $y = $stockData["ma02"];
+				else if($k==5) $y = $stockData["ma5"];
+				else if($k==6) $y = $stockData["ma6"];
 				if($y==null) continue;
 				$y = $this->getY($y);
 				if($i==0){
@@ -1447,94 +1227,6 @@ class stock_ViewChart{
 		$this->context->globalAlpha=1;
 	}
 	
-	public function paintTable(){
-
-		$this->context->restore();
-		$stock_symbol = $this->symbol;
-		$viewPrice = new stock_ViewPrice();
-
-		$text = "
-tdmua toiuu = tdmua cbcandle <br/>
-tdban toiuu = <b style='color:red'>tcp min</b> <br/>
-cpchia = 4 <br/>
-cpchiacho max = 2
-		";
-		//$this->paintText("<b><span style='color:black'>".$stock_symbol.".".$this->rowPriceArr[0]["market"]."</span></b>", $this->width - 250, 60);
-		$this->paintText("<b><span style='color:red'>".$viewPrice->formatPrice($this->rowPriceArr[0]["minClose"])."</span>_<span style='color:red;font-weight:bold'>".$viewPrice->formatPrice($this->rowPriceArr[0]["maxClose"])."</span>_<span style='color:red'>".$viewPrice->formatValue($this->rowPriceArr[0]["value2"])."</span></b>", $this->width - 160 - $this->padX, 0);
-		$this->paintText("<b><span style='color:red'>".$viewPrice->formatPrice($this->rowPriceArr[0]["minClose20"])."</span>_<span style='color:red'>".$viewPrice->formatPrice($this->rowPriceArr[0]["megaCount"])."</span>_<span style='color:red'>".$viewPrice->formatValue($this->rowPriceArr[0]["value"])."</span></b>", $this->width - 160 - $this->padX, 20);
-		$this->paintText("<span style='color:black'><b>".substr($stock_symbol,0,3).".".$this->rowPriceArr[0]["market"]."</b></span>", $this->width - 250 - $this->padX, 0)->css("width", 150);
-		$status = "";
-		if($this->hrefMap[$this->symbol]!=null) {
-			$text = $this->hrefMap[$this->symbol];
-			$arr = explode("/",$text);
-			$status = $arr[count($arr)-1];
-			$status = str_replace(".chn","",$status);
-			$status = str_replace("-"," ",$status);
-		}
-		$this->paintText("<span style='color:black'><b>".$status."</b></span>", 0, 40)->css(array(
-			 "width" => 756
-			,"text-align" => "right"
-		));
-		
-		if(stock_A::get()->isLive()){
-			//$this->paintText("<span style='color:black'><b>".$text."</b></span>", $this->width - 300, 100)->css("width", 300);
-		}
-
-		//$this->paintText("<b><span style='color:black'>". $this->cand3Str ."</span></b>", $this->width - 250, 60);
-		
-		$this->context->restore();
-		$this->context->beginPath();
-		$this->context->strokeStyle = 'Black';
-		$this->context->lineWidth=1;
-		/*
-		$x = $this->getX(10);
-		//$this->context->restore();
-		$this->context->beginPath();
-		$y1 = $this->getY($this->minStockDataY);
-		$y2 = $this->getY($this->maxStockDataY);
-		$this->context->moveTo($x, $y1);
-		$this->context->lineTo($x, $y2);
-		$this->context->stroke();
-		*/
-		$x1 = $this->getX(10);
-		$x2 = $this->getX(20);
-		
-		$this->context->beginPath();
-		$this->context->strokeStyle = 'Black';
-		$this->context->lineWidth=2;
-		$y = $this->getY(1.00*$this->rowPriceArr[0]["min"]);
-		$this->context->moveTo($x1, $y);
-		$this->context->lineTo($x2, $y);
-		$this->context->stroke();
-		
-		$this->context->beginPath();
-		$this->context->strokeStyle = 'Black';
-		$this->context->lineWidth=1;
-		$y = $this->getY(1.25*$this->rowPriceArr[0]["min"]);
-		$this->context->moveTo($x1, $y);
-		$this->context->lineTo($x2, $y);
-		$this->context->stroke();
-		
-		$this->context->beginPath();
-		$this->context->strokeStyle = 'Black';
-		$this->context->lineWidth=1;
-		$y = $this->getY(1.50*$this->rowPriceArr[0]["min"]);
-		$this->context->moveTo($x1, $y);
-		$this->context->lineTo($x2, $y);
-		$this->context->stroke();
-		
-		$this->context->beginPath();
-		$this->context->strokeStyle = 'Black';
-		$this->context->lineWidth=1;
-		$y = $this->getY(2.00*$this->rowPriceArr[0]["min"]);
-		$this->context->moveTo($x1, $y);
-		$this->context->lineTo($x2, $y);
-		$this->context->stroke();
-		
-		
-		return;
-	}
-
 	public function paintOxy(){
 		$this->context->restore();
 		$this->context->beginPath();
@@ -1685,346 +1377,5 @@ cpchiacho max = 2
 			if($this->rowPriceArr[$i+1]["close"]!=0) $this->rowPriceArr[$i]["closePercent"] = 100*($this->rowPriceArr[$i]["close"] - $this->rowPriceArr[$i+1]["close"])/$this->rowPriceArr[$i+1]["close"];
 		}
 	}
-	
-	public function makeFirst(){
-		$length = count($this->rowPriceArr);
-		if($length == 0) return;
-		$liveValue = 0;
-		$value0 = 0;
-		$value2 = 0;
-		$closePer = -99;
-		$value2Count = 0;
-		$count1 = 0;
-		$count2 = 0;
-		$count3 = 0;
-		$count4 = 0;
-		$megaCount1 = 0;
-		$megaCount2 = 0;
-		$megaCount3 = 0;
-		$megaCount4 = 0;
-		$PERCENT = 4;
-		$volume1 = 0;
-		$volumeCount = 0;
-		$maClose1 = 0;
-		$maClose2 = 0;
-		$maClose3 = 0;
-		$maClose4 = 0;
-		
-		$vo = new stock_VoPrice();
-		for($i=0; $i < $length; $i++){
-			if($this->rowPriceArr[$i+1]==null || $this->rowPriceArr[$i+1]["close"]==0 || $this->rowPriceArr[$i]["close"]==0) continue;
-			$vo->row = $this->rowPriceArr[$i];
-			$delta = 100*($this->rowPriceArr[$i]["close"] - $this->rowPriceArr[$i+1]["close"]) / $this->rowPriceArr[$i+1]["close"];
-			$deltaAbs = abs($delta);
-			if($deltaAbs >= 15){
-				//$this->rowPriceArr[0]["isDevided"] = 1;
-				continue;
-			}
 
-			if($i<12*20){
-				$megaCount4 += $deltaAbs;
-				$count4++;
-			
-				$volume1 += $this->rowPriceArr[$i]["volume"];
-				$volumeCount ++;
-				$maClose4 += $this->rowPriceArr[$i]["close"];
-			}
-			if($i<$this->ma3){
-				$megaCount3 += $deltaAbs;
-				$count3++;
-				$maClose3 += $this->rowPriceArr[$i]["close"];
-			}
-			if($i<$this->ma2){
-				$megaCount2 += $deltaAbs;
-				$count2++;
-				$maClose2 += $this->rowPriceArr[$i]["close"];
-			}
-			if($i==0) {
-				$value0 = $vo->getValue();
-				$liveValue = $vo->getLiveValue();
-				$closePer = $vo->getClosePer();
-			}
-			if($i<5){
-				$value2 += $vo->getLiveValue();
-				$value2Count ++;
-			}
-			if($i<$this->ma1){
-				$megaCount1 += $deltaAbs;
-				$count1++;
-				$maClose1 += $this->rowPriceArr[$i]["close"];
-			}
-		}
-		
-		if($count4!=0) {
-			$megaCount4 = ($megaCount4)/$count4;
-			$maClose4 = $maClose4/$count4;
-		}
-		if($count3!=0) {
-			$megaCount3 = ($megaCount3)/$count3;
-			$maClose3 = $maClose3/$count3;
-		}
-		if($count2!=0) {
-			$megaCount2 = ($megaCount2)/$count2;
-			$maClose2 = $maClose2/$count2;
-		}
-		if($count1!=0) {
-			$megaCount1 = ($megaCount1)/$count1;
-			$maClose1 = $maClose1/$count1;
-		}
-		if($volumeCount!=0) $volume1 = $volume1/$volumeCount;
-		
-		$megaCount = $megaCount4;
-		//if($megaCount3 > $megaCount) $megaCount = $megaCount3;
-		//if($megaCount2 > $megaCount) $megaCount = $megaCount2;
-		//if($megaCount1 > $megaCount) $megaCount = $megaCount1;
-		$this->rowPriceArr[0]["megaCount"] = $megaCount;
-		//$this->rowPriceArr[0]["megaCount4"] = $megaCount4;
-		//$this->rowPriceArr[0]["megaCount3"] = $megaCount3;
-		//$this->rowPriceArr[0]["megaCount2"] = $megaCount2;
-		//$this->rowPriceArr[0]["megaCount1"] = $megaCount1;
-		$this->rowPriceArr[0]["volume1"] = $volume1;
-		
-		if($value2Count!=0) $value2 = $value2/$value2Count;
-		else $value2 = 0;
-		$this->rowPriceArr[0]["value"] = $value0;
-		$this->rowPriceArr[0]["value2"] = $value2;
-		if($value2!=0) $this->rowPriceArr[0]["valuePercent"] = round(100*$value0/$value2);
-		$this->rowPriceArr[0]["liveValue"] = $liveValue;
-		$this->rowPriceArr[0]["closePer"] = $closePer;
-		$this->rowPriceArr[0]["maClose1"] = $maClose1;
-		$this->rowPriceArr[0]["maClose2"] = $maClose2;
-		$this->rowPriceArr[0]["maClose3"] = $maClose3;
-		$this->rowPriceArr[0]["maClose4"] = $maClose4;
-		
-		$this->rowPriceArr[0]["upCount"] = 0;
-		$PERCENT = 0.99;
-		if($this->rowPriceArr[0]["maClose4"]!=0){
-			if( $this->rowPriceArr[0]["close"]   >= $PERCENT * $this->rowPriceArr[0]["maClose4"]){
-				$this->rowPriceArr[0]["upCount"] ++;
-			}
-			if($this->rowPriceArr[0]["maClose1"] >= $PERCENT * $this->rowPriceArr[0]["maClose4"]){
-				$this->rowPriceArr[0]["upCount"] ++;
-			}
-			if($this->rowPriceArr[0]["maClose2"] >= $PERCENT * $this->rowPriceArr[0]["maClose4"]){
-				$this->rowPriceArr[0]["upCount"] ++;
-			}
-			if($this->rowPriceArr[0]["maClose3"] >= $PERCENT * $this->rowPriceArr[0]["maClose4"]){
-				$this->rowPriceArr[0]["upCount"] ++;
-			}
-		}
-		$min = 999999;
-		$imin = 0;
-		$max = 0;
-		$imax = 0;
-		$length = count($this->rowPriceArr);
-		for($i=0; $i < $length; $i++){
-			if($i <= 10){
-				if($this->rowPriceArr[$i]["close"] < 1 * $min){
-					$min = $this->rowPriceArr[$i]["close"];
-					$imin = $i;
-				}
-			}
-
-			if($this->rowPriceArr[$i]["close"] > $max){
-				$max = $this->rowPriceArr[$i]["close"];
-				$imax = $i;
-			}
-		}
-		$this->rowPriceArr[0]["maxClose20"] = 0;
-		if($this->rowPriceArr[0]["close"]!=0) $this->rowPriceArr[0]["maxClose20"] = 100*($max - $this->rowPriceArr[0]["close"])/$this->rowPriceArr[0]["close"];
-		$this->rowPriceArr[0]["imax20"] = $imax;
-		
-		$this->rowPriceArr[0]["minClose20"] = 0;
-		if($min!=0) $this->rowPriceArr[0]["minClose20"] = 100*($this->rowPriceArr[0]["close"] - $min)/$min;
-		$this->rowPriceArr[0]["imin20"] = $imin;
-		
-		
-		$min60 = 999999;
-		$imin60 = 0;
-		
-		$min5 = 999999;
-		$max5 = 0;
-		
-		$max60 = 0;
-		$imax60 = 0;
-		$max602 = 0;
-		$imax602 = 0;
-		
-		$min = 999999;
-		$imin = 0;
-		
-		$max0 = 0;
-		$imax0 = 0;
-		
-		$max = 0;
-		$imax = 0;
-		
-		$min2 = 999999;
-		$imin2 = 0;
-		
-		$max2 = 0;
-		$imax2 = 0;
-		
-		for($i=0; $i < $length; $i++){
-			if($i > 10) break;
-			if($this->rowPriceArr[$i]["close"] <= $min5){
-				$min5 = $this->rowPriceArr[$i]["close"];
-			}
-		}
-		for($i=0; $i < $length; $i++){
-			if($i > 10) break;
-			if($this->rowPriceArr[$i]["close"] >= $max5){
-				$max5 = $this->rowPriceArr[$i]["close"];
-			}
-		}
-		
-		for($i=0; $i < $length; $i++){
-			if($i >= 6*20) break;
-			if($this->rowPriceArr[$i]["close"] <= $min60){
-				$min60 = $this->rowPriceArr[$i]["close"];
-				$imin60 = $i;
-			}
-		}
-		for($i=0; $i < $length; $i++){
-			if($i >= 6*20) break;
-			if($this->rowPriceArr[$i]["close"] >= $max60){
-				$max60 = $this->rowPriceArr[$i]["close"];
-				$imax60 = $i;
-			}
-		}
-		for($i=0; $i <= $imin60; $i++){
-			if($i >= 6*20) break;
-			if($this->rowPriceArr[$i]["close"] >= $max602){
-				$max602 = $this->rowPriceArr[$i]["close"];
-				$imax602 = $i;
-			}
-		}
-		
-		for($i=0; $i < $length; $i++){
-			$x = $this->getX($i);
-			if($x<$this->padX) break;
-			if($this->rowPriceArr[$i]["close"] < $min){
-				$min = $this->rowPriceArr[$i]["close"];
-				$imin = $i;
-			}
-			
-			if($this->rowPriceArr[$i]["close"] > $max0){
-				$max0 = $this->rowPriceArr[$i]["close"];
-				$imax0 = $i;
-			}
-			
-		}
-		
-		for($i=0; $i <= $imin; $i++){
-			if($this->rowPriceArr[$i]["close"] > $max){
-				$max = $this->rowPriceArr[$i]["close"];
-				$imax = $i;
-			}
-		}
-		
-		for($i=0; $i <= $imax; $i++){
-			if($this->rowPriceArr[$i]["close"] < $min2){
-				$min2 = $this->rowPriceArr[$i]["close"];
-				$imin2 = $i;
-			}
-		}
-		
-		for($i=0; $i <= $imin2; $i++){
-			if($this->rowPriceArr[$i]["close"] > $max2){
-				$max2 = $this->rowPriceArr[$i]["close"];
-				$imax2 = $i;
-			}
-		}
-		
-		$this->rowPriceArr[0]["minClose"] = 0;
-		$this->rowPriceArr[0]["maxClose"] = 0;
-		$this->rowPriceArr[0]["minMax"] = 0;
-		//if($min!=0) $this->rowPriceArr[0]["minClose"] = 100*($this->rowPriceArr[0]["close"] - $min)/$min;
-		///if($this->rowPriceArr[0]["close"]!=0 && $min!=0) $this->rowPriceArr[0]["minMax"] = 100*($max0 - $min)/$min;
-		if($this->rowPriceArr[0]["close"]!=0 && $min5!=0) $this->rowPriceArr[0]["minMax"] = 100*($max5 - $min5)/$min5;
-		if($this->rowPriceArr[0]["close"]!=0 && $min5!=0) $this->rowPriceArr[0]["minMax5"] = 100*($max5 - $min5)/$min5;
-		$this->rowPriceArr[0]["min"] = $min60;
-		$this->rowPriceArr[0]["max0"] = $max0;
-		//if($min2!=0) $this->rowPriceArr[0]["minClose"] = 100*($this->rowPriceArr[0]["close"] - $min2)/$min2;
-		//if($min!=0) $this->rowPriceArr[0]["minClose"] = 100*($this->rowPriceArr[0]["close"] - $min)/$min;
-		if($min5!=0) $this->rowPriceArr[0]["minClose"] = 100*($this->rowPriceArr[0]["close"] - $min5)/$min5;
-		if($min5!=0) $this->rowPriceArr[0]["maxClose"] = 100*($max5 - $this->rowPriceArr[0]["close"])/$this->rowPriceArr[0]["close"];
-		
-		for($k=0; $k<$length; $k++){
-			
-			$min5=9999999;
-			for($i=$k+1; $i <= $k+10; $i++){
-				if($i>=$length) break;
-				if($this->rowPriceArr[$i]["close"] <= $min5){
-					$min5 = $this->rowPriceArr[$i]["close"];
-				}
-			}
-			$max5=0;
-			for($i=$k+1; $i <= $k+10; $i++){
-				if($i>=$length) break;
-				if($this->rowPriceArr[$i]["close"] >= $max5){
-					$max5 = $this->rowPriceArr[$i]["close"];
-				}
-			}
-			$minClose5=100*($this->rowPriceArr[$k]["close"] - $min5)/$min5;
-			$minMax5=100*($max5 - $min5)/$min5;
-		
-			$breakOut=0;
-			$gtCount=0;
-			for($i=$k+1; $i <= $k+10; $i++){
-				if($i>=$length) break;
-				if($this->rowPriceArr[$k]["close"] >= $this->rowPriceArr[$i]["close"]) $gtCount++;
-			}
-			if($gtCount>=7) $breakOut=1;
-			if($minMax5 >= 20) $breakOut=0;
-			$this->rowPriceArr[$k]["breakOut"]=$breakOut;
-		
-		}
-		
-		/*
-		for($k=0; $k<$length; $k++){
-			$breakOut=1;
-			if($this->rowPriceArr[$k]["ma4"]==null) break;
-			if($this->rowPriceArr[$k]["close"]<$this->rowPriceArr[$k]["ma1"]) $breakOut=0;
-			if($this->rowPriceArr[$k]["close"]<$this->rowPriceArr[$k]["ma2"]) $breakOut=0;
-			if($this->rowPriceArr[$k]["close"]<$this->rowPriceArr[$k]["ma3"]) $breakOut=0;
-			if($this->rowPriceArr[$k]["close"]<$this->rowPriceArr[$k]["ma4"]) $breakOut=0;
-			
-			$min5=9999999;
-			for($i=$k; $i < $k+10; $i++){
-				if($this->rowPriceArr[$i]["close"] <= $min5){
-					$min5 = $this->rowPriceArr[$i]["close"];
-				}
-			}
-			$max5=0;
-			for($i=$k; $i < $k+10; $i++){
-				if($this->rowPriceArr[$i]["close"] >= $max5){
-					$max5 = $this->rowPriceArr[$i]["close"];
-				}
-			}
-			$minClose5=100*($this->rowPriceArr[$k]["close"] - $min5)/$min5;
-			$minMax5=100*($max5 - $min5)/$min5;
-			
-			$MIN_CLOSE=10;
-			$MIN_MAX=15;
-			if($this->rowPriceArr[$k]["symbol"]=="VNINDEX"){
-				break;
-				$MIN_CLOSE=4;
-				$MIN_MAX=7;
-			}
-			if($this->rowPriceArr[$k]["symbol"]=="HAINDEX"){
-				break;
-				$MIN_CLOSE=4;
-				$MIN_MAX=7;
-			}
-			
-			//if($minClose5 >=$MIN_CLOSE) $breakOut=0;
-			if($minMax5 >=$MIN_MAX) $breakOut=0;
-			$this->rowPriceArr[$k]["breakOut"]=$breakOut;
-			//<
-			break;
-			//>
-		}
-		*/
-	}
 }

@@ -16,9 +16,9 @@ class stock_ViewStock{
 		$this->voPrice=$this->ao->bean("stock_VoPrice/con");
 		$this->voPrice2=$this->ao->bean("stock_VoPrice/con2");
 		$this->voPrice3=$this->ao->bean("stock_VoPrice/con3");
-		$this->voStock=get(new stock_Vo())->_con("rate,value2,trade,live,perHigh,minC1,maxC1,bv,roe,ff2","");//7
+		$this->voStock=get(new stock_Vo())->_con("rate,value2,perValue,trade,live,perHigh,perMa,minClose,bv,roe,ff2","");//7
 		
-		$this->voRowPriceArr=get(new stock_Vo())->_con("value2,code,minC1,maxC1,perHigh,delta,minMax1","");
+		$this->voRowPriceArr=get(new stock_Vo())->_con("value2,perValue,code,perMa,minClose,perHigh","");
 		$this->voStat=get(new stock_Vo())->_con("total,avg","");
 		
 		
@@ -343,253 +343,6 @@ class stock_ViewStock{
 	public function makeRowPriceArr($vo, $rowPriceArr ,$limit=null){
 		//$vo=$this->voPrice;
 		$re=array();
-		$len=count($rowPriceArr);
-		for($i=0 ; $i < $len ;$i++){
-			$re[$i]=array(
-			);
-		}
-		$intervalLen=count($this->intervalArr);
-		if($limit==null) $len2=$len;
-		else $len2=$limit;
-		
-		$maGreatCount=0;
-		//for($i=0 ; $i < $len2 ;$i++){
-		for($i=$len2-1 ; $i >=0 ;$i--){
-			$re[$i]["less"]=-1;
-			if($len-$i-1<$this->intervalArr[$intervalLen-1]) continue;
-			if($this->isNull0($rowPriceArr[$i][$vo->close])) continue;
-
-			$value2=0;
-			$delta=0;
-			
-			$less=0;
-					
-			$min=999999999;$max=0;
-			$isDivide=false;
-			$codeFull="";
-			$imin=null;$imax=null;
-			$maClose=0;
-			$maCloseVol=0;
-			$maMap=array(
-			);
-			$perMap=array(
-			);
-			$gain=0; $loss=0;
-			$maGreatCount++;
-			///////$re[$i]["maGreat"]=$maGreatCount;
-			$re[$i]["maGreat"]=0;
-			for($j=$i+1; $j-$i <= $this->intervalArr[$intervalLen-1] - 1 ;$j++){
-				if($rowPriceArr[$j][$vo->close]==0) break;
-				if($rowPriceArr[$j+1][$vo->close]==0) break;
-				/*
-				if($rowPriceArr[$j][$vo->close]<$min){
-					$min=$rowPriceArr[$j][$vo->close];
-					$imin=$j;
-				}
-				if($rowPriceArr[$j][$vo->close]>$max){
-					$max=$rowPriceArr[$j][$vo->close];
-					$imax=$j;
-				}
-				*/
-				//$maClose+=$rowPriceArr[$j][$vo->close]*$rowPriceArr[$j][$vo->volume];
-				//$maCloseVol+=$rowPriceArr[$j][$vo->volume];
-				$maClose+=$rowPriceArr[$j][$vo->close];
-				$maCloseVol+=1;
-				$interval= $j - $i + 1;
-				//if($interval==1) continue;
-
-				if($interval<=$this->intervalArr[1]) {
-					$value2 += $rowPriceArr[$j][$vo->close]*$rowPriceArr[$j][$vo->volume];
-					if($interval==$this->intervalArr[1]){
-						$re[$i]["value2"]=round($value2/$interval,0);
-						if($re[$i]["value2"]<$this->valueOff) break;
-					}
-				}
-				
-				if($interval>=2 && $interval<=6){
-					if($rowPriceArr[$i][$vo->close]<=$rowPriceArr[$j][$vo->close]) $less++;
-					if($interval==6){
-						$re[$i]["less"]=$less;
-					}
-				}
-				/*
-				if($interval==40){
-					$re[$i]["minMax2"]=round(100*($max-$min)/$min,1);
-					$re[$i]["maxClose2"]=round(100*($max-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close],1);
-					$re[$i]["minClose2"]=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min,1);
-				}
-				if($interval==20){
-					$re[$i]["minMax1"]=round(100*($max-$min)/$min,1);
-					$re[$i]["maxClose1"]=round(100*($max-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close],1);
-					$re[$i]["minClose1"]=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min,1);
-				
-				*/
-				if($interval==10){
-					$re[$i]["maxClose0"]=round(100*($max-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close],1);
-					$re[$i]["minClose0"]=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min,1);
-				}
-				/*RSI
-				$per=100*($rowPriceArr[$j][$vo->close]-$rowPriceArr[$j+1][$vo->close])/$rowPriceArr[$j+1][$vo->close];
-				$abs=abs( $per );
-				if($abs>=15) {
-					$isDivide=true;
-					break;
-				}
-				if($per>=0){
-					$gain+=$abs;
-				} else {
-					$loss+=$abs;
-				}
-				*/
-				if($interval==$this->intervalArr[0]||$interval==$this->intervalArr[1]||$interval==$this->intervalArr[2]||$interval==$this->intervalArr[3]){
-					$maAvg=$maClose/$maCloseVol;//$interval;
-					$re[$i]["ma".$interval]=$maAvg;
-					
-					$d=($rowPriceArr[$i][$vo->close]-$maAvg)/$maAvg;
-					//if($d<0 && $interval!=$this->intervalArr[0] && $interval!=$this->intervalArr[0]) {
-					if($d>=0 && ($interval==$this->intervalArr[2] || $interval==$this->intervalArr[3]) ) {
-						////$maGreatCount=0;
-						////$re[$i]["maGreat"]=$maGreatCount;
-						$re[$i]["maGreat"]++;
-					}
-					$re[$i]["maPer".$interval]=round(100*$d,2);
-					
-					////if($loss!=0) $rsi=100-100/(1+$gain/$loss);
-					////else $rsi=100;
-					////$re[$i]["rsi".$interval]=$rsi;
-				}
-			}
-		}
-		return $re;
-	}
-	
-	public function makeRowPriceArrzzzz($vo, $rowPriceArr ,$limit=null){
-		//$vo=$this->voPrice;
-		$re=array();
-		$len=count($rowPriceArr);
-		for($i=0 ; $i < $len ;$i++){
-			$re[$i]=array(
-			);
-		}
-		$intervalLen=count($this->intervalArr);
-		if($limit==null) $len2=$len;
-		else $len2=$limit;
-		
-		$maGreatCount=0;
-		//for($i=0 ; $i < $len2 ;$i++){
-		for($i=$len2-1 ; $i >=0 ;$i--){
-			$re[$i]["less"]=-1;
-			if($len-$i-1<$this->intervalArr[$intervalLen-1]) continue;
-			if($this->isNull0($rowPriceArr[$i][$vo->close])) continue;
-
-			$value2=0;
-			$delta=0;
-			
-			$less=0;
-					
-			$min=999999999;$max=0;
-			$isDivide=false;
-			$codeFull="";
-			$imin=null;$imax=null;
-			$maClose=0;
-			$maCloseVol=0;
-			$maMap=array(
-			);
-			$perMap=array(
-			);
-			$gain=0; $loss=0;
-			$maGreatCount++;
-			///////$re[$i]["maGreat"]=$maGreatCount;
-			$re[$i]["maGreat"]=0;
-			for($j=$i+1; $j-$i <= $this->intervalArr[$intervalLen-1] - 1 ;$j++){
-				if($rowPriceArr[$j][$vo->close]==0) break;
-				if($rowPriceArr[$j+1][$vo->close]==0) break;
-				/*
-				if($rowPriceArr[$j][$vo->close]<$min){
-					$min=$rowPriceArr[$j][$vo->close];
-					$imin=$j;
-				}
-				if($rowPriceArr[$j][$vo->close]>$max){
-					$max=$rowPriceArr[$j][$vo->close];
-					$imax=$j;
-				}
-				*/
-				//$maClose+=$rowPriceArr[$j][$vo->close]*$rowPriceArr[$j][$vo->volume];
-				//$maCloseVol+=$rowPriceArr[$j][$vo->volume];
-				$maClose+=$rowPriceArr[$j][$vo->close];
-				$maCloseVol+=1;
-				$interval= $j - $i + 1;
-				//if($interval==1) continue;
-
-				if($interval<=$this->intervalArr[1]) {
-					$value2 += $rowPriceArr[$j][$vo->close]*$rowPriceArr[$j][$vo->volume];
-					if($interval==$this->intervalArr[1]){
-						$re[$i]["value2"]=round($value2/$interval,0);
-						if($re[$i]["value2"]<$this->valueOff) break;
-					}
-				}
-				
-				if($interval>=2 && $interval<=6){
-					if($rowPriceArr[$i][$vo->close]<=$rowPriceArr[$j][$vo->close]) $less++;
-					if($interval==6){
-						$re[$i]["less"]=$less;
-					}
-				}
-				/*
-				if($interval==40){
-					$re[$i]["minMax2"]=round(100*($max-$min)/$min,1);
-					$re[$i]["maxClose2"]=round(100*($max-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close],1);
-					$re[$i]["minClose2"]=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min,1);
-				}
-				if($interval==20){
-					$re[$i]["minMax1"]=round(100*($max-$min)/$min,1);
-					$re[$i]["maxClose1"]=round(100*($max-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close],1);
-					$re[$i]["minClose1"]=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min,1);
-				}
-				if($interval==10){
-					$re[$i]["minMax0"]=round(100*($max-$min)/$min,1);
-					$re[$i]["maxClose0"]=round(100*($max-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close],1);
-					$re[$i]["minClose0"]=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min,1);
-				}
-				*/
-				/*RSI
-				$per=100*($rowPriceArr[$j][$vo->close]-$rowPriceArr[$j+1][$vo->close])/$rowPriceArr[$j+1][$vo->close];
-				$abs=abs( $per );
-				if($abs>=15) {
-					$isDivide=true;
-					break;
-				}
-				if($per>=0){
-					$gain+=$abs;
-				} else {
-					$loss+=$abs;
-				}
-				*/
-				if($interval==$this->intervalArr[0]||$interval==$this->intervalArr[1]||$interval==$this->intervalArr[2]||$interval==$this->intervalArr[3]){
-					$maAvg=$maClose/$maCloseVol;//$interval;
-					$re[$i]["ma".$interval]=$maAvg;
-					
-					$d=($rowPriceArr[$i][$vo->close]-$maAvg)/$maAvg;
-					//if($d<0 && $interval!=$this->intervalArr[0] && $interval!=$this->intervalArr[0]) {
-					if($d>=0 && ($interval==$this->intervalArr[2] || $interval==$this->intervalArr[3]) ) {
-						////$maGreatCount=0;
-						////$re[$i]["maGreat"]=$maGreatCount;
-						$re[$i]["maGreat"]++;
-					}
-					$re[$i]["maPer".$interval]=round(100*$d,2);
-					
-					////if($loss!=0) $rsi=100-100/(1+$gain/$loss);
-					////else $rsi=100;
-					////$re[$i]["rsi".$interval]=$rsi;
-				}
-			}
-		}
-		return $re;
-	}
-	
-	public function makeRowPriceArr2($vo, $rowPriceArr ,$limit=null){
-		//$vo=$this->voPrice;
-		$re=array();
 		$voRe=$this->voRowPriceArr;
 		$len=count($rowPriceArr);
 		for($i=0 ; $i < $len ;$i++){
@@ -598,38 +351,10 @@ class stock_ViewStock{
 
 		if($limit==null) $len2=$len;
 		else $len2=$limit;
-//<@
+
 		for($i=$len2-1 ; $i >=0 ;$i--){
 			//if($i >= $len - $this->intervalArr[3]) continue;
 			if($this->isNull0($rowPriceArr[$i][$vo->close])) continue;
-			/*
-			$min=999999;$max=-999999;$imin=null;$imax=null;$max0=-999999;$min1=9999999;$max1=-9999999;
-			if($i==0){
-				for($j=0 ; $j < 60 ; $j++){
-					$x=$i+$j;
-					if($x>=$len) break;
-					if($this->isNull0($rowPriceArr[$x][$vo->close])) break;
-					
-					if($rowPriceArr[$x][$vo->close]<$min){
-						$min=$rowPriceArr[$x][$vo->close];
-						$imin=$x;
-					}
-					if($rowPriceArr[$x][$vo->close]>$max){
-						$max=$rowPriceArr[$x][$vo->close];
-						$imax=$x;
-					}
-					if($j<4 && $rowPriceArr[$x][$vo->high]!=null && $rowPriceArr[$x][$vo->high]>$max0){
-						$max0=$rowPriceArr[$x][$vo->high];
-					}
-					if($max>$max0) $max0=$max;
-				}
-				$re[$i][$voRe->min]=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min);
-				$re[$i][$voRe->imin]=$imin;
-				$re[$i][$voRe->max]=round(100*($max-$min)/$min);
-				$re[$i][$voRe->imax]=$imax;
-				$re[$i][$voRe->minMax]=round(100*($max-$min)/$min);
-			}
-			*/
 			$min=999999;$max=-999999;$imin=null;$imax=null;$max0=-999999;$min1=999999;$max1=-999999;
 			$value2=0;
 			$code="";
@@ -638,26 +363,27 @@ class stock_ViewStock{
 			$minC2=9999999;
 			$maxC2=0;
 			$delta=0;
-			if($i==0) {
-				$re[$i][$voRe->code]="up";
-			}
-			if($i==0) for($j=0 ; $j < 55 ; $j++){
+			$re[$i][$voRe->code]=null;
+			$imaxUp=null;
+			$minMax=null;
+			for($j=0 ; $j < 55 ; $j++){
 				$x=$i+$j;
 				if($this->isNull0($rowPriceArr[$x][$vo->close])) break;
-				if($this->isNull0($rowPriceArr[$x+1][$vo->close])) break;
+				if($rowPriceArr[$x+1]==null || $this->isNull0($rowPriceArr[$x+1][$vo->close])) break;
 				
 				if($rowPriceArr[$x][$vo->close]<$min){
 					$min=$rowPriceArr[$x][$vo->close];
-					$imin=$x;
+					$imin=$j;
 				}
 				if($rowPriceArr[$x][$vo->close]>$max){
 					$max=$rowPriceArr[$x][$vo->close];
-					$imax=$x;
+					$imax=$j;
 				}
-				if($j<4 && $rowPriceArr[$x][$vo->high]!=null && $rowPriceArr[$x][$vo->high]>$max0){
+				if($j<=8-1 && $rowPriceArr[$x][$vo->high]!=null && $rowPriceArr[$x][$vo->high]>$max0){
 					$max0=$rowPriceArr[$x][$vo->high];
 				}
 				//if($max>$max0) $max0=$max;
+				/*
 				if($j>=1 && $j<=4){
 					if($rowPriceArr[$x][$vo->close]<$min1){
 						$min1=$rowPriceArr[$x][$vo->close];
@@ -669,142 +395,101 @@ class stock_ViewStock{
 						if($min1!=0) $re[$i][$voRe->minMax1]=round(100*($max1-$min1)/$min1);
 					}
 				}
-				
-				if($j<10) {
+				*/
+
+				if($i==0 && $j<10) {
 					$value2 += $rowPriceArr[$j][$vo->close]*$rowPriceArr[$j][$vo->volume];
 					if($j==10-1){
 						$re[$i][$voRe->value2]=round($value2/($j+1),0);
+						if($re[$i][$voRe->value2]!=0) $re[$i][$voRe->perValue]= round(100*$rowPriceArr[$i][$vo->close]*$rowPriceArr[$i][$vo->volume]/$re[$i][$voRe->value2]);
+						else $re[$i][$voRe->perValue]=0;
+							
+//<@
 						if($re[$i][$voRe->value2]<$this->valueOff) break;
-					}
-				}
-
-				$per = 100*($rowPriceArr[$x][$vo->close] - $rowPriceArr[$x+1][$vo->close])/$rowPriceArr[$x+1][$vo->close];
-				if(abs($per) <= 20 )$delta += abs($per);
-				
-				$maC+=$rowPriceArr[$x+1][$vo->close];
-				
-				if($i<=1000){
-					if($j==5-1 || $j==8-1 || $j==13-1 || $j==21-1 || $j==34-1 || $j==55-1){
-						$close=1.00*$rowPriceArr[$i][$vo->close];
-						
-						$maC0=$maC/($j+1);
-						$maC0=round(100*($close-$maC0)/$maC0);
-						
-						if($i==0) {
-							$close=1.02*$rowPriceArr[$i][$vo->close];///1.04
-							$maC0=$maC/($j+1);
-							$maC0=round(100*($close-$maC0)/$maC0);
-							if($maC0<0) {
-								$re[$i][$voRe->code]="down";
-							}
-						}
-					}
-				}
-				if($i==0 && $j==10-1){ //$j==$this->intervalArr[0]-1
-					$re[$i][$voRe->perHigh]=round(100*($max0-$rowPriceArr[$i][$vo->close])/$max0);
-				}
-				if($i==0 && $j==5-1){ //$j==$this->intervalArr[0]-1
-					/////$re[$i][$voRe->perHigh]=round(100*($max0-$rowPriceArr[$i][$vo->close])/$max0);
-					
-					//$minC=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min);
-					if($max-$min!=0) $minC=round(100*($rowPriceArr[$i][$vo->close]-$min)/($max-$min));
-					else $minC=-100;
-					//$maxC=round(100*($max-$rowPriceArr[$i][$vo->close])/$min);
-					$maxC=round(100*($max-$min)/$min);
-					$re[$i][$voRe->minC1]=$minC;
-					$re[$i][$voRe->maxC1]=$maxC;
-				}
-				/*if($i==0 && $j==7-1){ //$j==$this->intervalArr[0]-1
-					$re[$i][$voRe->maPerC1]=$maC/($j+1);
-					$re[$i][$voRe->maPerC1]=round(100*($rowPriceArr[$i][$vo->close]-$re[$i][$voRe->maPerC1])/$re[$i][$voRe->maPerC1]);
-				}*/
-				/*
-				if($i==0 && $j==21-1){ //$this->intervalArr[3]
-					//$minC=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min);
-					if($max-$min!=0) $minC=round(100*($rowPriceArr[$i][$vo->close]-$min)/($max-$min));
-					else $minC=-100;
-					//$maxC=round(100*($max-$rowPriceArr[$i][$vo->close])/$min);
-					$maxC=round(100*($max-$min)/$min);
-					$re[$i][$voRe->minC2]=$minC;
-					$re[$i][$voRe->maxC2]=$maxC;
-					
-					///////$delta=$delta/($j+1);
-					////////$re[$i][$voRe->delta]=$delta;
-					
-					$re[$i][$voRe->maPerC2]=$maC/($j+1);
-					$re[$i][$voRe->maPerC2]=round(100*($rowPriceArr[$i][$vo->close]-$re[$i][$voRe->maPerC2])/$re[$i][$voRe->maPerC2]);
-				}
-				*/
-				if($i==0 && $j==34-1){
-					$delta=$delta/($j+1);
-					$re[$i][$voRe->delta]=$delta;
-				}
-			}
-		}
 //@>
-/*<@
-		if($this->ao->conf["combineDay"]==1){
-			$ma0=8
-			$ma1=21
-			$ma2=34
-			$ma3=55
-		} else if($this->ao->conf["combineDay"]==2 || $this->ao->conf["combineDay"]==8){
-		/// 1 1 2 3 5 8 13 21 34 55 89
-			$ma0=5;
-			$ma01=9;
-			$ma1=13;
-			$ma02=17;
-			$ma2=21;
-			$ma3=34;
-			
-			//$ma0=4;
-			//$ma1=11;
-			//$ma2=17;//23
-			//$ma3=55;
-		} else {
-		/// 1 1 2 3 5 8 13 21 34
-			$ma0=8;
-			$ma1=21;
-			$ma2=21;
-			$ma3=34;
-		}
-		
-		for($i=$len-1 ; $i >=0 ;$i--){
-			//if($i >= $len - $ma3) continue;
-			if($this->isNull0($rowPriceArr[$i][$vo->close])) continue;
-			
-			$maC=0;
-			for($j=0 ; $j < $ma3 ; $j++){
-				$x=$i+$j;
-				if($this->isNull0($rowPriceArr[$x][$vo->close])) break;
-				if($rowPriceArr[$x+1]==null || $this->isNull0($rowPriceArr[$x+1][$vo->close])) break;
+					}
+				}
+
+				//$per = 100*($rowPriceArr[$x][$vo->close] - $rowPriceArr[$x+1][$vo->close])/$rowPriceArr[$x+1][$vo->close];
+				//if(abs($per) <= 15 )$delta += abs($per);
 
 				$maC+=$rowPriceArr[$x+1][$vo->close];
-				//$maC+=($rowPriceArr[$x+1][$vo->low]+$rowPriceArr[$x+1][$vo->high])/2;
-				if($j==$ma0-1 || $j==$ma1-1 || $j==$ma2-1 || $j==$ma3-1 || $j==$ma01-1 || $j==$ma02-1){
-					if($j==$ma0-1) $re[$i][$voRe->maC1]=$maC/($j+1);
-					if($j==$ma1-1) $re[$i][$voRe->maC2]=$maC/($j+1);
-					if($j==$ma2-1) $re[$i][$voRe->maC3]=$maC/($j+1);
-					if($j==$ma01-1) $re[$i]["ma01"]=$maC/($j+1);
-					if($j==$ma02-1) $re[$i]["ma02"]=$maC/($j+1);
-					if($j==$ma3-1) {
-						$re[$i][$voRe->maC4]=$maC/($j+1);
-						$dev=0;
-						for($k=0 ; $k < $ma3 ; $k++){
-							$y=$i+$k;
-							$close=$rowPriceArr[$y+1][$vo->close];
-							$dev+=pow($close-$re[$i][$voRe->maC4],2);
-							if($k==$ma3-1) {
-								$dev=round(sqrt($dev/($k+1)),2);
-								$re[$i][$voRe->dev]=$dev;
+				
+				if($re[$i][$voRe->code]!="down"){
+					if($j==5-1 || $j==8-1 || $j==13-1 || $j==21-1 || $j==34-1 || $j==55-1){
+						
+						$close=$rowPriceArr[$i][$vo->close];///1.04
+						if($j>21-1) $close=1.02*$rowPriceArr[$i][$vo->close];
+						$maC0=$maC/($j+1);
+						$maC0=100*($close-$maC0)/$maC0;
+						if($maC0<0) {
+							$re[$i][$voRe->code]="pre";
+						}
+						
+						$close=1.02*$rowPriceArr[$i][$vo->close];///1.04
+						$maC0=$maC/($j+1);
+						$maC0=100*($close-$maC0)/$maC0;
+						if($maC0<0) {
+							$re[$i][$voRe->code]="down";
+						}
+						if($j==55-1 && $re[$i][$voRe->code]==null) {
+							$re[$i][$voRe->code]="up";
+							if($re[$i+1]!=null && ($re[$i+1][$voRe->code]=="high" || $re[$i+1][$voRe->code]=="up") && $minMax>=6){
+								if($re[$i][$voRe->perHigh]>=3) $re[$i][$voRe->code]="high";
+								if($imaxUp>=3) $re[$i][$voRe->code]="high";
 							}
 						}
 					}
 				}
-
+				if($j==5-1){
+					//@ $re[$i]["ma1"]=$maC/($j+1);
+					$ma1=$maC/($j+1);
+				}
+				if($j==6-1){
+					$re[$i][$voRe->minClose]=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min);
+					$re[$i][$voRe->perHigh]=round(100*($max0-$rowPriceArr[$i][$vo->close])/$max0);
+					$imaxUp=$imax;
+					$minMax=100*($max0-$min)/$min;
+				}
+				if($j==8-1){
+/*<@ 
+					$re[$i]["ma2"]=$maC/($j+1);					
+					$ma=$re[$i]["ma2"];
+					if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$re[$i]["ma1"]) $ma=$re[$i]["ma1"];
+					$re[$i]["perMa2"]=round(100*($rowPriceArr[$i][$vo->close]-$ma)/$ma);
+@>*/
+//<@					
+					$ma=$maC/($j+1);
+					if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$ma1) $ma=$ma1;
+					$re[$i][$voRe->perMa]=round(100*($rowPriceArr[$i][$vo->close]-$ma)/$ma);
+//@>				
+				}
+				if($j==13-1){
+					//@ $re[$i]["ma3"]=$maC/($j+1);
+				}
+				if($j==21-1){
+					//@ $re[$i]["ma4"]=$maC/($j+1);
+					
+//<@					
+					//$delta=$delta/($j+1);
+					//$re[$i][$voRe->delta]=$delta;
+//@>
+				}
+				if($j==34-1){
+					//@ $re[$i]["ma5"]=$maC/($j+1);
+				}
+				if($j==55-1){
+/*<@ 
+					$re[$i]["ma6"]=$maC/($j+1);					
+					$ma=$re[$i]["ma6"];
+					if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$re[$i]["ma3"]) $ma=$re[$i]["ma3"];
+					if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$re[$i]["ma4"]) $ma=$re[$i]["ma4"];
+					if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$re[$i]["ma5"]) $ma=$re[$i]["ma5"];
+					$re[$i]["perMa6"]=round(100*($rowPriceArr[$i][$vo->close]-$ma)/$ma);
+@>*/
+				}
 			}
 		}
-@>*/
 		return $re;
 	}
 	
@@ -972,7 +657,7 @@ class stock_ViewStock{
 		else if($value<-6)$color="limegreen";
 		else if($value<0)$color="red";
 		
-		if($value<=0)$color="red";
+		if($value<0)$color="red";
 		else $color="blue";
 		
 		$f=10;
@@ -1072,11 +757,11 @@ class stock_ViewStock{
 		return "<span style='color:".$color."'>".$value."</span>";
 	}
 	
-	public function formatPercentScale($value, $maPer){
+	public function formatPercentScale($value, $perMa){
 		if($value==null) return "";
 		if($value>=50) $color="blue";
 		else $color="red";
-		//if($maPer>=0) $color="blue";
+		//if($perMa>=0) $color="blue";
 		//else $color="red";
 		if($value>=100) $value=99;
 		if($value<=-100) $value=-99;
@@ -1577,12 +1262,14 @@ class stock_ViewStock{
 		//<td><=?= $this->formatPer($stock[$voStock->avg]) ?=></td>
 		//<td><=?= $stock[$voStock->code] ?=></td>
 		
-		$perValue=0;
-		$value0=$stock[$voStock->live][$vo->close]*$stock[$voStock->live][$vo->volume];
-		if($stock[$voStock->value2]!=0 && $stock[$voStock->value2]!=null) $perValue=round(100*$value0/$stock[$voStock->value2]);
+		//$perValue=0;
+		//$value0=$stock[$voStock->live][$vo->close]*$stock[$voStock->live][$vo->volume];
+		//if($stock[$voStock->value2]!=0 && $stock[$voStock->value2]!=null) $perValue=round(100*$value0/$stock[$voStock->value2]);
 		
 		if($stock[$voStock->perHigh]>=10) $stock[$voStock->perHigh]=9;
-		if($stock[$voStock->maxC1]>=100) $stock[$voStock->maxC1]=99;
+		$minClose=$stock[$voStock->minClose];
+		if($minClose>=10) $minClose=9;
+		//if($stock[$voStock->maxC1]>=100) $stock[$voStock->maxC1]=99;
 		//if($stock[$voStock->minMaxArr][3]>=100) $stock[$voStock->minMaxArr][3]=99;
 		
 		if(!$this->isNull0($stock[$voStock->bv])) $bvp=(1*($stock[$voStock->live][$vo->close]-$stock[$voStock->bv])/$stock[$voStock->bv]);
@@ -1605,30 +1292,28 @@ class stock_ViewStock{
 		<td _tag2="symbolLeft0" _tag="symbol" _value="<?=$symbol?>" style="font-weight:normal;<?= $trStyle ?>"><?= $this->formatSymbol($symbol) ?></td>
 <? } ?>
 		<td style="border-right:0px solid black;<?= $trStyle ?>"><?= $this->formatPer($perSell,$stock[$voStock->live],null) ?></td>
+		<td style="border-right:2px solid black;<?= $trStyle ?>"><?= $this->shortString($marketTrade) ?></td>
 		
-		
-		<td style="border-right:0px solid black;<?= $trStyle ?>"><?= $this->shortString($marketTrade) ?></td>
-		<td style="border-right:2px solid black;<?= $trStyle ?>"><?= $this->formatPercentRev( $stock[$voStock->perHigh] ) ?> </td>
-		
-		
-		<td style="border-right:0px solid black;<?= $trStyle ?>"> <?= $this->formatPercentScale( $stock[$voStock->minC1], null ) ?> </td>
-		<td style="border-right:0px solid black;<?= $trStyle ?>"> <?= $stock[$voStock->maxC1] ?> </td>
-		
-		<td style="<?= $trStyle ?>"><?=  $this->formatPercentValue( $perValue ) ?></td>
-		<td style="<?= $trStyle ?>;border-right:0px solid black;"><?= $this->formatValue2($stock[$voStock->value2]) ?></td>
 		
 		<td style="<?= $trStyle ?>"><?= $this->formatPrice($vo->buyPrice1,$stock[$voStock->live],$_live) ?></td>
 		<td style="border-right:0px solid black;<?= $trStyle ?>"><?= $this->formatVolume1($vo->buyVolume1,$stock[$voStock->live],$_live,$symbol) ?></td>
-		
 		<td style="border-left:0px solid black;<?= $trStyle ?>"><?= $this->formatPrice($vo->sellPrice1,$stock[$voStock->live],$_live) ?></td>
 		<td style="border-right:2px solid black;<?= $trStyle ?>"><?= $this->formatVolume1($vo->sellVolume1,$stock[$voStock->live],$_live,$symbol) ?></td>
+		
+		
+		
+		<td style="border-right:0px solid black;<?= $trStyle ?>"><?= $this->formatPercentRev( $stock[$voStock->perHigh] ) ?> </td>
+		<td style="border-right:0px solid black;<?= $trStyle ?>"> <?= $minClose ?> </td>
+		<td style="<?= $trStyle ?>"><?=  $this->formatPercentValue( $stock[$voStock->perValue] ) ?></td>
+		<td style="<?= $trStyle ?>;border-right:0px solid black;"><?= $this->formatValue2($stock[$voStock->value2]) ?></td>
+		<td style="border-right:0px solid black;<?= $trStyle ?>"> <?= $this->formatPer( $stock[$voStock->perMa], null ) ?> </td>
+		<td style="color:black;border-right:2px solid black;<?= $trStyle ?>" ><?= $this->formatVolume2($buy,$vo->sellPrice1,$stock[$voStock->live],$_live) ?></td>
+		
+	
 
 		<td style="color:black;border-right:0px solid black;<?= $trStyle ?>" ><?= $this->formatRoe($stock[$voStock->roe],$ysFa,$noFa) ?></td>
 		<td style="color:black;border-right:0px solid black;<?= $trStyle ?>" ><?= $this->formatBvp($bvp) ?></td>
-		
-		
 		<td style="color:black;border-right:0px solid black;<?= $trStyle ?>" ><?= $this->formatFf($stock[$voStock->ff2],$ysFa,$noFa) ?></td>
-		<td style="color:black;border-right:0px solid black;<?= $trStyle ?>" ><?= $this->formatVolume2($buy,$vo->sellPrice1,$stock[$voStock->live],$_live) ?></td>
 		
 		
 <? /*
@@ -1750,39 +1435,7 @@ class stock_ViewStock{
 		if($value==null || $value==0) return true;
 		return false;
 	}
-	public function getCodeFull($rowPriceArr,$i){
-		$codeFull=$rowPriceArr[$i]["codeFull"];
-		return $codeFull;
-		if($codeFull==null||$this->indexArr[$i]==null||$this->indexArr[$i]["codePer"]==null){
-			return null;
-		} else{
-			return $codeFull=$codeFull.$this->indexArr[$i]["codePer"];
-		}
-	}
-	public function makeIndex(){
-		$len=count($this->indexArr);
-		for($i=0;$i<$len;$i++){
-			if($i+1+10>$len) break;
-			if($this->indexArr[$i]["count"]==0) break;
-			$perT=0;
-			$countT=0;
-			for($j=$i+1;$j<$i+1+10;$j++){
-				if($this->indexArr[$j]["count"]==0) break;
-				$perT+=$this->indexArr[$j]["per"];
-				$countT+=$this->indexArr[$j]["count"];
-				if($j-$i==10){
-					$perT=round($perT/$countT,2);
-					
-					if($perT<0) $this->indexArr[$i]["codePer"]="G".round(-100*$perT);
-					else $this->indexArr[$i]["codePer"]="T".round(100*$perT);
-				}
-			}
-			if($this->indexArr[$i]["codePer"]==null) break;
-			$this->indexArr[$i]["per"]=round($this->indexArr[$i]["per"]/$this->indexArr[$i]["count"],2);
-			if($this->indexArr[$i]["per"]<0) $this->indexArr[$i]["codePer"].="g".round(-100*$this->indexArr[$i]["per"]);
-			else $this->indexArr[$i]["codePer"].="t".round(100*$this->indexArr[$i]["per"]);
-		}
-	}
+	
 	public function rpcMakeTa(){
 //<@ $this->json();
 		$taMap=array(
@@ -1938,10 +1591,8 @@ try{
 		foreach($rowSymbolMap as $symbol=>$symbolzzz){
 			////$symbol = $rowSymbolArr[$k];
 			if(strlen($symbol)<3) continue;
-			$rowPriceArr=$this->getRowPriceArr($vo,$symbol,90);////220
-			//$rowPriceExArr=$this->makeRowPriceArr($vo,$rowPriceArr,1);
-			//$reRowPriceArr=$this->makeRowPriceArr2($vo,$rowPriceArr,3);
-			$reRowPriceArr=$this->makeRowPriceArr2($vo,$rowPriceArr,1);
+			$rowPriceArr=$this->getRowPriceArr($vo,$symbol,100);////220
+			$reRowPriceArr=$this->makeRowPriceArr($vo,$rowPriceArr,2);
 			
 			//print_p($reRowPriceArr); break;
 			
@@ -1967,9 +1618,9 @@ try{
 				//$stockMap[$symbol][$voStock->close]=$vo->row[$vo->close];
 				$value0=$live[$vo2->close]*$live[$vo2->volume];
 				$stockMap[$symbol][$voStock->value2]=$reRowPriceArr[$i][$voRe->value2];
+				$stockMap[$symbol][$voStock->perValue]=$reRowPriceArr[$i][$voRe->perValue];
 				
-				$perValue=0;
-				if($stockMap[$symbol][$voStock->value2]!=0 && $stockMap[$symbol][$voStock->value2]!=null) $perValue=100*$value0/$stockMap[$symbol][$voStock->value2];
+				$perValue=$reRowPriceArr[$i][$voRe->perValue];
 				
 				//$stockMap[$symbol][$voStock->perBuy]=$this->getPricePer($vo2->buyPrice1,$stockMap[$symbol][$voStock->live]);
 				//$stockMap[$symbol][$voStock->perSell]=$this->getPricePer($vo2->sellPrice1,$stockMap[$symbol][$voStock->live]);
@@ -1993,10 +1644,10 @@ try{
 				);
 				*/
 				$stockMap[$symbol][$voStock->perHigh]=$perHigh;
-				$stockMap[$symbol][$voStock->minC1]=$reRowPriceArr[$i][$voRe->minC1];
-				$stockMap[$symbol][$voStock->maxC1]=$reRowPriceArr[$i][$voRe->maxC1];
+				$stockMap[$symbol][$voStock->perMa]=$reRowPriceArr[$i][$voRe->perMa];
+				$stockMap[$symbol][$voStock->minClose]=$reRowPriceArr[$i][$voRe->minClose];
 	
-				/////$stockMap[$symbol][$voStock->delta]=$reRowPriceArr[$i][$voRe->delta];
+				////$stockMap[$symbol][$voStock->delta]=round(10*$reRowPriceArr[$i][$voRe->delta]);
 				/////$stockMap[$symbol][$voStock->minMax]=$reRowPriceArr[$i][$voRe->minMax];
 				/////$stockMap[$symbol][$voStock->status]=$reRowPriceArr[$i][$voRe->status];
 				/////$stockMap[$symbol][$voStock->status0]=$reRowPriceArr[$i][$voRe->status0];
@@ -2074,75 +1725,37 @@ try{
 						}
 						$rate-=100000000;
 						
-						/*if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 12 && 
-					  ($reRowPriceArr[$i][$voRe->maxC1]*$reRowPriceArr[$i][$voRe->minC1]/100 < 7) && 
-					  $reRowPriceArr[$i][$voRe->minC1] > 0 && $reRowPriceArr[$i][$voRe->delta] >=0.0 &&
-					  ($reRowPriceArr[$i][$voRe->value2]>=300000 || $value0>=300000)){
-							//$rate+=9000000;
-							if($reRowPriceArr[$i][$voRe->minC1] > 50) $rate+=900000+9000000;
-						}
-						*/
-						//////////////////$rate+= 100*$reRowPriceArr[$i][$voRe->minC1];
+						if( $reRowPriceArr[$i][$voRe->code]=="up" ){
+						} else $rate+=9000000;
+						
 						if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
-						else $rate+=round($perValue*100);
-						//$rate-=100*$stockMap[$symbol][$voStock->perSell];
-						//$rate-=100*$stockMap[$symbol][$voStock->perSell];
-						/*
-						if( ($reRowPriceArr[$i][$voRe->status0]=="greatF" || $reRowPriceArr[$i+0][$voRe->status]=="greatF") && 
-						$reRowPriceArr[$i][$voRe->maxC2] > -1 && $reRowPriceArr[$i][$voRe->value2]>=1000000){
-							$rate+=9000000;
-							if($reRowPriceArr[$i+0][$voRe->status]=="greatF") $rate+=9000000;
-						}
-						*/
+						//else $rate+=round($perValue*100);
+						else $rate+= -$perValue + 1000*$perHigh;
 					}
 					else{
 						if($faMap[ $rowPriceArr[$i][$vo->symbol] ] !=null) {
 							//$rate+=5000000000;
 							
 						}
-						/*if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 12 && 
-					  ($reRowPriceArr[$i][$voRe->maxC1]*$reRowPriceArr[$i][$voRe->minC1]/100 < 7) && 
-					  $reRowPriceArr[$i][$voRe->minC1] > 0 && $reRowPriceArr[$i][$voRe->delta] >=0.0 &&
-					  ($reRowPriceArr[$i][$voRe->value2]>=300000 || $value0>=300000)){
-							//$rate+=9000000;
-							if($reRowPriceArr[$i][$voRe->minC1] > 50) $rate+=900000+9000000;
-						}*/
-						//	if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
-						//	else $rate+=round($perValue*100);
-						//}
-						//else {
-							if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
-							//else $rate+= -100*$reRowPriceArr[$i][$voRe->minC1] + 100000*$perHigh;
-							//else $rate+= -100000*$reRowPriceArr[$i][$voRe->minC1] + 100*$perHigh;
-							else $rate+= -round($perValue*100) + 100000*$perHigh;
-						//}
+						if( $reRowPriceArr[$i][$voRe->code]=="up" ){
+						} else $rate+=9000000;
 						
-						
+						if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
+						//else $rate+= -100*$reRowPriceArr[$i][$voRe->minC1] + 100000*$perHigh;
+						//else $rate+= -100000*$reRowPriceArr[$i][$voRe->minC1] + 100*$perHigh;
+						else $rate+= -$perValue + 1000*$perHigh;
 					}
 				} else {
 					if($faMap[ $rowPriceArr[$i][$vo->symbol] ] !=null) {
 						//$rate+=20000000;
 						$rate+=2000000;
 					}
-					/*
-					if( ($reRowPriceArr[$i][$voRe->status0]=="greatF" || $reRowPriceArr[$i+0][$voRe->status]=="greatF") && 
-					$reRowPriceArr[$i][$voRe->maxC2] > -1 && $reRowPriceArr[$i][$voRe->value2]>=1000000){
-						$rate+=9000000;
-						if($reRowPriceArr[$i+0][$voRe->status]=="greatF" && $perValue>=40) $rate+=9000000;
-						///////$rate+=$reRowPriceArr[$i][$voRe->value2]/1000;
-						$rate+=round($perValue*100);
-						//////////$rate+= 100*$reRowPriceArr[$i][$voRe->minC1];
-					} else {
-						///////////$rate+=$reRowPriceArr[$i][$voRe->value2]/1000;
-						$rate+=round($perValue*100);
-					}
-					*/
-					if( $reRowPriceArr[$i][$voRe->code]=="up" && $reRowPriceArr[$i][$voRe->perHigh] < 12 && 
-					  ($reRowPriceArr[$i][$voRe->maxC1]*$reRowPriceArr[$i][$voRe->minC1]/100 < 7) && 
-					  $reRowPriceArr[$i][$voRe->minC1] > 0 && $reRowPriceArr[$i][$voRe->delta] >=0.0 &&
+
+					if( ($reRowPriceArr[$i][$voRe->code]=="up" || $reRowPriceArr[$i][$voRe->code]=="pre") && 
+					   $reRowPriceArr[$i][$voRe->minClose] <= 8.0 && $reRowPriceArr[$i][$voRe->delta] >=0.0 &&
 					  ($reRowPriceArr[$i][$voRe->value2]>=300000 || $value0>=300000)){
 							$rate+=9000000;
-							if($reRowPriceArr[$i][$voRe->minC1] > 50) $rate+=900000;
+							if($reRowPriceArr[$i][$voRe->code]=="up") $rate+=900000;
 						
 						if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
 						else $rate+=round($perValue*100);
@@ -2218,323 +1831,7 @@ try{
 		$tradeMap=$this->obJfile->load("stock_ViewStock/tradeMap");
 		return $tradeMap;
 	}
-	
-	public function loadStatMap(){
-		$statMap=$this->obJfile->load("stock_ViewStock/statMap");
-		return $statMap;
-	}
-	public function rpcMakeStatMapzzz(){
-//<@ $this->json();
-		$rowSymbolArr=$this->getRowSymbolArr();
-		
-		$rowPriceArrMap=array(
-		);
-		for($k=0; $k<count($rowSymbolArr); $k++){
-			$symbol = $rowSymbolArr[$k]["symbol"];
-			if(strlen($symbol)<3) continue;
-			if($this->isMarket($symbol)) continue;
-			
-			$rowPriceArr=$this->getRowPriceArrS($symbol);
-			$this->makeRowPriceArr($rowPriceArr);
-			$rowPriceArrMap[$symbol]=$rowPriceArr;
-		}
-		
-		$v=300000;
-		$f=1/30;
 
-		$no=0;
-		$tradeMap=array(
-		);
-		$vMap=array(
-		);
-		$len=count($rowPriceArrMap["VNINDEX"]);
-		for($i=$len-1;$i>=0;$i--){
-			$stockMap=array(
-			);
-			for($k=0; $k<count($rowSymbolArr); $k++){
-				$symbol = $rowSymbolArr[$k]["symbol"];
-				if(strlen($symbol)<3) continue;
-				if($this->viewStock->isMarket($symbol)) continue;
-				
-				if($rowPriceArrMap[$symbol][$i]==null || $rowPriceArrMap[$symbol][$i]["codeFull"]==null) continue;
-				$stockMap[$symbol]=array(
-				);
-			}
-			
-			foreach($tradeMap as $symbol2=>$trade){
-				$symbol=$tradeMap[$symbol2]["symbol"];
-				$codeFull=$tradeMap[$symbol2]["codeFull"];
-				$profit=$rowPriceArrMap[$symbol][$i]["close"]/$tradeMap[$symbol2]["close"];
-				$vSell=$tradeMap[$symbol2]["vBuy"]*$profit;
-				$vBuf[$codeFull]+=(1-0.005)*$vSell;
-			}
-			
-			foreach($stockMap as $symbol=>$stock){
-				$codeFull=$rowPriceArrMap[$symbol][$i]["codeFull"];
-				$symbol2=$symbol.$i;
-				$tradeMap[$symbol2]=array(
-				);
-				$tradeMap[$symbol2]["symbol"]=$symbol;
-				$tradeMap[$symbol2]["codeFull"]=$codeFull;
-				$tradeMap[$symbol2]["i"]=$i;
-				$tradeMap[$symbol2]["close"]=$rowPriceArrMap[$symbol][$i]["close"];
-				$tradeMap[$symbol2]["vBuy"]=$f*$vBuf;
-				$no++;
-				$vBuy=$tradeMap[$symbol2]["vBuy"];
-				$vBuyT+=(1+0.005)*$vBuy;
-				
-				if($v[$codeFull]==null){
-					$v[$codeFull]=10000;
-				}
-				$v[$codeFull]+=(1+0.005)*$vBuy;
-			}
-			
-			foreach($tradeMap as $symbol2=>$trade){
-				$symbol=$tradeMap[$symbol2]["symbol"];
-				if($i==($tradeMap[$symbol2]["i"]-4)){
-					$codeFull=$tradeMap[$symbol2]["codeFull"];
-					$profit=$rowPriceArrMap[$symbol][$i]["close"]/$tradeMap[$symbol2]["close"];
-					$vSell=$tradeMap[$symbol2]["vBuy"]*$profit;
-
-					$v[$codeFull]+=(1-0.005)*$vSell;					
-					unset($tradeMap[$symbol2]);
-				}
-			}
-			//print_p($i." ".$vBuf);
-		}
-		//print_p($vBuf);
-//@>
-	}
-	public function rpcMakeStatMapAppfog($statMap){
-//<@ $this->json($statMap);
-		$this->obJfile->save("stock_ViewStock/statMap",$statMap);
-		return 1111;
-//@>
-	}
-	public function rpcMakeStatMap(){
-//<@ $this->json();
-		$vo=$this->voPrice3;
-		//$vo=get(new stock_Vo())->_con("close,volume","");
-		$voRe=$this->voRowPriceArr;
-		$rowSymbolArr=$this->getRowSymbolArr();
-		$len=count($rowSymbolArr);
-		
-		$voStat=$this->voStat;
-		
-		
-		$this->obJfile->delete("stock_ViewStock/statMap");
-		$statMap=$this->obJfile->load("stock_ViewStock/statMap");
-		if($statMap==null){
-			$statMap=array(
-			);
-			for($k=0; $k<$len; $k++){
-	//if($k==10) break;
-				$symbol = $rowSymbolArr[$k][0];
-				if(strlen($symbol)!=3) continue;
-				$rowPriceArr=$this->getRowPriceArrS($vo,$symbol);			
-				$reRowPriceArr=$this->makeRowPriceArr2($vo,$rowPriceArr);
-				$len2=count($rowPriceArr);
-				for($i=5;$i<$len2;$i++){
-					$code=$reRowPriceArr[$i][$voRe->code];
-					if($code==null) continue;
-					
-					if($statMap[$code]==null){
-						$statMap[$code]=array();
-						$statMap[$code][$voStat->total]=0;
-						//$statMap[$code][$voStat->inc]=0;
-						$statMap[$code][$voStat->avg]=0;
-					}
-
-					$per=0;
-					for($j=1;$j<=100;$j++){
-						$x=$i-$j;
-						if($x<0) break;
-						$per=100*($rowPriceArr[$x][$vo->close]-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close];
-						if($reRowPriceArr[$x][$voRe->status]=="lessF") {
-							break;
-						}
-					}
-					if($per>=13){
-						$statMap[$code][$voStat->avg]+=$per;
-						$statMap[$code][$voStat->total]+=1;
-					}
-				}
-			}
-			
-			foreach($statMap as $code=>$stat){
-				//$statMap[$code][$voStat->prop]=round(100*$statMap[$code][$voStat->inc]/$statMap[$code][$voStat->total],2);
-				if($statMap[$code][$voStat->total]!=0) $statMap[$code][$voStat->avg]=round($statMap[$code][$voStat->avg]/$statMap[$code][$voStat->total],2);
-			}
-		}
-		foreach($statMap as $code=>$stat){
-			if($statMap[$code][$voStat->total]<=100) unset($statMap[$code]);
-		}
-		
-		function sortFunc($a, $b){
-			if($a[1] > $b[1]) return -1;
-			if($a[1] < $b[1]) return 1;
-			return 0;
-		}	
-		uasort($statMap, "sortFunc");
-			
-		$this->obJfile->save("stock_ViewStock/statMap",$statMap);
-		
-		$str="stt\tcode\ttotal\tavg\n";
-		$i=0;
-		$totalAll=0;
-		$str0="";
-		foreach($statMap as $code=>$stat){
-			$str.=($i+1)."\t".$code."\t".$statMap[$code][$voStat->total]."\t".$statMap[$code][$voStat->avg]."\n";
-			
-			$totalAll+=$statMap[$code][$voStat->total];
-			
-			$i++;
-		}
-		$str0="tAll\t".$totalAll;
-		print_p($str0);
-		print_p($str);
-		//print_p($statMap);
-//@>
-	}
-	
-	
-	public function rpcMakeStatMapzz(){
-//<@ $this->json();
-		$this->voStat=get(new stock_Vo())->_con("codeFull,count,avg,avgInc,avgDec,prop,num","");
-		$vo=$this->voPrice3;
-		$rowSymbolArr=$this->getRowSymbolArr();
-		$statMap = array(
-		);
-		$rowPriceArrMap=array(
-		);
-		for($k=0; $k<count($rowSymbolArr); $k++){
-//if($k==5) break;
-			$symbol = $rowSymbolArr[$k][0];
-			if(strlen($symbol)<3) continue;
-			
-			$rowPriceArr=$this->getRowPriceArrS($vo,$symbol);
-			$rowPriceExArr=$this->makeRowPriceArr($vo,$rowPriceArr);
-			//$rowPriceArrMap[$symbol]=$rowPriceArr;
-		//}
-		//$this->makeIndex();
-		//foreach($rowPriceArrMap as $symbol=>&$rowPriceArr){
-			$len=count($rowPriceArr);
-			$intervalLen=count($this->intervalArr);
-			for($i=0 ;$i<$len ;$i++){
-				if($len-$i-1<$this->intervalArr[$intervalLen-1]) break;//-$i-1
-				if($this->isNull0($rowPriceArr[$i][$vo->close])) continue;
-				$codeFull=$rowPriceExArr[$i]["codeFull"];
-				//print_p($codeFull);
-				if($codeFull==null) continue;
-				
-				if($i<3) continue;
-				$profit=0;
-				for($j=$i-3; $i-$j<=30; $j--){
-					if($j<0) break;
-					if($this->isNull0($rowPriceArr[$j][$vo->close]) || $this->isNull0($rowPriceArr[$j+1][$vo->close])) continue;
-					$profit=($rowPriceArr[$j][$vo->close]-$rowPriceArr[$i][$vo->close])/$rowPriceArr[$i][$vo->close];
-					$per=($rowPriceArr[$j][$vo->close]-$rowPriceArr[$j+1][$vo->close])/$rowPriceArr[$j+1][$vo->close];
-					if($profit>=0 && $per>=0.02){
-					} else{
-						break;
-					}
-				}
-				/*
-				if($i<20) continue;
-				$count=0;
-				$close=0;
-				for($j=$i-3; $j>=$i-20; $j--){
-					if($this->isNull0($rowPriceArr[$j]["close"])) continue;
-					$close += $rowPriceArr[$j]["close"];
-					$count++;
-				}
-				if($count!=0) $close = $close/$count;
-				$profit = $close/$rowPriceArr[$i]["close"];
-				*/
-				$rowPriceExArr[$i]["profit"]=$profit;
-				if($statMap[$codeFull]==null) $statMap[$codeFull]=array(
-					"codeFull"=>$codeFull
-					,"total"=>0
-					,"count"=>0
-					,"totalInc"=>0
-					,"countInc"=>0
-					,"totalDec"=>0
-					,"countDec"=>0
-				);
-				
-				$statMap[$codeFull]["total"]+=$profit;
-				$statMap[$codeFull]["count"]++;
-				if($profit>0){
-					$statMap[$codeFull]["totalInc"]+=$profit;
-					$statMap[$codeFull]["countInc"]++;
-				} else {
-					$statMap[$codeFull]["totalDec"]+=$profit;
-					$statMap[$codeFull]["countDec"]++;
-				}
-			}
-		}
-		$str="";
-		foreach($statMap as $key=>$stat){
-			if($statMap[$key]["count"]!=0) $statMap[$key]["avg"]=round(1+$statMap[$key]["total"]/$statMap[$key]["count"],4);
-			if($statMap[$key]["countInc"]!=0) $statMap[$key]["avgInc"]=round(1+$statMap[$key]["totalInc"]/$statMap[$key]["countInc"],4);
-			if($statMap[$key]["countDec"]!=0) $statMap[$key]["avgDec"]=round(1+$statMap[$key]["totalDec"]/$statMap[$key]["countDec"],4);
-			if($statMap[$key]["count"]!=0) $statMap[$key]["prop"]=round($statMap[$key]["countInc"]/$statMap[$key]["count"],4);
-			//if($statMap[$key]["avgDec"]!=0) $statMap[$key]["bet"]=abs(round($statMap[$key]["avgInc"]/$statMap[$key]["avgDec"],2));
-			if(1==0&&$statMap[$key]["prop"]!=null){
-				$a = 1-$statMap[$key]["avgDec"];
-				$b = $statMap[$key]["avgInc"]-1;
-				$p = $statMap[$key]["prop"];
-				$q = 1 - $p;
-				//if($a!=0&&$b!=0) $statMap[$key]["kelly"] = round( ($b*$p - $a*$q)/$b ,2);
-				if($a!=0&&$b!=0) $statMap[$key]["kelly"] = $p/$a - $q/$b;
-			}
-			unset($statMap[$key]["total"]);
-			unset($statMap[$key]["totalInc"]);
-			unset($statMap[$key]["countInc"]);
-			unset($statMap[$key]["totalDec"]);
-			unset($statMap[$key]["countDec"]);
-		}
-		function sortFunc($a, $b){
-			if($a["count"] > $b["count"]) return -1;
-			if($a["count"] < $b["count"]) return 1;
-			return 0;
-		}
-		uasort($statMap, "sortFunc");
-		$num=0;
-		foreach($statMap as $key=>$stat){
-			$num++;
-			$statMap[$key]["num"]=$num;
-		}
-		foreach($statMap as $key=>$stat){
-			if($statMap[$key]["kelly"]==null) continue;
-			foreach($stat as $key2=>$value){
-				$str.=$key2."\t";
-			}
-			$str.="\n";
-			break;
-		}
-		foreach($statMap as $key=>$stat){
-			foreach($stat as $key2=>$value){
-				$str.=$value."\t";
-			}
-			$str.="\n";
-		}
-		print_p($str);
-		$this->obJfile->save("stock_ViewStock/statMap",$statMap);
-		
-		if($this->ao->canSaveAppfog()){
-			$url="http://cophieu.ap01.aws.af.cm/j.php?s=stock_ViewStock/rpcMakeStatMapAppfog";
-			//$url='http://127.0.0.1/stock/j.php?s=stock_ViewStock/rpcTradeCapAppfog';
-			$client = new Zend_Http_Client($url);
-			$paramArray=array($statMap);
-			$client->setParameterPost('paramArray', json_encode($paramArray));
-			$client->request("POST")->getBody();
-		}
-//@>
-	}
-	
-	
-	
 	public static function main(){
 		//@ que($__doc)->ready(function(){
 			stock_Ao::get()->bean("stock_ViewStock/con")->view();
