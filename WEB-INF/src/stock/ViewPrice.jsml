@@ -274,8 +274,8 @@ try{
 			$vo->row[$vo->ref]=$refMap[$symbol];
 			//$vo->row[$vo->buyPrice3]=$val[5][1];
 			//$vo->row[$vo->buyVolume3]=$val[6][1];
-			//$vo->row[$vo->buyPrice2]=$arr2[3];
-			//$vo->row[$vo->buyVolume2]=$arr2[4]*10;
+			$vo->row[$vo->buyPrice2]=$arr2[3];
+			$vo->row[$vo->buyVolume2]=$arr2[4]*10;
 			$vo->row[$vo->buyPrice1]=$arr2[5];
 			$vo->row[$vo->buyVolume1]=$arr2[6]*10;
 			
@@ -284,8 +284,8 @@ try{
 			
 			$vo->row[$vo->sellPrice1]=$arr2[11];
 			$vo->row[$vo->sellVolume1]=$arr2[12]*10;
-			//$vo->row[$vo->sellPrice2]=$arr2[13];
-			//$vo->row[$vo->sellVolume2]=$arr2[14]*10;
+			$vo->row[$vo->sellPrice2]=$arr2[13];
+			$vo->row[$vo->sellVolume2]=$arr2[14]*10;
 			//$vo->row[$vo->sellPrice3]=$val[18][1];
 			//$vo->row[$vo->sellVolume3]=$val[19][1];
 			
@@ -308,9 +308,9 @@ try{
 			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->ref];
 			
 			if($vo->row[$vo->sellVolume1]==0|| $vo->row[$vo->sellVolume1]==null) $vo->row[$vo->sellPrice1]=null;
-			//if($vo->row[$vo->sellVolume2]==0|| $vo->row[$vo->sellVolume2]==null) $vo->row[$vo->sellPrice2]=null;
+			if($vo->row[$vo->sellVolume2]==0|| $vo->row[$vo->sellVolume2]==null) $vo->row[$vo->sellPrice2]=null;
 			if($vo->row[$vo->buyVolume1]==0|| $vo->row[$vo->buyVolume1]==null) $vo->row[$vo->buyPrice1]=null;
-			//if($vo->row[$vo->buyVolume2]==0|| $vo->row[$vo->buyVolume2]==null) $vo->row[$vo->buyPrice2]=null;
+			if($vo->row[$vo->buyVolume2]==0|| $vo->row[$vo->buyVolume2]==null) $vo->row[$vo->buyPrice2]=null;
 			
 			$rowPriceLiveMap[$symbol] = $vo->row;
 			
@@ -338,8 +338,8 @@ try{
 			$vo->row[$vo->ref]=$this->getNumStar($arr[1]);
 			//$vo->row[$vo->buyPrice3]=$val[5][1];
 			//$vo->row[$vo->buyVolume3]=$val[6][1];
-			//$vo->row[$vo->buyPrice2]=$this->getNumStar($arr[7]);
-			//$vo->row[$vo->buyVolume2]=$this->getNumStar($arr[6])*1000;
+			$vo->row[$vo->buyPrice2]=$this->getNumStar($arr[7]);
+			$vo->row[$vo->buyVolume2]=$this->getNumStar($arr[6])*1000;
 			$vo->row[$vo->buyPrice1]=$this->getNumStar($arr[9]);
 			$vo->row[$vo->buyVolume1]=$this->getNumStar($arr[8])*1000;
 			
@@ -348,8 +348,8 @@ try{
 			
 			$vo->row[$vo->sellPrice1]=$this->getNumStar($arr[20]);
 			$vo->row[$vo->sellVolume1]=$this->getNumStar($arr[19])*1000;
-			//$vo->row[$vo->sellPrice2]=$this->getNumStar($arr[18]);
-			//$vo->row[$vo->sellVolume2]=$this->getNumStar($arr[17])*1000;
+			$vo->row[$vo->sellPrice2]=$this->getNumStar($arr[18]);
+			$vo->row[$vo->sellVolume2]=$this->getNumStar($arr[17])*1000;
 			//$vo->row[$vo->sellPrice3]=$val[18][1];
 			//$vo->row[$vo->sellVolume3]=$val[19][1];
 			
@@ -372,9 +372,9 @@ try{
 			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->ref];
 			
 			if($vo->row[$vo->sellVolume1]==0|| $vo->row[$vo->sellVolume1]==null) $vo->row[$vo->sellPrice1]=null;
-			//if($vo->row[$vo->sellVolume2]==0|| $vo->row[$vo->sellVolume2]==null) $vo->row[$vo->sellPrice2]=null;
+			if($vo->row[$vo->sellVolume2]==0|| $vo->row[$vo->sellVolume2]==null) $vo->row[$vo->sellPrice2]=null;
 			if($vo->row[$vo->buyVolume1]==0|| $vo->row[$vo->buyVolume1]==null) $vo->row[$vo->buyPrice1]=null;
-			//if($vo->row[$vo->buyVolume2]==0|| $vo->row[$vo->buyVolume2]==null) $vo->row[$vo->buyPrice2]=null;
+			if($vo->row[$vo->buyVolume2]==0|| $vo->row[$vo->buyVolume2]==null) $vo->row[$vo->buyPrice2]=null;
 			
 			if(!$isSaveFuture) $rowFuturePriceLiveMap[$symbol] = $vo->row;
 			if($isSaveFuture) $rowPriceLiveMap[$symbol] = $vo->row;

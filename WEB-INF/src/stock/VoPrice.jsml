@@ -25,7 +25,7 @@ class stock_VoPrice extends stock_Vo{
 	}
 	public function con2(){
 		//return $this->_con("symbol,stockDate,open,high,low,close,volume,ref,market,volume0,ceil,floor,buyPrice3,buyVolume3,buyPrice2,buyVolume2,buyPrice1,buyVolume1,sellPrice1,sellVolume1,sellPrice2,sellVolume2,sellPrice3,sellVolume3,buyVolumeP,sellVolumeP,average,buyVolumeF,sellVolumeF","");
-		return $this->_con("open,high,low,close,volume,ref,market,volume0,buyPrice1,buyVolume1,sellPrice1,sellVolume1","");
+		return $this->_con("open,high,low,close,volume,ref,market,volume0,buyPrice1,buyVolume1,buyPrice2,buyVolume2,sellPrice1,sellVolume1,sellPrice2,sellVolume2","");
 	}
 	public function con3(){
 		return $this->_con("close,volume","");

@@ -390,11 +390,11 @@ class stock_ViewDetail{
 					$this->symbol = $symbol;
 					$this->preloadDetail($this->symbol);
 					if(count($this->rowPriceArrMap[$symbol])>0){
-						$this->rowPriceArrMap[$symbol][0][$this->voPrice1->open]=$live[$this->voPrice2->open];
-						$this->rowPriceArrMap[$symbol][0][$this->voPrice1->high]=$live[$this->voPrice2->high];
-						$this->rowPriceArrMap[$symbol][0][$this->voPrice1->low]=$live[$this->voPrice2->low];
-						$this->rowPriceArrMap[$symbol][0][$this->voPrice1->close]=$live[$this->voPrice2->close];
-						$this->rowPriceArrMap[$symbol][0][$this->voPrice1->volume]=$live[$this->voPrice2->volume];
+						$this->rowPriceArrMap[$symbol][0][$this->voPrice1->open]=1.0*$live[$this->voPrice2->open];
+						$this->rowPriceArrMap[$symbol][0][$this->voPrice1->high]=1.0*$live[$this->voPrice2->high];
+						$this->rowPriceArrMap[$symbol][0][$this->voPrice1->low]=1.0*$live[$this->voPrice2->low];
+						$this->rowPriceArrMap[$symbol][0][$this->voPrice1->close]=1.0*$live[$this->voPrice2->close];
+						$this->rowPriceArrMap[$symbol][0][$this->voPrice1->volume]=1.0*$live[$this->voPrice2->volume];
 						$this->conPaint()->viewPaint();
 					} else $this->rowPriceArrMap[$symbol] = null;
 				}
