@@ -474,7 +474,7 @@ class stock_ViewChart{
 		$this->maxStockDataY3=10;
 		$this->minStockDataY3=-10;
 		$this->maxStockDataY3=100;
-		$this->minStockDataY3=-110;
+		$this->minStockDataY3=-130;
 		
 		$this->rangeY3 = $this->maxStockDataY3 - $this->minStockDataY3;
 		$this->scaleY3 = (0.16*$this->height) / $this->rangeY3;
@@ -695,7 +695,7 @@ class stock_ViewChart{
 		*/
 		$this->paintText("<div><span style='color:black'>".round( 100*($this->_maxStockDataY-$this->_minStockDataY)/$this->_minStockDataY )."</span></div>", $this->width - 50 , 2+0.16*$this->height+$this->oy);////// 850 485
 		
-		$this->paintText("<div><span style='color:black'>".$this->rowPriceExArr[0]["profitStr"]."|".round($this->rowPriceExArr[0]["profit"],1)."|".round( $this->rowPriceExArr[0]["profitAvg"],1 )."</span></div>", 0*$this->width + 50 , 2+0.16*$this->height+$this->oy+50);////// 850 485
+		$this->paintText("<div><span style='color:black'>".$this->rowPriceExArr[0]["profitStr"]."|".round($this->rowPriceExArr[0]["profitAvg"],1)."|".round( $this->rowPriceExArr[0]["profit"],1 )."</span></div>", 0*$this->width + 50 , 2+0.16*$this->height+$this->oy+50);////// 850 485
 		
 		for($i=0; $i<$this->rowPriceArr->length-1; $i++){
 			if($limit!=null && $i>=$limit) break;
@@ -772,25 +772,28 @@ class stock_ViewChart{
 				$this->context->fill();
 				//$this->context->fillStyle = 'hotpink';
 			}
-			
+			$this->context->lineWidth=3;
 			if( $this->rowPriceExArr[$i]["codeB"]=="up" ){
 				$xm1 = $this->getX($i);
 				$this->context->beginPath();
 				$this->context->fillStyle = 'blue';
+				$this->context->strokeStyle = 'blue';
 				$this->context->arc($xm1+4, $this->getY($stockData[$vo1->low])+45, 9, 0, 2 * Math::PI, false);
 				$this->context->closePath();
 				$this->context->fill();
-				//$this->context->fillStyle = 'green';
+				//$this->context->stroke();
+				//$this->context->fillRect($x+2, $this->getY($stockData[$vo1->low])+35, 2, 20 );
 			}
 			if( $this->rowPriceExArr[$i]["codeB"]!=null && $this->rowPriceExArr[$i]["codeB"]!="up" ){
 				$xm1 = $this->getX($i);
 				$this->context->beginPath();
-				if($this->rowPriceExArr[$i]["codeB"]=="down") $this->context->fillStyle = 'red';
-				else $this->context->fillStyle = 'sienna';
+				if($this->rowPriceExArr[$i]["codeB"]=="down") { $this->context->fillStyle = 'red'; $this->context->strokeStyle='red'; }
+				else { $this->context->fillStyle = 'sienna'; $this->context->strokeStyle='sienna'; }
 				$this->context->arc($xm1+4, $this->getY($stockData[$vo1->high])-45, 9, 0, 2 * Math::PI, false);
 				$this->context->closePath();
 				$this->context->fill();
-				//$this->context->fillStyle = 'hotpink';
+				//$this->context->stroke();
+				//$this->context->fillRect($x+2, $this->getY($stockData[$vo1->high])-35, 2, 20 );
 			}
 			
 			$this->context->globalAlpha=1;
@@ -907,30 +910,78 @@ class stock_ViewChart{
 		$this->context->stroke();
 		
 		$this->context->fillStyle = 'red';
-		for($i=0; $i<$this->rowPriceArr->length-1; $i++){
+		$this->context->lineWidth=3;
+		for($i=$this->rowPriceArr->length-1; $i>=0; $i--){
 			$stockData = $this->rowPriceArr[$i];
 			$vo->row = $stockData;
 			$x = $this->getX($i);
-			if($x< 0*(911-$this->padX1)) break;
+			if($x< 0*(911-$this->padX1)) continue;
 
-			if( $this->rowPriceExArr[$i]["codeB"]=="up" ){
+			/*
+			if( $this->rowPriceExArr[$i]["code2"]=="up" ){
 				$xm1 = $this->getX($i);
 				$this->context->beginPath();
 				$this->context->fillStyle = 'blue';
-				$this->context->arc($xm1+4, $this->getY3(-100)+7, 6, 0, 2 * Math::PI, false);
+				$this->context->arc($xm1+4, $this->getY3(-100)+7, 3, 0, 2 * Math::PI, false);
 				$this->context->closePath();
 				$this->context->fill();
 				//$this->context->fillStyle = 'green';
 			}
-			if( $this->rowPriceExArr[$i]["codeB"]!=null && $this->rowPriceExArr[$i]["codeB"]!="up" ){
+			if( $this->rowPriceExArr[$i]["code2"]!=null && $this->rowPriceExArr[$i]["code2"]!="up" ){
 				$xm1 = $this->getX($i);
 				$this->context->beginPath();
 				$this->context->fillStyle = 'red';
-				$this->context->arc($xm1+4, $this->getY3(-100)+7, 6, 0, 2 * Math::PI, false);
+				$this->context->arc($xm1+4, $this->getY3(-100)+7, 3, 0, 2 * Math::PI, false);
 				$this->context->closePath();
 				$this->context->fill();
 				//$this->context->fillStyle = 'hotpink';
 			}
+			*/
+			
+			if( $this->rowPriceExArr[$i]["code2"]=="up" ){
+				$xm1 = $this->getX($i);
+				$this->context->beginPath();
+				$this->context->fillStyle = 'blue';
+				$this->context->arc($xm1+4, $this->getY3(-100)+15, 6, 0, 2 * Math::PI, false);
+				$this->context->closePath();
+				$this->context->fill();
+				//$this->context->fillStyle = 'green';
+			}
+			if( $this->rowPriceExArr[$i]["code2"]!=null && $this->rowPriceExArr[$i]["code2"]!="up" ){
+				$xm1 = $this->getX($i);
+				$this->context->beginPath();
+				if($this->rowPriceExArr[$i]["code2"]=="down") $this->context->fillStyle = 'red';
+				else $this->context->fillStyle = 'sienna';
+				$this->context->arc($xm1+4, $this->getY3(-100)+15, 6, 0, 2 * Math::PI, false);
+				$this->context->closePath();
+				$this->context->fill();
+				//$this->context->fillStyle = 'hotpink';
+			}
+			$this->context->lineWidth=3;
+			if( $this->rowPriceExArr[$i]["codeB"]=="up" ){
+				$xm1 = $this->getX($i);
+				$this->context->beginPath();
+				$this->context->fillStyle = 'blue';
+				$this->context->strokeStyle = 'blue';
+				$this->context->arc($xm1+4, $this->getY3(-100)+15, 9, 0, 2 * Math::PI, false);
+				$this->context->closePath();
+				$this->context->fill();
+				//$this->context->stroke();
+				//$this->context->fillRect($x+2, $this->getY($stockData[$vo1->low])+35, 2, 20 );
+			}
+			if( $this->rowPriceExArr[$i]["codeB"]!=null && $this->rowPriceExArr[$i]["codeB"]!="up" ){
+				$xm1 = $this->getX($i);
+				$this->context->beginPath();
+				if($this->rowPriceExArr[$i]["codeB"]=="down") { $this->context->fillStyle = 'red'; $this->context->strokeStyle='red'; }
+				else { $this->context->fillStyle = 'sienna'; $this->context->strokeStyle='sienna'; }
+				$this->context->arc($xm1+4, $this->getY3(-100)+15, 9, 0, 2 * Math::PI, false);
+				$this->context->closePath();
+				$this->context->fill();
+				//$this->context->stroke();
+				//$this->context->fillRect($x+2, $this->getY($stockData[$vo1->high])-35, 2, 20 );
+			}
+			
+			
 		}
 		return;
 		

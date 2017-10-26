@@ -14,6 +14,7 @@ class stock_ViewStock{
 		$this->viewChart=$this->ao->bean("stock_ViewChart/con");
 		$this->viewTrade=$this->ao->bean("stock_ViewTrade/con");
 		$this->voPrice=$this->ao->bean("stock_VoPrice/con");
+		$this->voPrice1=$this->ao->bean("stock_VoPrice/con1");
 		$this->voPrice2=$this->ao->bean("stock_VoPrice/con2");
 		$this->voPrice3=$this->ao->bean("stock_VoPrice/con3");
 		$this->voStock=get(new stock_Vo())->_con("rate,value2,perValue,trade,live,perHigh,perMa,minClose,perMinMax,code,bv,roe,ff2","");//7
@@ -451,19 +452,18 @@ class stock_ViewStock{
 						
 						$close=1.00*$rowPriceArr[$i][$vo->close];
 						$per = 100*($rowPriceArr[$i][$vo->close] - $rowPriceArr[$i+1][$vo->close])/$rowPriceArr[$i+1][$vo->close];
-						if($j==5-1 || $j==8-1) {
-							//if($j==5-1 && $per>0 && $per<2) $close=1.02*$rowPriceArr[$i+1][$vo->close];
-							if($j==8-1 && $per>0 && $per<2) $close=1.02*$rowPriceArr[$i+1][$vo->close];
-						}
-						else{
-							//if($j==13-1) $close=1.00*$rowPriceArr[$i+0][$vo->close];
-							//if($j==21-1) $close=1.00*$rowPriceArr[$i+0][$vo->close];
-							//if($j==34-1) $close=1.02*$rowPriceArr[$i+0][$vo->close];
-							//if($j==55-1) $close=1.02*$rowPriceArr[$i+0][$vo->close];
-							if($j==13-1 && $per>0 && $per<2) $close=1.02*$rowPriceArr[$i+1][$vo->close];
-							if($j==21-1 && $per>0 && $per<3) $close=1.03*$rowPriceArr[$i+1][$vo->close];
-							if($j==34-1 && $per>0 && $per<3) $close=1.03*$rowPriceArr[$i+1][$vo->close];
-							if($j==55-1 && $per>0 && $per<3) $close=1.03*$rowPriceArr[$i+1][$vo->close];
+						$per2 = 100*($rowPriceArr[$i+1][$vo->close] - $rowPriceArr[$i+2][$vo->close])/$rowPriceArr[$i+2][$vo->close];
+						if($per>=0 && $per2<3){
+							if($j==5-1 || $j==8-1) {
+								if($j==5-1 && $per<2) $close=1.02*$rowPriceArr[$i+1][$vo->close];
+								if($j==8-1 && $per<2) $close=1.02*$rowPriceArr[$i+1][$vo->close];
+							}
+							else{
+								if($j==13-1 && $per<3) $close=1.03*$rowPriceArr[$i+1][$vo->close];
+								if($j==21-1 && $per<3) $close=1.03*$rowPriceArr[$i+1][$vo->close];
+								if($j==34-1 && $per<3) $close=1.03*$rowPriceArr[$i+1][$vo->close];
+								if($j==55-1 && $per<3) $close=1.03*$rowPriceArr[$i+1][$vo->close];
+							}
 						}
 						$maC0=$maC/($j+1);
 						$maC0=100*($close-$maC0)/$maC0;
@@ -482,7 +482,7 @@ class stock_ViewStock{
 						if($j==55-1 && $re[$i][$voRe->code]==null) {
 							$re[$i][$voRe->code]="up";
 							//if($re[$i+1][$voRe->code]=="high") $re[$i][$voRe->code]="high";
-							if($re[$i+1]!=null && ($re[$i+1][$voRe->code]=="high" || $re[$i+1][$voRe->code]=="up") ){ //&& $re[$i+1]["minMax2"]>=$CMINMAXHIGH
+							if($re[$i+1]!=null && ($re[$i+1][$voRe->code]=="high" || $re[$i+1][$voRe->code]=="up") && $re[$i][$voRe->minClose]>=$CMINMAXUP ){ //&& $re[$i+1]["minMax2"]>=$CMINMAXHIGH
 								//if($re[$i][$voRe->perHigh]>=4 && $rowPriceArr[$i][$vo->close]<$rowPriceArr[$i+1][$vo->close]) $re[$i][$voRe->code]="high";
 								//if($imaxUp>=3) $re[$i][$voRe->code]="high";
 								/*
@@ -493,7 +493,7 @@ class stock_ViewStock{
 								if($lt>=2) $re[$i][$voRe->code]="high";
 								*/
 								//if($re[$i][$voRe->perMinMax]<60) $re[$i][$voRe->code]="high";
-								if($perMinMax0<60) $re[$i][$voRe->code]="high";
+								if($perMinMax0<60 || $re[$i][$voRe->perHigh]>=5) $re[$i][$voRe->code]="high";
 								//if($re[$i+1]["minMax2"]>=$CMINMAXHIGH) $re[$i][$voRe->code]="high";
 								//////if($re[$i+1][$voRe->code]=="high") $re[$i][$voRe->code]="high";
 								//if($CMINMAXHIGH==0) $re[$i][$voRe->code]="down";
@@ -506,13 +506,11 @@ class stock_ViewStock{
 					$ma1=$maC/($j+1);
 				}
 				if($j==5-1){
-					///////////////$re[$i][$voRe->minClose]=round(100*($rowPriceArr[$i][$vo->close]-$min)/$min);
+					///////////////$re[$i][$voRe->minClose]=100*($rowPriceArr[$i][$vo->close]-$min)/$min;
 					$re[$i][$voRe->perHigh]=round(100*($max0-$rowPriceArr[$i][$vo->close])/$max0);
-					$imaxUp=$imax;
 					//$minMax0=round(100*($max0-$min)/$min);
 					$re[$i]["minMax"]=100*($max-$min)/$min;
-					$re[$i][$voRe->minClose]=null;
-					if($re[$i+1]!=null) $re[$i][$voRe->minClose]=$re[$i+1]["minMax"];
+					
 					//$minOpen=round(100*($rowPriceArr[$i][$vo->open]-$min)/$min);
 					
 				}
@@ -533,10 +531,14 @@ class stock_ViewStock{
 					if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$ma1) $ma=$ma1;
 					$re[$i][$voRe->perMa]=round(100*($rowPriceArr[$i][$vo->close]-$ma)/$ma);
 //@>				
-					
+					$re[$i]["minClose"]=100*($rowPriceArr[$i][$vo->close]-$min)/$min;
+					$re[$i][$voRe->minClose]=null;
+					if($re[$i+1]!=null) $re[$i][$voRe->minClose]=$re[$i+1]["minClose"];
 				}
 				if($j==13-1){
 					$re[$i]["minMax2"]=round(100*($max-$min)/$min);
+					
+					
 				}
 				if($j==13-1){
 					//@ $re[$i]["ma3"]=$maC/($j+1);
@@ -564,55 +566,22 @@ class stock_ViewStock{
 @>*/
 				}
 			}
-			
-				if($maxUp!=null){
-					if($rowPriceArr[$i][$vo->close]<$minUp){
-						$minUp=$rowPriceArr[$i][$vo->close];
-						$iminUp=$i;
-					}
-					if($rowPriceArr[$i][$vo->close]>$maxUp){
-						$maxUp=$rowPriceArr[$i][$vo->close];
-						$imaxUp=$i;
-					}
-				}
 			/*
-				if($re[$i][$voRe->code]=="up" && $re[$i+1]!=null && $re[$i+1][$voRe->code]!="up" && $re[$i+1][$voRe->code]!="up" && $re[$i+1]["minMax"]<=$CMINMAXUP ) {
-						
-						$re[$i]["codeB"]=$re[$i][$voRe->code];
-						$iUp2=$i;
-						$maxUp=$rowPriceArr[$i][$vo->close];
-						$minUp=$rowPriceArr[$i][$vo->close];
-						if($closeB==null){
-							$iUp=$i;
-							$closeB=1.002*$rowPriceArr[$i][$vo->close];
-							if(1.025*$rowPriceArr[$i+1][$vo->close]<=$rowPriceArr[$i][$vo->close]) $closeB=1.002*1.025*$rowPriceArr[$i+1][$vo->close];
-						}
+			if($maxUp!=null){
+				if($rowPriceArr[$i][$vo->close]<$minUp){
+					$minUp=$rowPriceArr[$i][$vo->close];
+					$iminUp=$i;
 				}
-				if($closeB!=null && $re[$i][$voRe->code]!="up" && $rowPriceArr[$iUp2+1]!=null){
-					//$perB=100*($rowPriceArr[$i][$vo->close]-$rowPriceArr[$iUp+1][$vo->close])/$rowPriceArr[$iUp+1][$vo->close];
-					$perMaxUp=100*($maxUp-$rowPriceArr[$iUp2+1][$vo->close])/$rowPriceArr[$iUp2+1][$vo->close];
-					$perMinUp=100*($minUp-$rowPriceArr[$iUp2][$vo->close])/$rowPriceArr[$iUp2][$vo->close];
-					//$perMinUp=100*($minUp-$maxUp)/$maxUp;
-					//$perMinMaxUp=100*($maxUp-$minUp)/$minUp;
-					if( (($re[$i+1]!=null && $re[$i+1][$voRe->code]=="up" && $iUp>=3+$i) || $iUp==3+$i || ($iUp>=3+$i && $perMinUp<=-$CMINUP)) && ( $re[$i]["minMax2"]>=$CMINMAXHIGH  || $perMinUp<=-$CMINUP)) { 
-					//
-					//$perMaxUp >= $CMAXUP
-					//if($re[$i][$voRe->code]!="up"  && (($re[$i+1]!=null && $re[$i+1][$voRe->code]=="up" && $iUp>=3+$i) || $iUp==3+$i || ($iUp>=3+$i && $perB<-3)) && abs($perB) > 3) {
-					//if($re[$i][$voRe->code]!="up"  && $re[$i+1]!=null && $re[$i+1][$voRe->code]=="up" ) {
-						$re[$i]["codeB"]=$re[$i][$voRe->code];
-						$closeS=0.998*$rowPriceArr[$i][$vo->close];
-						if(0.975*$rowPriceArr[$i+1][$vo->close]>=$rowPriceArr[$i][$vo->close]) $closeS=0.998*0.975*$rowPriceArr[$i+1][$vo->close];
-						$re[0]["profit"]+=100*($closeS-$closeB)/$closeB;
-						$profitCount++;
-						$closeB=null;
-						$maxUp=null;
-						$minUp=null;
-						$iUp=null;
-					}
+				if($rowPriceArr[$i][$vo->close]>$maxUp){
+					$maxUp=$rowPriceArr[$i][$vo->close];
+					$imaxUp=$i;
 				}
+			}
 			*/
 			if($re[$i+1]!=null){
-				if($re[$i][$voRe->code]=="up" && $re[$i+1][$voRe->code]!="up") {
+				if($re[$i][$voRe->code]=="up" && $re[$i+1][$voRe->code]!="up"
+					// && $rowPriceArr[$i][$vo->close]>=$rowPriceArr[$i][$vo->open] && $rowPriceArr[$i][$vo->close]>=$rowPriceArr[$i+1][$vo->close]
+				) {
 					$re[$i]["code2"]=$re[$i][$voRe->code];
 				}
 				
@@ -623,13 +592,13 @@ class stock_ViewStock{
 				}
 				
 				if($closeB==null){
-					if($re[$i]["code2"]=="up" && $re[$i][$voRe->minClose]<=$CMINMAXUP 
-						&& $rowPriceArr[$i][$vo->close]>=$rowPriceArr[$i][$vo->open] && $rowPriceArr[$i][$vo->close]>=$rowPriceArr[$i+1][$vo->close]
+					if($re[$i]["code2"]=="up" && $re[$i][$voRe->minClose]<=5
+						// && $rowPriceArr[$i][$vo->close]>=$rowPriceArr[$i][$vo->open] && $rowPriceArr[$i][$vo->close]>=$rowPriceArr[$i+1][$vo->close]
 					){
 						$re[$i]["codeB"]=$re[$i][$voRe->code];
 						$iUp2=$i;
-						$maxUp=$rowPriceArr[$i][$vo->close];
-						$minUp=$rowPriceArr[$i][$vo->close];
+						////$maxUp=$rowPriceArr[$i][$vo->close];
+						////$minUp=$rowPriceArr[$i][$vo->close];
 
 						$iUp=$i;
 						//$closeB=$rowPriceArr[$i+1][$vo->close];
@@ -639,7 +608,7 @@ class stock_ViewStock{
 					}
 				}
 				if($closeB!=null && $iUp>=3+$i){
-					if( ($re[$i][$voRe->code]=="high" && $re[$i][$voRe->minClose]>$CMINMAXUP)
+					if( ($re[$i][$voRe->code]=="high") // && $re[$i][$voRe->minClose]>=$CMINMAXUP
 						|| $re[$i][$voRe->code]=="down"
 					){
 						$re[$i]["codeB"]=$re[$i][$voRe->code];
@@ -650,8 +619,8 @@ class stock_ViewStock{
 						$re[0]["profit"]+=100*($closeS-$closeB)/$closeB;
 						$profitCount++;
 						$closeB=null;
-						$maxUp=null;
-						$minUp=null;
+						////$maxUp=null;
+						////$minUp=null;
 						$iUp=null;
 					}
 				}
@@ -1936,8 +1905,8 @@ try{
 						} else $rate+=9000000;
 						
 						if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
-						else $rate+=+1000*round($perHigh*100)+round($perValue*100);
-						//else $rate+=round($perValue*100);
+						//else $rate+=+1000*round($perHigh*100)+round($perValue*100);
+						else $rate+=round($perValue*100);
 						//else $rate+=-1000*round($perSell*100)+round($perValue*100);
 					}
 					else{
@@ -1963,7 +1932,7 @@ try{
 					   $reRowPriceArr[$i][$voRe->minClose] <= 5 && $reRowPriceArr[$i][$voRe->delta] >=0.0 &&
 					  ($reRowPriceArr[$i][$voRe->value2]>=300000 || $value0>=300000)){
 							$rate+=10000000;
-							if($reRowPriceArr[0]["codeB"]=="up" || $reRowPriceArr[1]["codeB"]=="up") $rate+=900000;
+							if($reRowPriceArr[0]["code2"]=="up" || $reRowPriceArr[1]["code2"]=="up") $rate+=900000;
 						
 						if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
 						else $rate+=round($perValue*100);
