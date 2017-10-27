@@ -455,7 +455,7 @@ class stock_ViewDetail{
 			$jque = que($obj);
 			if($jque->attr("_value") == $this->symbol){
 				$h=33;//33
-				$display = 20;//24;
+				$display = 40;//24;
 				//$h=16;//16;//16;//18;
 				//$display = 26;
 				$height = $h*$display;
