@@ -493,7 +493,8 @@ class stock_ViewStock{
 				}
 				if($j==13-1){
 					//@ $re[$i]["ma3"]=$maC/($j+1);
-					$re[$i]["minMax2"]=round(100*($max-$min)/$min);
+					//$re[$i]["minMax2"]=round(100*($max-$min)/$min);
+					$re[$i]["minClose1"]=100*($rowPriceArr[$i][$vo->close]-$min)/$min;
 				}
 				if($j==21-1){
 					//@ $re[$i]["ma4"]=$maC/($j+1);
@@ -528,17 +529,6 @@ class stock_ViewStock{
 						//$per2 = 100*($rowPriceArr[$i+1][$vo->close] - $rowPriceArr[$i+2][$vo->close])/$rowPriceArr[$i+2][$vo->close];
 						if($per>=0 && $rowPriceArr[$i][$vo->close] >= $rowPriceArr[$i][$vo->open]){
 							/*
-							if($j==5-1 || $j==8-1) {
-								if($j==5-1 && $per<=2) $close=1.02*$rowPriceArr[$i+1][$vo->close];
-								if($j==8-1 && $per<=2) $close=1.02*$rowPriceArr[$i+1][$vo->close];
-							}
-							else{
-								if($j==13-1 && $per<=2) $close=1.02*$rowPriceArr[$i+1][$vo->close];
-								if($j==21-1 && $per<=2) $close=1.02*$rowPriceArr[$i+1][$vo->close];
-								if($j==34-1 && $per<=3) $close=1.03*$rowPriceArr[$i+1][$vo->close];
-								if($j==55-1 && $per<=3) $close=1.03*$rowPriceArr[$i+1][$vo->close];
-							}
-							*/
 							if($per<=3){
 								$close=1.03*$rowPriceArr[$i+1][$vo->close];
 								if($j==34-1 || $j==55-1) $close=1.03*$rowPriceArr[$i+1][$vo->close];
@@ -546,6 +536,9 @@ class stock_ViewStock{
 								$close=1.05*$rowPriceArr[$i+1][$vo->close];
 								if($j==34-1 || $j==55-1) $close=1.05*$rowPriceArr[$i+1][$vo->close];
 							}
+							*/
+							$close=1.02*$rowPriceArr[$i][$vo->close];
+							if($close > 1.05*$rowPriceArr[$i+1][$vo->close]) $close=1.05*$rowPriceArr[$i+1][$vo->close]; 
 						}
 						$maC0=$maC/($j+1);
 						$maC0=100*($close-$maC0)/$maC0;
@@ -563,8 +556,8 @@ class stock_ViewStock{
 						*/
 						if($j==55-1 && $re[$i][$voRe->code]==null) {
 							$re[$i][$voRe->code]="up";
-							if($re[$i+1]!=null && ($re[$i+1][$voRe->code]=="high" || $re[$i+1][$voRe->code]=="up") && $re[$i+1]["minMax2"]>=13 ){ //&& $re[$i+1]["minMax2"]>=$CMINMAXHIGH
-								if($re[$i][$voRe->perMinMax]<50 || ($re[$i][$voRe->perHigh]>=4 && $per<0 && $rowPriceArr[$i][$vo->close] < $rowPriceArr[$i][$vo->open])) $re[$i][$voRe->code]="high";
+							if($re[$i+1]!=null && ($re[$i+1][$voRe->code]=="high" || $re[$i+1][$voRe->code]=="up") && $re[$i+1]["minClose1"]>=13 ){ //&& $re[$i+1]["minMax2"]>=$CMINMAXHIGH
+								if($re[$i][$voRe->perMinMax]<60 || ($re[$i][$voRe->perHigh]>=4 && $per<0 && $rowPriceArr[$i][$vo->close] < $rowPriceArr[$i][$vo->open])) $re[$i][$voRe->code]="high";
 								//if($re[$i][$voRe->perMinMax]<50) $re[$i][$voRe->code]="high";
 								//if(($re[$i][$voRe->perHigh]>=4 && $per<0)) $re[$i][$voRe->code]="high";
 							}				
@@ -616,7 +609,7 @@ class stock_ViewStock{
 					}
 				}
 				if($closeB!=null && $iUp>=3+$i){
-					if( ($re[$i][$voRe->code]=="high" && $re[$i+1]["minMax2"]>=18)
+					if( ($re[$i][$voRe->code]=="high")// && $re[$i+1]["minClose1"]>=18
 						|| $re[$i][$voRe->code]=="down"
 					){
 						$re[$i]["codeB"]=$re[$i][$voRe->code];
@@ -1917,8 +1910,8 @@ try{
 						
 						if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
 						//else $rate+=+1000*round($perHigh*100)+round($perValue*100);
-						else $rate+=round($perValue*100);
-						//else $rate+=-1000*round($perSell*100)+round($perValue*100);
+						//else $rate+=round($perValue*100);
+						else $rate+=100000*(100000-round($perSell*100))+round($perValue*100);
 					}
 					else{
 						$rate=500100000100000;
@@ -1942,8 +1935,8 @@ try{
 						} else $rate+=100000100000;
 						
 						if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
-						//else $rate+=+1000*round($perHigh*100)+round($perValue*100);
-						else $rate+=round($perValue*100);
+						else $rate+=(100000*round($perHigh*100))+round($perValue*100);
+						//else $rate+=round($perValue*100);
 						//else $rate+=-1000*round($perSell*100)+round($perValue*100);
 					}
 				} else {
@@ -1959,16 +1952,16 @@ try{
 							//if($reRowPriceArr[0]["code2"]=="up" || $reRowPriceArr[1]["code2"]=="up") $rate+=900000;
 						
 						if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
-						else $rate+=round($perValue*100);
-						//else $rate+=-1000*round($perSell*100)+round($perValue*100);
+						//else $rate+=round($perValue*100);
+						else $rate+=100000*(100000-round($perSell*100))+round($perValue*100);
 						
 						//if($filterMap["fa"]=="fa" && ($stockMap[$symbol][$voStock->roe]>=20 || $ysFaMap[$symbol]!=null) && $live[$vo2->close]<=3*$stockMap[$symbol][$voStock->bv] && $noFaMap[$symbol]==null) $rate+=100000;
 						
 					} else {
 						$rate=200100000100000;
 						if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
-						else $rate+=round($perValue*100);
-						//else $rate+=-1000*round($perSell*100)+round($perValue*100);
+						//else $rate+=round($perValue*100);
+						else $rate+=100000*(100000-round($perSell*100))+round($perValue*100);
 						
 						//$rate+= 100*$reRowPriceArr[$i][$voRe->maxC2];
 						//if($filterMap["fa"]=="fa" && ($stockMap[$symbol][$voStock->roe]>=20 || $ysFaMap[$symbol]!=null) && $live[$vo2->close]<=3*$stockMap[$symbol][$voStock->bv] && $noFaMap[$symbol]==null) $rate+=100000;
@@ -2001,7 +1994,8 @@ try{
 				
 				$rate0 = 400100000100000+700000100000;
 				if($rate<$rate0 && $vn30Map[ $symbol ] !=null) {
-					$rate=$rate0 - $vn30Map[ $symbol ];
+					//$rate=$rate0 - $vn30Map[ $symbol ];
+					$rate=$rate0+(100000-round($perSell*100));
 					$willunset=false;
 				}
 				

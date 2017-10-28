@@ -654,8 +654,8 @@ class stock_ViewChart{
 		
 		//$this->paintStat();
 		$this->paintValue();
-		$this->paintMa();
 		$this->paintCandleStick();
+		$this->paintMa();
 		//$this->paintClose();
 		$this->setOnePrice();
 		$this->paintIndicator();
@@ -675,8 +675,8 @@ class stock_ViewChart{
 		
 		$this->paintStat();
 		$this->paintValue();
-		$this->paintMa();
 		$this->paintCandleStick();
+		$this->paintMa();
 		//$this->paintIndicator();
 	}
 
@@ -892,18 +892,18 @@ class stock_ViewChart{
 			if( $y>=60) $this->context->fillStyle = 'blue';
 			else $this->context->fillStyle = 'red';
 			
-			$this->context->fillRect($x, $this->getY3(-100), $this->w+1 , -$delta);
+			$this->context->fillRect($x, $this->getY3(0), $this->w+1 , -$delta);
 			
 			//$y = 10*$this->rowPriceExArr[$i][$voRe->minClose];
-			$y = $this->rowPriceExArr[$i]["perMinMax2"];
+			$y = 10*$this->rowPriceExArr[$i][$voRe->perHigh];
 			if($y>$this->maxStockDataY3) $y=$this->maxStockDataY3;
 			if($y<$this->minStockDataY3) $y=$this->minStockDataY3;
 			$delta=$y*$this->scaleY3;
 			if($i==0 && abs($delta)<3) $delta=3;
 
-			if( $y>=60) $this->context->fillStyle = 'blue';
+			if( $y<=40) $this->context->fillStyle = 'blue';
 			else $this->context->fillStyle = 'red';
-			$this->context->fillRect($x, $this->getY3(-0), $this->w+1 , -$delta);
+			$this->context->fillRect($x, $this->getY3(0), $this->w+1 , +$delta);
 			
 			/*
 			$y = 10*$this->rowPriceExArr[$i]["perMa6"];
