@@ -948,11 +948,11 @@ var $this = this; var $__arguments = arguments; var $voStock = null; var $vo2 = 
 	}
 stock_ViewChart.prototype.getX = function($i){
 var $this = this; var $__arguments = arguments;
-		return ($this.width - $this.ox - $this.padX) - ($this.w+0)*$i;
+		return ($this.width - $this.ox - $this.padX) - ($this.w+1)*$i;
 	}
 stock_ViewChart.prototype.getI = function($x){
 var $this = this; var $__arguments = arguments;
-		return round( (($this.width - $this.ox - $this.padX) - $x)/($this.w+0) );
+		return round( (($this.width - $this.ox - $this.padX) - $x)/($this.w+1) );
 	}
 stock_ViewChart.prototype.saveScale = function(){
 var $this = this; var $__arguments = arguments;
@@ -1200,12 +1200,20 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 			if( $this.rowPriceExArr[$i]["code2"]!=null && $this.rowPriceExArr[$i]["code2"]!="up" ){
 				$xm1 = $this.getX($i);
 				$this.context.beginPath();
-				if($this.rowPriceExArr[$i]["code2"]=="down") $this.context.fillStyle = 'red';
-				else $this.context.fillStyle = 'red';
-				$this.context.arc($xm1+4, $this.getY($stockData[$vo1.high])-25, 6, 0, 2 * Math.PI, false);
-				$this.context.closePath();
-				$this.context.fill();
-							}
+				if($this.rowPriceExArr[$i]["code2"]=="down"){
+					$this.context.fillStyle = 'red';
+					$this.context.arc($xm1+4, $this.getY($stockData[$vo1.high])-25, 6, 0, 2 * Math.PI, false);
+					$this.context.closePath();
+					$this.context.fill();
+				}
+				else {
+					$this.context.fillStyle = 'red';
+					$this.context.strokeStyle = 'red';
+					$this.context.arc($xm1+4, $this.getY($stockData[$vo1.high])-25, 6, 0, 2 * Math.PI, false);
+					$this.context.closePath();
+										$this.context.fill();
+									}
+			}
 			$this.context.lineWidth=3;
 			if( $this.rowPriceExArr[$i]["codeB"]=="up" ){
 				$xm1 = $this.getX($i);
@@ -1292,17 +1300,17 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 			if( $y>=60) $this.context.fillStyle = 'blue';
 			else $this.context.fillStyle = 'red';
 			
-			$this.context.fillRect($x, $this.getY3(-100), $this.w , -$delta);
+			$this.context.fillRect($x, $this.getY3(-100), $this.w+1 , -$delta);
 			
-						$y = 10*$this.rowPriceExArr[$i][$voRe.minClose];
+						$y = $this.rowPriceExArr[$i]["perMinMax2"];
 			if($y>$this.maxStockDataY3) $y=$this.maxStockDataY3;
 			if($y<$this.minStockDataY3) $y=$this.minStockDataY3;
 			$delta=$y*$this.scaleY3;
 			if($i==0 && abs($delta)<3) $delta=3;
 
-			if( $y<=50) $this.context.fillStyle = 'blue';
+			if( $y>=60) $this.context.fillStyle = 'blue';
 			else $this.context.fillStyle = 'red';
-			$this.context.fillRect($x, $this.getY3(-0), $this.w , -$delta);
+			$this.context.fillRect($x, $this.getY3(-0), $this.w+1 , -$delta);
 			
 			
 		}
@@ -1555,8 +1563,8 @@ var $this = this; var $__arguments = arguments; var $vo1 = null; var $vo = null;
 			if($x<$this.padX) break;
 			if( $stockData[$vo1.close] >= $stockData[$vo1.open]) $this.context.fillStyle = 'blue';
 			else $this.context.fillStyle = 'red';
-			if($this.w==2)$this.context.fillRect($x, $this.getY2(0), $this.w , -$y2*$this.scaleY2);
-			else $this.context.fillRect($x, $this.getY2(0), $this.w , -$y2*$this.scaleY2);
+			if($this.w==2)$this.context.fillRect($x, $this.getY2(0), $this.w+1 , -$y2*$this.scaleY2);
+			else $this.context.fillRect($x, $this.getY2(0), $this.w+1 , -$y2*$this.scaleY2);
 
 			if($i==0){
 																							}
@@ -3164,8 +3172,8 @@ var $this = this; var $__arguments = arguments;
 		$this.voPrice1=$this.ao.bean("stock_VoPrice/con1");
 		$this.voPrice2=$this.ao.bean("stock_VoPrice/con2");
 		$this.voPrice3=$this.ao.bean("stock_VoPrice/con3");
-		$this.voStock=get(new stock_Vo())._con("rate,value2,perValue,trade,live,perHigh,perMa,minClose,perMinMax,code,bv,roe,ff2","");		
-		$this.voRowPriceArr=get(new stock_Vo())._con("value2,perValue,code,perMa,minClose,perMinMax,perHigh","");
+		$this.voStock=get(new stock_Vo())._con("rate,value2,perValue,trade,live,perHigh,perMa,minClose,perMinMax,perMinMax2,code,bv,roe,ff2","");		
+		$this.voRowPriceArr=get(new stock_Vo())._con("value2,perValue,code,perMa,minClose,perMinMax,perMinMax2,perHigh","");
 		$this.voStat=get(new stock_Vo())._con("total,avg","");
 		
 		
@@ -3393,7 +3401,7 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 
 		if($limit==null) $len2=$len;
 		else $len2=$limit;
-		if($len2>153) $len2=153;
+				if($len2>130) $len2=130;
 		$codeB=null;
 		$closeB=null;
 		$re[0]["profit"]=0;
@@ -3465,14 +3473,15 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 				if($j==5-1){
 					$re[$i][$voRe.perHigh]=100*($max0-$rowPriceArr[$i][$vo.close])/$max0;
 					
-					$re[$i]["minClose0"]=100*($rowPriceArr[$i][$vo.close]-$min)/$min;
+					
 				}
-				if($j==4-1){
+				if($j==5-1){
 					if($max-$min!=0) $re[$i][$voRe.perMinMax]=100*($rowPriceArr[$i][$vo.close]-$min)/($max-$min);
 					else $re[$i][$voRe.perMinMax]=0;
 					
 					
 					$re[$i]["minMax0"]=100*($max-$min)/$min;
+					$re[$i]["minClose0"]=100*($rowPriceArr[$i][$vo.close]-$min)/$min;
 				}
 				if($j==8-1){
 					$re[$i]["ma2"]=$maC/($j+1);					
@@ -3481,17 +3490,23 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 					$re[$i]["perMa2"]=round(100*($rowPriceArr[$i][$vo.close]-$ma)/$ma);
 					
 				
-					$re[$i]["minMax2"]=100*($max-$min)/$min;
-				
+										
+				}
+				if($j==6-1){
+					if($max-$min!=0) $re[$i]["perMinMax2_"]=100*($rowPriceArr[$i][$vo.close]-$min)/($max-$min);
+					else $re[$i]["perMinMax2_"]=0;
+					$re[$i]["perMinMax2"]=$re[$i+1]["perMinMax2_"];
+					
 					$re[$i]["minClose"]=100*($rowPriceArr[$i][$vo.close]-$min)/$min;
-					$re[$i][$voRe.minClose]=null;
+					$re[$i][$voRe.minClose]=0;
 					if($re[$i+1]!=null) $re[$i][$voRe.minClose]=$re[$i+1]["minClose"];
 				}
 				if($j==13-1){
 				}
 				if($j==13-1){
 					 $re[$i]["ma3"]=$maC/($j+1);
-								}
+				$re[$i]["minMax2"]=round(100*($max-$min)/$min);
+				}
 				if($j==21-1){
 					 $re[$i]["ma4"]=$maC/($j+1);
 				
@@ -3500,7 +3515,8 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 				}
 				if($j==34-1){
 					 $re[$i]["ma5"]=$maC/($j+1);
-			}
+				$re[$i]["minClose2"]=100*($rowPriceArr[$i][$vo.close]-$min)/$min;
+				}
 				if($j==55-1){
 					$re[$i]["ma6"]=$maC/($j+1);					
 					$ma=$re[$i]["ma6"];
@@ -3508,7 +3524,7 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 					if($rowPriceArr[$i][$vo.close]-$ma > $rowPriceArr[$i][$vo.close]-$re[$i]["ma4"]) $ma=$re[$i]["ma4"];
 					if($rowPriceArr[$i][$vo.close]-$ma > $rowPriceArr[$i][$vo.close]-$re[$i]["ma5"]) $ma=$re[$i]["ma5"];
 					$re[$i]["perMa6"]=round(100*($rowPriceArr[$i][$vo.close]-$ma)/$ma);
-					$re[$i]["minMax"]=100*($max-$min)/$min;
+										
 				}
 				
 				if($re[$i][$voRe.code]!="down"){
@@ -3516,16 +3532,14 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 						
 						$close=1.00*$rowPriceArr[$i][$vo.close];
 						$per = 100*($rowPriceArr[$i][$vo.close] - $rowPriceArr[$i+1][$vo.close])/$rowPriceArr[$i+1][$vo.close];
-												if($per>=0 && $re[$i+1]["minClose0"]<=2 ){
-							if($j==5-1 || $j==8-1) {
-								if($j==5-1 && $per<=2) $close=1.02*$rowPriceArr[$i+1][$vo.close];
-								if($j==8-1 && $per<=2) $close=1.02*$rowPriceArr[$i+1][$vo.close];
-							}
-							else{
-								if($j==13-1 && $per<=2) $close=1.02*$rowPriceArr[$i+1][$vo.close];
-								if($j==21-1 && $per<=3) $close=1.03*$rowPriceArr[$i+1][$vo.close];
-								if($j==34-1 && $per<=3) $close=1.03*$rowPriceArr[$i+1][$vo.close];
-								if($j==55-1 && $per<=3) $close=1.03*$rowPriceArr[$i+1][$vo.close];
+												if($per>=0 && $rowPriceArr[$i][$vo.close] >= $rowPriceArr[$i][$vo.open]){
+							
+							if($per<=3){
+								$close=1.03*$rowPriceArr[$i+1][$vo.close];
+								if($j==34-1 || $j==55-1) $close=1.03*$rowPriceArr[$i+1][$vo.close];
+							} else {
+								$close=1.05*$rowPriceArr[$i+1][$vo.close];
+								if($j==34-1 || $j==55-1) $close=1.05*$rowPriceArr[$i+1][$vo.close];
 							}
 						}
 						$maC0=$maC/($j+1);
@@ -3536,15 +3550,14 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 						
 						if($j==55-1 && $re[$i][$voRe.code]==null) {
 							$re[$i][$voRe.code]="up";
-														if($re[$i+1]!=null && ($re[$i+1][$voRe.code]=="high" || $re[$i+1][$voRe.code]=="up") && $re[$i+1]["minMax2"]>=5 ){ 																								
-																if($re[$i][$voRe.perMinMax]<50 || ($re[$i][$voRe.perHigh]>=4 && $per<0)) $re[$i][$voRe.code]="high";
-																															}				
+							if($re[$i+1]!=null && ($re[$i+1][$voRe.code]=="high" || $re[$i+1][$voRe.code]=="up") && $re[$i+1]["minMax2"]>=13 ){ 								if($re[$i][$voRe.perMinMax]<50 || ($re[$i][$voRe.perHigh]>=4 && $per<0 && $rowPriceArr[$i][$vo.close] < $rowPriceArr[$i][$vo.open])) $re[$i][$voRe.code]="high";
+																							}				
 						}
 					}
 				}
 			}
 			
-			if($re[$i+1]!=null){
+			if($re[$i+1]!=null && $re[$i+2]!=null){
 				if($re[$i][$voRe.code]=="up" && $re[$i+1][$voRe.code]!="up"
 									) {
 					$re[$i]["code2"]=$re[$i][$voRe.code];
@@ -3557,8 +3570,7 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 				}
 				
 				if($closeB==null){
-					$per = 100*($rowPriceArr[$i][$vo.close] - $rowPriceArr[$i+1][$vo.close])/$rowPriceArr[$i+1][$vo.close];
-					if($re[$i]["code2"]=="up" && $re[$i][$voRe.minClose]<5 											){
+															if($re[$i][$voRe.code]=="up" && $re[$i][$voRe.minClose]<=5 && $re[$i+1]["minClose2"]<=34  											){
 						$re[$i]["codeB"]=$re[$i][$voRe.code];
 						$iUp2=$i;
 												
@@ -3569,7 +3581,8 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 					}
 				}
 				if($closeB!=null && $iUp>=3+$i){
-					if( ($re[$i][$voRe.code]=="high") 						|| $re[$i][$voRe.code]=="down"
+					if( ($re[$i][$voRe.code]=="high" && $re[$i+1]["minMax2"]>=18)
+						|| $re[$i][$voRe.code]=="down"
 					){
 						$re[$i]["codeB"]=$re[$i][$voRe.code];
 												$closeS=0.998*$rowPriceArr[$i][$vo.close];
