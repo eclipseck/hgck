@@ -18,7 +18,7 @@ class stock_ViewChart{
 		$this->minMaxPadFactorWeb = $this->minMaxPadFactor;
 	
 		$this->width = 0*830+939;//;+840  1779
-		$this->height = 1300;//720;////410;/////440;//540+0*100;
+		$this->height = 1300+0;//720;////410;/////440;//540+0*100;
 		
 		$this->rowPriceArrMap=array(
 		);
@@ -34,7 +34,7 @@ class stock_ViewChart{
 <div>
 	<div id="divCanvasText" style='position:relative'>
 	</div>
-	<div id="divOnePrice" align="right" style='position:absolute;left:200px;top:<?= 2+0.0*$this->height ?>px;border:0px solid;width:655px;'></div>
+	<div id="divOnePrice" align="right" style='position:absolute;left:200px;top:<?= 80+0.0*$this->height ?>px;border:0px solid;width:655px;'></div>
 	<canvas id="canvas"></canvas>
 </div>
 <!--/$html--><?
@@ -280,9 +280,9 @@ class stock_ViewChart{
 		return $re;
 	}
 	
-	public function changeRowPriceArr($rowPriceArr){
+	public function changeRowPriceArr($rowPriceArr, $combineDay){
 		$combineDay=$this->ao->conf["combineDay"];
-		if($this->ao->conf["combineDay"]==8) $combineDay=2;
+		if($combineDay==8) $combineDay=2;
 		$vo=$this->voPrice1;
 		
 		$rowPriceArrEx=array();
@@ -466,10 +466,18 @@ class stock_ViewChart{
 		//$this->scaleX = ($this->width - $this->ox - $this->padX) / $this->rangeX;
 
 		$this->rangeY = $this->maxStockDataY - $this->minStockDataY;
-		$this->scaleY = (0.45*$this->height) / $this->rangeY;
+		$this->scaleY = (0.60*$this->height) / $this->rangeY;
 
 		$this->rangeY2 = $this->maxStockDataY2 - $this->minStockDataY2;
-		$this->scaleY2 = (0.45*$this->height) / $this->rangeY2;
+		$this->scaleY2 = (0.60*$this->height) / $this->rangeY2;
+		
+		if($this->oy>500){
+			$this->rangeY = $this->maxStockDataY - $this->minStockDataY;
+			$this->scaleY = (0.32*$this->height) / $this->rangeY;
+
+			$this->rangeY2 = $this->maxStockDataY2 - $this->minStockDataY2;
+			$this->scaleY2 = (0.32*$this->height) / $this->rangeY2;
+		}
 
 		$this->maxStockDataY3=10;
 		$this->minStockDataY3=-10;
@@ -477,7 +485,7 @@ class stock_ViewChart{
 		$this->minStockDataY3=-130;
 		
 		$this->rangeY3 = $this->maxStockDataY3 - $this->minStockDataY3;
-		$this->scaleY3 = (0.10*$this->height) / $this->rangeY3;
+		$this->scaleY3 = (0.08*$this->height) / $this->rangeY3;
 		
 		$this->maxStockDataY4=7;
 		$this->minStockDataY4=-7;
@@ -486,14 +494,16 @@ class stock_ViewChart{
 		$this->scaleY4 = (0.2*$this->height) / $this->rangeY4;
 	}
 	public function getY($y){
-		return (0.45*$this->height+$this->oy) - ($y- $this->minStockDataY) * $this->scaleY;
+		if($this->oy>500) return (0.32*$this->height+$this->oy) - ($y- $this->minStockDataY) * $this->scaleY;
+		return (0.60*$this->height+$this->oy) - ($y- $this->minStockDataY) * $this->scaleY;
 	}
 	public function getY2($y){
-		return (0.45*$this->height+$this->oy) - ($y- $this->minStockDataY2) * $this->scaleY2;
+		if($this->oy>500) return (0.32*$this->height+$this->oy) - ($y- $this->minStockDataY2) * $this->scaleY2;
+		return (0.60*$this->height+$this->oy) - ($y- $this->minStockDataY2) * $this->scaleY2;
 	}
 	public function getY3($y){
 		//return ($this->height - $this->oy - $this->padY) - ($y- $this->minStockDataY3) * $this->scaleY3;
-		return (0.55*$this->height+$this->oy) - ($y- $this->minStockDataY3) * $this->scaleY3;
+		return (0.68*$this->height+$this->oy) - ($y- $this->minStockDataY3) * $this->scaleY3;
 	}
 	public function getY4($y){
 		//return ($this->height - $this->oy - $this->padY) - ($y- $this->minStockDataY3) * $this->scaleY3;
@@ -640,7 +650,10 @@ class stock_ViewChart{
 		);
 		//$this->rowPriceArrMap[$this->symbol]=$this->viewDetail->rowPriceArr;
 		//$this->rowPriceExArr=$this->viewStock->makeRowPriceArr2($this->voPrice1,$this->viewDetail->rowPriceArr,count($this->viewDetail->rowPriceArr));
-		$this->rowPriceArrMap[$this->symbol] = $this->viewDetail->rowPriceArrMap[$this->symbol];
+		
+		if($this->ao->conf["combineDay"]==1) $this->rowPriceArrMap[$this->symbol] = $this->viewDetail->rowPriceArrMap[$this->symbol];
+		else $this->rowPriceArrMap[$this->symbol] = $this->changeRowPriceArr($this->viewDetail->rowPriceArrMap[$this->symbol],$this->ao->conf["combineDay"]);
+		
 		$this->rowPriceExArr=$this->viewStock->makeRowPriceArr($this->voPrice1,$this->rowPriceArrMap[$this->symbol]);
 		
 		$this->rowPriceArr = $this->rowPriceArrMap[$this->symbol];
@@ -662,14 +675,14 @@ class stock_ViewChart{
 		
 		$this->rowPriceArrMap=array(
 		);
-		//$this->rowPriceArrMap[$this->symbol]=$this->viewDetail->rowPriceArr;
-		//$this->rowPriceExArr=$this->viewStock->makeRowPriceArr2($this->voPrice1,$this->viewDetail->rowPriceArr,count($this->viewDetail->rowPriceArr));
-		$this->rowPriceArrMap[$this->symbol] = $this->changeRowPriceArr($this->viewDetail->rowPriceArrMap[$this->symbol]);
+		$combineDay=$this->ao->conf["combineDay"];
+		$this->ao->conf["combineDay"]=2;
+		$this->rowPriceArrMap[$this->symbol] = $this->changeRowPriceArr($this->viewDetail->rowPriceArrMap[$this->symbol],$this->ao->conf["combineDay"]);
 		$this->rowPriceExArr=$this->viewStock->makeRowPriceArr($this->voPrice1,$this->rowPriceArrMap[$this->symbol]);
 		
 		$this->rowPriceArr = $this->rowPriceArrMap[$this->symbol];
 		
-		$this->oy = 0.55*$this->height;
+		$this->oy = 0.68*$this->height;
 		
 		$this->saveDtParams();
 		
@@ -678,6 +691,7 @@ class stock_ViewChart{
 		$this->paintCandleStick();
 		$this->paintMa();
 		//$this->paintIndicator();
+		$this->ao->conf["combineDay"]=$combineDay;
 	}
 
 	public function paintCandleStick($limit){
@@ -693,9 +707,9 @@ class stock_ViewChart{
 		if($bv==null) $bp="";
 		else $bp=round(100*($this->rowPriceArr[0][$vo1->close]-$bv)/$bv);
 		*/
-		$this->paintText("<div><span style='color:black'>".round( 100*($this->_maxStockDataY-$this->_minStockDataY)/$this->_minStockDataY )."</span></div>", $this->width - 50 , 2+0.0*$this->height+$this->oy);////// 850 485
+		$this->paintText("<div><span style='color:black'>".round( 100*($this->_maxStockDataY-$this->_minStockDataY)/$this->_minStockDataY )."</span></div>", $this->width - 50 , 5+0.0*$this->height+$this->oy);////// 850 485
 		
-		$this->paintText("<div><span style='color:black'>".$this->rowPriceExArr[0]["profitStr"]."|".round($this->rowPriceExArr[0]["profitAvg"],1)."|".round( $this->rowPriceExArr[0]["profit"],1 )."</span></div>", 0*$this->width + 50 , 2+0.0*$this->height+$this->oy+70);////// 850 485
+		$this->paintText("<div><span style='color:black'>".$this->rowPriceExArr[0]["profitStr"]."|".round($this->rowPriceExArr[0]["profitAvg"],1)."|".round( $this->rowPriceExArr[0]["profit"],1 )."</span></div>", 0*$this->width + 50 , 5+0.0*$this->height+$this->oy+70);////// 850 485
 		
 		for($i=0; $i<$this->rowPriceArr->length-1; $i++){
 			if($limit!=null && $i>=$limit) break;
@@ -753,7 +767,7 @@ class stock_ViewChart{
 				//$this->context->fillStyle = 'hotpink';
 			}
 			*/
-			if( $this->rowPriceExArr[$i]["code2"]=="up" ){
+			if( $this->rowPriceExArr[$i]["code2"]=="up" || ($this->rowPriceExArr[$i][$voRe->code]=="up"&&$i==0) ){
 				$xm1 = $this->getX($i);
 				$this->context->beginPath();
 				$this->context->fillStyle = 'blue';
@@ -762,7 +776,7 @@ class stock_ViewChart{
 				$this->context->fill();
 				//$this->context->fillStyle = 'green';
 			}
-			if( $this->rowPriceExArr[$i]["code2"]!=null && $this->rowPriceExArr[$i]["code2"]!="up" ){
+			if( ($this->rowPriceExArr[$i]["code2"]!=null && $this->rowPriceExArr[$i]["code2"]!="up") || ($this->rowPriceExArr[$i][$voRe->code]!="up" && $i==0) ){
 				$xm1 = $this->getX($i);
 				$this->context->beginPath();
 				if($this->rowPriceExArr[$i]["code2"]=="down"){
@@ -947,21 +961,21 @@ class stock_ViewChart{
 			}
 			*/
 			
-			if( $this->rowPriceExArr[$i]["code2"]=="up" ){
+			if( $this->rowPriceExArr[$i]["code2"]=="up" || ($this->rowPriceExArr[$i][$voRe->code]=="up" && $i==0) ){
 				$xm1 = $this->getX($i);
 				$this->context->beginPath();
 				$this->context->fillStyle = 'blue';
-				$this->context->arc($xm1+4, $this->getY3(-100)+13, 6, 0, 2 * Math::PI, false);
+				$this->context->arc($xm1+4, $this->getY3(-100)+10, 6, 0, 2 * Math::PI, false);
 				$this->context->closePath();
 				$this->context->fill();
 				//$this->context->fillStyle = 'green';
 			}
-			if( $this->rowPriceExArr[$i]["code2"]!=null && $this->rowPriceExArr[$i]["code2"]!="up" ){
+			if( ($this->rowPriceExArr[$i]["code2"]!=null && $this->rowPriceExArr[$i]["code2"]!="up") || ($this->rowPriceExArr[$i][$voRe->code]!="up" && $i==0)){
 				$xm1 = $this->getX($i);
 				$this->context->beginPath();
 				if($this->rowPriceExArr[$i]["code2"]=="down") $this->context->fillStyle = 'red';
 				else $this->context->fillStyle = 'red';
-				$this->context->arc($xm1+4, $this->getY3(-100)+13, 6, 0, 2 * Math::PI, false);
+				$this->context->arc($xm1+4, $this->getY3(-100)+10, 6, 0, 2 * Math::PI, false);
 				$this->context->closePath();
 				$this->context->fill();
 				//$this->context->fillStyle = 'hotpink';
@@ -972,7 +986,7 @@ class stock_ViewChart{
 				$this->context->beginPath();
 				$this->context->fillStyle = 'blue';
 				$this->context->strokeStyle = 'blue';
-				$this->context->arc($xm1+4, $this->getY3(-100)+13, 9, 0, 2 * Math::PI, false);
+				$this->context->arc($xm1+4, $this->getY3(-100)+10, 9, 0, 2 * Math::PI, false);
 				$this->context->closePath();
 				$this->context->fill();
 				//$this->context->stroke();
@@ -983,7 +997,7 @@ class stock_ViewChart{
 				$this->context->beginPath();
 				if($this->rowPriceExArr[$i]["codeB"]=="down") { $this->context->fillStyle = 'red'; $this->context->strokeStyle='red'; }
 				else { $this->context->fillStyle = 'red'; $this->context->strokeStyle='red'; }
-				$this->context->arc($xm1+4, $this->getY3(-100)+13, 9, 0, 2 * Math::PI, false);
+				$this->context->arc($xm1+4, $this->getY3(-100)+10, 9, 0, 2 * Math::PI, false);
 				$this->context->closePath();
 				$this->context->fill();
 				//$this->context->stroke();
@@ -1236,7 +1250,7 @@ class stock_ViewChart{
 			$status = str_replace(".chn","",$status);
 			$status = str_replace("-"," ",$status);
 		}
-		$this->paintText("<div style='width:580px;color:black;border:0px solid'><b>".$status."</b></div>", 30 , 2+$this->oy+0.0*$this->height);////// 850 485
+		$this->paintText("<div style='width:580px;color:black;border:0px solid'><b>".$status."</b></div>", 30 , 5+$this->oy+0.0*$this->height);////// 850 485
 		return;
 	}
 	public function setOnePrice(){

@@ -29,8 +29,6 @@ class stock_ViewDetail{
 <tr>
 	
 	<td valign="top">
-		<div id="divChart"></div>
-		
 		<div style="text-align:right; width:<?= $this->viewChart->width ?>px;">
 			<button id='buttonHA'   style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;display:none">HA</button>
 			<button id='buttonCand1' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px;display:none">Ca8</button>
@@ -49,6 +47,10 @@ class stock_ViewDetail{
 			<button id='buttonList' style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">List</button>
 			<button id='buttonVN'   style="font-weight: bold; width:<?=$w1?>px; height: <?=$h1?>px">VN</button>
 		</div>
+		
+		<div id="divChart"></div>
+		
+		
 		<div id="divTrade"></div>
 		<div id="divConf" style="text-align:right;">
 			<br/>
@@ -111,7 +113,7 @@ class stock_ViewDetail{
 		//@ que($this->viewStock)->bind("rpc.rpcMakeTa", function($event, $result){ $this->onrpcMakeTa($event, $result); });
 
 		//@ que($__doc)->bind("keydown", function ($event){ return $this->onkeydown($event); });
-		
+
 		return $this;
 	}
 	public function conPaint(){
@@ -316,7 +318,7 @@ class stock_ViewDetail{
 		}
 	}
 	public function onclickButtonCand($event){
-		if($this->ao->conf["combineDay"]==2) $this->ao->conf["combineDay"]=3;
+		if($this->ao->conf["combineDay"]==2) $this->ao->conf["combineDay"]=1;
 		else $this->ao->conf["combineDay"]=2;
 		$this->conPaint()->viewPaint();
 		$this->buttonCand->text("Ca".$this->ao->conf["combineDay"]);
@@ -437,7 +439,16 @@ class stock_ViewDetail{
 		}
 	}
 	public function highlight(){
-		$fnum = 3;
+		if($this->displayStock==null) $this->displayStock=$this->ao->conf["displayStock"];
+		if($this->tableClass!="") {//small
+			$h=22;//33
+			$this->displayStock=$this->ao->conf["displayStock"];
+		}
+		else if($this->tableClass=="") {
+			$h=33;//33
+			$this->displayStock=26;
+		}
+		$fnum = 2;
 		//$jSymbol=$this->divStock->find("[_tag='symbol'],[_tag='symbolLeft'],[_tag='symbolRight'],[_tag='symbolLeft0'],[_tag='symbolRight0']");
 		$jSymbol=$this->divStock->find("[_tag2='symbolLeft'],[_tag2='symbolRight'],[_tag2='symbolLeft0'],[_tag2='symbolRight0']");
 		//@ $jSymbol->each(function( $i, $obj ) {
@@ -454,8 +465,8 @@ class stock_ViewDetail{
 		//@ $this->divStock->find("[_tag='symbol']")->each(function( $i, $obj ) {
 			$jque = que($obj);
 			if($jque->attr("_value") == $this->symbol){
-				$h=33;//33
-				$display = 40;//24;
+				//$h=33;//33
+				$display = $this->displayStock;//24;
 				//$h=16;//16;//16;//18;
 				//$display = 26;
 				$height = $h*$display;
@@ -602,10 +613,13 @@ class stock_ViewDetail{
 			$this->getQue("buttonList")->click();
 		} else if($ch == "C"){
 			$this->buttonCand->click();
-		} else if($ch == "T"){
-			$this->getQue("buttonT")->click();
-		} else if($ch == "Y"){
-			$this->getQue("buttonY")->click();
+		} else if($ch == "P"){
+			//if($this->displayStock==$this->ao->conf["displayStock"]) $this->displayStock=26;
+			//else $this->displayStock=$this->ao->conf["displayStock"];
+			if($this->tableClass==null || $this->tableClass=="") $this->tableClass='class="smallTable"';
+			else $this->tableClass="";
+		} else if($ch == "R"){
+			$this->buttonRun->click();
 		} else if($ch == "X"){
 			if($this->enablePlus==false){
 				$this->enablePlus = true;

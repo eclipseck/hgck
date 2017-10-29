@@ -615,7 +615,7 @@ var $this = this; var $__arguments = arguments;
 		$this.minMaxPadFactor = 2.5;
 		$this.minMaxPadFactorWeb = $this.minMaxPadFactor;
 	
-		$this.width = 0*830+939;		$this.height = 1300;		
+		$this.width = 0*830+939;		$this.height = 1300+0;		
 		$this.rowPriceArrMap={
 		};
 		$this.voRowPriceArr=get(new stock_Vo())._con("maC1,maC2,maC3,maC4,dev,minMax1","");		
@@ -631,7 +631,7 @@ $__htmlArray.push('\
 <div id="divCanvasText" style=\'position:relative\'>\
 </div>\
 <div id="divOnePrice" align="right" style=\'position:absolute;left:200px;top:');
-$__htmlArray.push( 2+0.0*$this.height );
+$__htmlArray.push( 80+0.0*$this.height );
 
 $__htmlArray.push('px;border:0px solid;width:655px;\'></div>\
 <canvas id="canvas"></canvas>\
@@ -793,10 +793,10 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 		}
 		return $re;
 	}
-stock_ViewChart.prototype.changeRowPriceArr = function($rowPriceArr){
-var $this = this; var $__arguments = arguments; var $combineDay = null; var $vo = null; var $rowPriceArrEx = null; var $j = null; var $len = null; var $i = null; var $first = null; var $newI = null; var $mod = null;
+stock_ViewChart.prototype.changeRowPriceArr = function($rowPriceArr, $combineDay){
+var $this = this; var $__arguments = arguments; var $vo = null; var $rowPriceArrEx = null; var $j = null; var $len = null; var $i = null; var $first = null; var $newI = null; var $mod = null;
 		$combineDay=$this.ao.conf["combineDay"];
-		if($this.ao.conf["combineDay"]==8) $combineDay=2;
+		if($combineDay==8) $combineDay=2;
 		$vo=$this.voPrice1;
 		
 		$rowPriceArrEx=[];
@@ -958,10 +958,18 @@ stock_ViewChart.prototype.saveScale = function(){
 var $this = this; var $__arguments = arguments;
 				
 		$this.rangeY = $this.maxStockDataY - $this.minStockDataY;
-		$this.scaleY = (0.45*$this.height) / $this.rangeY;
+		$this.scaleY = (0.60*$this.height) / $this.rangeY;
 
 		$this.rangeY2 = $this.maxStockDataY2 - $this.minStockDataY2;
-		$this.scaleY2 = (0.45*$this.height) / $this.rangeY2;
+		$this.scaleY2 = (0.60*$this.height) / $this.rangeY2;
+		
+		if($this.oy>500){
+			$this.rangeY = $this.maxStockDataY - $this.minStockDataY;
+			$this.scaleY = (0.32*$this.height) / $this.rangeY;
+
+			$this.rangeY2 = $this.maxStockDataY2 - $this.minStockDataY2;
+			$this.scaleY2 = (0.32*$this.height) / $this.rangeY2;
+		}
 
 		$this.maxStockDataY3=10;
 		$this.minStockDataY3=-10;
@@ -969,7 +977,7 @@ var $this = this; var $__arguments = arguments;
 		$this.minStockDataY3=-130;
 		
 		$this.rangeY3 = $this.maxStockDataY3 - $this.minStockDataY3;
-		$this.scaleY3 = (0.10*$this.height) / $this.rangeY3;
+		$this.scaleY3 = (0.08*$this.height) / $this.rangeY3;
 		
 		$this.maxStockDataY4=7;
 		$this.minStockDataY4=-7;
@@ -979,15 +987,17 @@ var $this = this; var $__arguments = arguments;
 	}
 stock_ViewChart.prototype.getY = function($y){
 var $this = this; var $__arguments = arguments;
-		return (0.45*$this.height+$this.oy) - ($y- $this.minStockDataY) * $this.scaleY;
+		if($this.oy>500) return (0.32*$this.height+$this.oy) - ($y- $this.minStockDataY) * $this.scaleY;
+		return (0.60*$this.height+$this.oy) - ($y- $this.minStockDataY) * $this.scaleY;
 	}
 stock_ViewChart.prototype.getY2 = function($y){
 var $this = this; var $__arguments = arguments;
-		return (0.45*$this.height+$this.oy) - ($y- $this.minStockDataY2) * $this.scaleY2;
+		if($this.oy>500) return (0.32*$this.height+$this.oy) - ($y- $this.minStockDataY2) * $this.scaleY2;
+		return (0.60*$this.height+$this.oy) - ($y- $this.minStockDataY2) * $this.scaleY2;
 	}
 stock_ViewChart.prototype.getY3 = function($y){
 var $this = this; var $__arguments = arguments;
-				return (0.55*$this.height+$this.oy) - ($y- $this.minStockDataY3) * $this.scaleY3;
+				return (0.68*$this.height+$this.oy) - ($y- $this.minStockDataY3) * $this.scaleY3;
 	}
 stock_ViewChart.prototype.getY4 = function($y){
 var $this = this; var $__arguments = arguments;
@@ -1093,7 +1103,7 @@ var $this = this; var $__arguments = arguments;
 		return que(implode("", ["<div style='font-size:10px;'>",$text,"</div>"])).css({"position":"absolute", "left":$left, "top":$top, "color":$color}).appendTo($this.divCanvasText);
 	}
 stock_ViewChart.prototype.paint = function(){
-var $this = this; var $__arguments = arguments;
+var $this = this; var $__arguments = arguments; var $combineDay = null;
 		$this.oy=0;
 		$this.paintField();
 		if($this.symbol == "MARKET") {
@@ -1113,7 +1123,10 @@ var $this = this; var $__arguments = arguments;
 		
 		$this.rowPriceArrMap={
 		};
-						$this.rowPriceArrMap[$this.symbol] = $this.viewDetail.rowPriceArrMap[$this.symbol];
+						
+		if($this.ao.conf["combineDay"]==1) $this.rowPriceArrMap[$this.symbol] = $this.viewDetail.rowPriceArrMap[$this.symbol];
+		else $this.rowPriceArrMap[$this.symbol] = $this.changeRowPriceArr($this.viewDetail.rowPriceArrMap[$this.symbol],$this.ao.conf["combineDay"]);
+		
 		$this.rowPriceExArr=$this.viewStock.makeRowPriceArr($this.voPrice1,$this.rowPriceArrMap[$this.symbol]);
 		
 		$this.rowPriceArr = $this.rowPriceArrMap[$this.symbol];
@@ -1132,12 +1145,14 @@ var $this = this; var $__arguments = arguments;
 		
 		$this.rowPriceArrMap={
 		};
-						$this.rowPriceArrMap[$this.symbol] = $this.changeRowPriceArr($this.viewDetail.rowPriceArrMap[$this.symbol]);
+		$combineDay=$this.ao.conf["combineDay"];
+		$this.ao.conf["combineDay"]=2;
+		$this.rowPriceArrMap[$this.symbol] = $this.changeRowPriceArr($this.viewDetail.rowPriceArrMap[$this.symbol],$this.ao.conf["combineDay"]);
 		$this.rowPriceExArr=$this.viewStock.makeRowPriceArr($this.voPrice1,$this.rowPriceArrMap[$this.symbol]);
 		
 		$this.rowPriceArr = $this.rowPriceArrMap[$this.symbol];
 		
-		$this.oy = 0.55*$this.height;
+		$this.oy = 0.68*$this.height;
 		
 		$this.saveDtParams();
 		
@@ -1145,7 +1160,8 @@ var $this = this; var $__arguments = arguments;
 		$this.paintValue();
 		$this.paintCandleStick();
 		$this.paintMa();
-			}
+				$this.ao.conf["combineDay"]=$combineDay;
+	}
 stock_ViewChart.prototype.paintCandleStick = function($limit){
 var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = null; var $candCount = null; var $i = null; var $stockData = null; var $x = null; var $_i = null; var $xm1 = null; var $deltaClose = null; var $deltaHigh = null;
 		$voRe=$this.viewStock.voRowPriceArr;
@@ -1157,8 +1173,8 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 		$candCount = 0;
 		
 		
-		$this.paintText("<div><span style='color:black'>"+round( 100*($this._maxStockDataY-$this._minStockDataY)/$this._minStockDataY )+"</span></div>", $this.width - 50 , 2+0.0*$this.height+$this.oy);		
-		$this.paintText("<div><span style='color:black'>"+$this.rowPriceExArr[0]["profitStr"]+"|"+round($this.rowPriceExArr[0]["profitAvg"],1)+"|"+round( $this.rowPriceExArr[0]["profit"],1 )+"</span></div>", 0*$this.width + 50 , 2+0.0*$this.height+$this.oy+70);		
+		$this.paintText("<div><span style='color:black'>"+round( 100*($this._maxStockDataY-$this._minStockDataY)/$this._minStockDataY )+"</span></div>", $this.width - 50 , 5+0.0*$this.height+$this.oy);		
+		$this.paintText("<div><span style='color:black'>"+$this.rowPriceExArr[0]["profitStr"]+"|"+round($this.rowPriceExArr[0]["profitAvg"],1)+"|"+round( $this.rowPriceExArr[0]["profit"],1 )+"</span></div>", 0*$this.width + 50 , 5+0.0*$this.height+$this.oy+70);		
 		for($i=0; $i<$this.rowPriceArr.length-1; $i++){
 			if($limit!=null && $i>=$limit) break;
 			$stockData = $this.rowPriceArr[$i];
@@ -1189,7 +1205,7 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 			}
 
 			
-			if( $this.rowPriceExArr[$i]["code2"]=="up" ){
+			if( $this.rowPriceExArr[$i]["code2"]=="up" || ($this.rowPriceExArr[$i][$voRe.code]=="up"&$i==0) ){
 				$xm1 = $this.getX($i);
 				$this.context.beginPath();
 				$this.context.fillStyle = 'blue';
@@ -1197,7 +1213,7 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 				$this.context.closePath();
 				$this.context.fill();
 							}
-			if( $this.rowPriceExArr[$i]["code2"]!=null && $this.rowPriceExArr[$i]["code2"]!="up" ){
+			if( ($this.rowPriceExArr[$i]["code2"]!=null && $this.rowPriceExArr[$i]["code2"]!="up") || ($this.rowPriceExArr[$i][$voRe.code]!="up" && $i==0) ){
 				$xm1 = $this.getX($i);
 				$this.context.beginPath();
 				if($this.rowPriceExArr[$i]["code2"]=="down"){
@@ -1326,20 +1342,20 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 
 			
 			
-			if( $this.rowPriceExArr[$i]["code2"]=="up" ){
+			if( $this.rowPriceExArr[$i]["code2"]=="up" || ($this.rowPriceExArr[$i][$voRe.code]=="up" && $i==0) ){
 				$xm1 = $this.getX($i);
 				$this.context.beginPath();
 				$this.context.fillStyle = 'blue';
-				$this.context.arc($xm1+4, $this.getY3(-100)+13, 6, 0, 2 * Math.PI, false);
+				$this.context.arc($xm1+4, $this.getY3(-100)+10, 6, 0, 2 * Math.PI, false);
 				$this.context.closePath();
 				$this.context.fill();
 							}
-			if( $this.rowPriceExArr[$i]["code2"]!=null && $this.rowPriceExArr[$i]["code2"]!="up" ){
+			if( ($this.rowPriceExArr[$i]["code2"]!=null && $this.rowPriceExArr[$i]["code2"]!="up") || ($this.rowPriceExArr[$i][$voRe.code]!="up" && $i==0)){
 				$xm1 = $this.getX($i);
 				$this.context.beginPath();
 				if($this.rowPriceExArr[$i]["code2"]=="down") $this.context.fillStyle = 'red';
 				else $this.context.fillStyle = 'red';
-				$this.context.arc($xm1+4, $this.getY3(-100)+13, 6, 0, 2 * Math.PI, false);
+				$this.context.arc($xm1+4, $this.getY3(-100)+10, 6, 0, 2 * Math.PI, false);
 				$this.context.closePath();
 				$this.context.fill();
 							}
@@ -1349,7 +1365,7 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 				$this.context.beginPath();
 				$this.context.fillStyle = 'blue';
 				$this.context.strokeStyle = 'blue';
-				$this.context.arc($xm1+4, $this.getY3(-100)+13, 9, 0, 2 * Math.PI, false);
+				$this.context.arc($xm1+4, $this.getY3(-100)+10, 9, 0, 2 * Math.PI, false);
 				$this.context.closePath();
 				$this.context.fill();
 											}
@@ -1358,7 +1374,7 @@ var $this = this; var $__arguments = arguments; var $voRe = null; var $vo1 = nul
 				$this.context.beginPath();
 				if($this.rowPriceExArr[$i]["codeB"]=="down") { $this.context.fillStyle = 'red'; $this.context.strokeStyle='red'; }
 				else { $this.context.fillStyle = 'red'; $this.context.strokeStyle='red'; }
-				$this.context.arc($xm1+4, $this.getY3(-100)+13, 9, 0, 2 * Math.PI, false);
+				$this.context.arc($xm1+4, $this.getY3(-100)+10, 9, 0, 2 * Math.PI, false);
 				$this.context.closePath();
 				$this.context.fill();
 											}
@@ -1527,7 +1543,7 @@ var $this = this; var $__arguments = arguments; var $vo1 = null; var $symbol = n
 			$status = str_replace(".chn","",$status);
 			$status = str_replace("-"," ",$status);
 		}
-		$this.paintText("<div style='width:580px;color:black;border:0px solid'><b>"+$status+"</b></div>", 30 , 2+$this.oy+0.0*$this.height);		return;
+		$this.paintText("<div style='width:580px;color:black;border:0px solid'><b>"+$status+"</b></div>", 30 , 5+$this.oy+0.0*$this.height);		return;
 	}
 stock_ViewChart.prototype.setOnePrice = function(){
 var $this = this; var $__arguments = arguments; var $jSymbol = null; var $i = null; var $obj = null; var $jque = null; var $tr = null;
@@ -1882,8 +1898,7 @@ $__htmlArray.push('\
 <table>\
 <tr>\
  <td valign="top">\
-<div id="divChart"></div>\
- <div style="text-align:right; width:');
+<div style="text-align:right; width:');
 $__htmlArray.push( $this.viewChart.width );
 
 $__htmlArray.push('px;">\
@@ -1969,7 +1984,8 @@ $__htmlArray.push($h1);
 
 $__htmlArray.push('px">VN</button>\
 </div>\
-<div id="divTrade"></div>\
+ <div id="divChart"></div>\
+  <div id="divTrade"></div>\
 <div id="divConf" style="text-align:right;">\
 <br/>\
  <button id=\'buttonTa\' style="font-weight: bold; width:');
@@ -2068,7 +2084,6 @@ $html = $__htmlArray.join("");
 	 que($this).bind("rpc.rpcDetail", function($event, $result){ $this.onrpcDetail($event, $result); });
 	 que($this.viewStock).bind("rpc.rpcMakeTa", function($event, $result){ $this.onrpcMakeTa($event, $result); });
 		 que($__doc).bind("keydown", function ($event){ return $this.onkeydown($event); });
-	
 		return $this;
 	}
 stock_ViewDetail.prototype.conPaint = function(){
@@ -2372,7 +2387,7 @@ var $this = this; var $__arguments = arguments;
 	}
 stock_ViewDetail.prototype.onclickButtonCand = function($event){
 var $this = this; var $__arguments = arguments; var $strConf = null; var $day = null;
-		if($this.ao.conf["combineDay"]==2) $this.ao.conf["combineDay"]=3;
+		if($this.ao.conf["combineDay"]==2) $this.ao.conf["combineDay"]=1;
 		else $this.ao.conf["combineDay"]=2;
 		$this.conPaint().viewPaint();
 		$this.buttonCand.text("Ca"+$this.ao.conf["combineDay"]);
@@ -2496,8 +2511,14 @@ var $this = this; var $__arguments = arguments; var $preKey = null; var $preKey2
 		}
 	}
 stock_ViewDetail.prototype.highlight = function(){
-var $this = this; var $__arguments = arguments; var $fnum = null; var $jSymbol = null; var $i = null; var $obj = null; var $jque = null; var $h = null; var $display = null; var $height = null; var $num = null; var $top = null;
-		$fnum = 3;
+var $this = this; var $__arguments = arguments; var $h = null; var $fnum = null; var $jSymbol = null; var $i = null; var $obj = null; var $jque = null; var $display = null; var $height = null; var $num = null; var $top = null;
+		if($this.displayStock==null) $this.displayStock=$this.ao.conf["displayStock"];
+		if($this.tableClass!="") {			$h=22;			$this.displayStock=$this.ao.conf["displayStock"];
+		}
+		else if($this.tableClass=="") {
+			$h=33;			$this.displayStock=26;
+		}
+		$fnum = 2;
 				$jSymbol=$this.divStock.find("[_tag2='symbolLeft'],[_tag2='symbolRight'],[_tag2='symbolLeft0'],[_tag2='symbolRight0']");
 		 $jSymbol.each(function( $i, $obj ) {
 		$jque = que($obj);
@@ -2513,7 +2534,7 @@ var $this = this; var $__arguments = arguments; var $fnum = null; var $jSymbol =
 	 $this.divStock.find("[_tag='symbol']").each(function( $i, $obj ) {
 		$jque = que($obj);
 			if($jque.attr("_value") == $this.symbol){
-				$h=33;				$display = 40;												$height = $h*$display;
+								$display = $this.displayStock;												$height = $h*$display;
 				$num = floor($i/$display);
 				$top = 0 - $num * $height;
 				if($num!=0) $top += $h*$fnum;
@@ -2602,10 +2623,11 @@ var $this = this; var $__arguments = arguments; var $target = null; var $charCod
 			$this.getQue("buttonList").click();
 		} else if($ch == "C"){
 			$this.buttonCand.click();
-		} else if($ch == "T"){
-			$this.getQue("buttonT").click();
-		} else if($ch == "Y"){
-			$this.getQue("buttonY").click();
+		} else if($ch == "P"){
+									if($this.tableClass==null || $this.tableClass=="") $this.tableClass='class="smallTable"';
+			else $this.tableClass="";
+		} else if($ch == "R"){
+			$this.buttonRun.click();
 		} else if($ch == "X"){
 			if($this.enablePlus==false){
 				$this.enablePlus = true;
@@ -3473,15 +3495,15 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 				if($j==5-1){
 					$re[$i][$voRe.perHigh]=100*($max0-$rowPriceArr[$i][$vo.close])/$max0;
 					
-					
+					$re[$i]["minMax0"]=100*($max-$min)/$min;
+					$re[$i]["minClose0"]=100*($rowPriceArr[$i][$vo.close]-$min)/$min;
 				}
-				if($j==5-1){
+				if($j==4-1){
 					if($max-$min!=0) $re[$i][$voRe.perMinMax]=100*($rowPriceArr[$i][$vo.close]-$min)/($max-$min);
 					else $re[$i][$voRe.perMinMax]=0;
 					
 					
-					$re[$i]["minMax0"]=100*($max-$min)/$min;
-					$re[$i]["minClose0"]=100*($rowPriceArr[$i][$vo.close]-$min)/$min;
+					
 				}
 				if($j==8-1){
 					$re[$i]["ma2"]=$maC/($j+1);					
@@ -3565,7 +3587,7 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 				}
 				
 				if($closeB==null){
-															if($re[$i][$voRe.code]=="up" && $re[$i][$voRe.minClose]<=5 && $re[$i+1]["minClose2"]<=34  											){
+															if($re[$i][$voRe.code]=="up" && $re[$i][$voRe.minClose]<=5 && $re[$i][$voRe.perHigh]<=5 && $re[$i+1]["minClose2"]<=34  											){
 						$re[$i]["codeB"]=$re[$i][$voRe.code];
 						$iUp2=$i;
 												
@@ -4143,7 +4165,7 @@ var $this = this; var $__arguments = arguments; var $voStock = null;
 		return $this.stockMap[$symbol][$voStock.live];
 	}
 stock_ViewStock.prototype.onrpcStockMap = function($event ,$result){
-var $this = this; var $__arguments = arguments; var $vo = null; var $voStock = null; var $count = null; var $valueT = null; var $valueNowT = null; var $profitT = null; var $valueTfake = null; var $valueNowTfake = null; var $profitTfake = null; var $seperate1 = null; var $seperate2 = null; var $seperate3 = null; var $seperate4 = null; var $seperate5 = null; var $ysFaArr = null; var $ysFaMap = null; var $symbol = null; var $str = null; var $noFaArr = null; var $noFaMap = null; var $isFuture = null; var $futureArr = null; var $futureMap = null; var $_live = null; var $buy = null; var $perSell = null; var $perBuy = null; var $stock = null; var $buyPrice = null; var $symbolTrade = null; var $trade = null; var $dateArr = null; var $priceArr = null; var $volumeArr = null; var $marketArr = null; var $live = null; var $value = null; var $valueNow = null; var $profit = null; var $canSell = null; var $i = null; var $date = null; var $tp = null; var $price = null; var $volume = null; var $marketTrade = null; var $per = null; var $seperate0 = null; var $seperate6 = null; var $seperate7 = null; var $trStyle = null; var $minClose = null; var $bvp = null; var $ysFa = null; var $noFa = null; var $html2 = null; var $htmlTr2 = null; var $html = null; var $arrayStock_symbol = null; var $selectStock = null; var $selectedSymbol = null; var $selectedIndex = null;
+var $this = this; var $__arguments = arguments; var $vo = null; var $voStock = null; var $tableClass = null; var $count = null; var $valueT = null; var $valueNowT = null; var $profitT = null; var $valueTfake = null; var $valueNowTfake = null; var $profitTfake = null; var $seperate1 = null; var $seperate2 = null; var $seperate3 = null; var $seperate4 = null; var $seperate5 = null; var $ysFaArr = null; var $ysFaMap = null; var $symbol = null; var $str = null; var $noFaArr = null; var $noFaMap = null; var $isFuture = null; var $futureArr = null; var $futureMap = null; var $_live = null; var $buy = null; var $perSell = null; var $perBuy = null; var $stock = null; var $buyPrice = null; var $symbolTrade = null; var $trade = null; var $dateArr = null; var $priceArr = null; var $volumeArr = null; var $marketArr = null; var $live = null; var $value = null; var $valueNow = null; var $profit = null; var $canSell = null; var $i = null; var $date = null; var $tp = null; var $price = null; var $volume = null; var $marketTrade = null; var $per = null; var $seperate0 = null; var $seperate6 = null; var $seperate7 = null; var $trStyle = null; var $minClose = null; var $bvp = null; var $ysFa = null; var $noFa = null; var $html2 = null; var $htmlTr2 = null; var $html = null; var $arrayStock_symbol = null; var $selectStock = null; var $selectedSymbol = null; var $selectedIndex = null;
 		$vo=$this.voPrice2;
 		$voStock=$this.voStock;
 		$this._stockMap=$this.stockMap;
@@ -4153,10 +4175,16 @@ var $this = this; var $__arguments = arguments; var $vo = null; var $voStock = n
 			$this.viewDetail.preloadDetail($this.viewDetail.symbol);
 			$this.firstRun=false;
 		}
+		
+		$tableClass = $this.viewDetail.tableClass;
+		if($tableClass==null) $tableClass="";
 
 var $__html2Array = new Array();
 $__html2Array.push('\
-<table border="0" style="border-color:red;border-spacing:0px 0px;">\
+<table border="0" ');
+$__html2Array.push( $tableClass );
+
+$__html2Array.push(' style="border-color:red;border-spacing:0px 0px;">\
 <tr style="display:none">\
  <td>m</td>\
 <td>&nbsp;</td>\
@@ -4482,7 +4510,7 @@ $htmlTr2 = $__htmlTr2Array.join("");
 	}
 		$html+="</table>";
 		$html2+="</table>";
-		$this.viewDetail.divStock.html($html2);
+				$this.viewDetail.divStock.html($html2);
 		
 		
 		$arrayStock_symbol = [];
@@ -6041,6 +6069,11 @@ body,div,span,dl,dt,dd,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,textarea,but
 	margin: 0;
 	padding: 0;
 	font-size: 28px ;
+	font-family: sans-serif,Arial, Times New Roman, Arial, Helvetica, sans-serif, Courier New, Verdana;
+}
+
+.smallTable tr td, .smallTable tr td span, .smallTable tr td div, .smallTable tr td a{
+	font-size: 18px ;
 	font-family: sans-serif,Arial, Times New Roman, Arial, Helvetica, sans-serif, Courier New, Verdana;
 }
 

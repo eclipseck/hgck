@@ -455,15 +455,15 @@ class stock_ViewStock{
 				if($j==5-1){
 					$re[$i][$voRe->perHigh]=100*($max0-$rowPriceArr[$i][$vo->close])/$max0;
 					
-					
+					$re[$i]["minMax0"]=100*($max-$min)/$min;
+					$re[$i]["minClose0"]=100*($rowPriceArr[$i][$vo->close]-$min)/$min;
 				}
-				if($j==5-1){
+				if($j==4-1){
 					if($max-$min!=0) $re[$i][$voRe->perMinMax]=100*($rowPriceArr[$i][$vo->close]-$min)/($max-$min);
 					else $re[$i][$voRe->perMinMax]=0;
 					
 					
-					$re[$i]["minMax0"]=100*($max-$min)/$min;
-					$re[$i]["minClose0"]=100*($rowPriceArr[$i][$vo->close]-$min)/$min;
+					
 				}
 				if($j==8-1){
 /*<@ 
@@ -593,7 +593,7 @@ class stock_ViewStock{
 				if($closeB==null){
 					//$per = 100*($rowPriceArr[$i][$vo->close] - $rowPriceArr[$i+1][$vo->close])/$rowPriceArr[$i+1][$vo->close];
 					//$per2 = 100*($rowPriceArr[$i+1][$vo->close] - $rowPriceArr[$i+2][$vo->close])/$rowPriceArr[$i+2][$vo->close];
-					if($re[$i][$voRe->code]=="up" && $re[$i][$voRe->minClose]<=5 && $re[$i+1]["minClose2"]<=34  //  && $re[$i+1]["minClose0"]<=3 $re[$i]["perMinMax2"]<=100  && $re[$i]["perMinMax2"]<=50   && $per<=3 &&  $re[$i+1][$voRe->code]!="high" && $re[$i+1]["minMax2"]<=8
+					if($re[$i][$voRe->code]=="up" && $re[$i][$voRe->minClose]<=5 && $re[$i][$voRe->perHigh]<=5 && $re[$i+1]["minClose2"]<=34  //  && $re[$i+1]["minClose0"]<=3 $re[$i]["perMinMax2"]<=100  && $re[$i]["perMinMax2"]<=50   && $per<=3 &&  $re[$i+1][$voRe->code]!="high" && $re[$i+1]["minMax2"]<=8
 						// && $rowPriceArr[$i][$vo->close]>=$rowPriceArr[$i][$vo->open] && $rowPriceArr[$i][$vo->close]>=$rowPriceArr[$i+1][$vo->close]
 					){
 						$re[$i]["codeB"]=$re[$i][$voRe->code];
@@ -1253,9 +1253,12 @@ class stock_ViewStock{
 			$this->viewDetail->preloadDetail($this->viewDetail->symbol);
 			$this->firstRun=false;
 		}
+		
+		$tableClass = $this->viewDetail->tableClass;
+		if($tableClass==null) $tableClass="";
 ?>
 <!--$html2-->
-<table border="0" style="border-color:red;border-spacing:0px 0px;">
+<table border="0" <?= $tableClass ?> style="border-color:red;border-spacing:0px 0px;">
 	<tr style="display:none">
 		
 		<td>m</td>
@@ -1537,6 +1540,7 @@ class stock_ViewStock{
 	}
 		$html.="</table>";
 		$html2.="</table>";
+		//$this->viewDetail->divStock->css("font-size",12);
 		$this->viewDetail->divStock->html($html2);
 		/*
 		if($valueT!=0) $perT=round(100*($valueNowT-$valueT)/$valueT,1);
