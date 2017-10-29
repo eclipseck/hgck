@@ -21,7 +21,7 @@ class stock_ViewDetail{
 	}
 	public function view(){
 		if($this->jque!=null) return $this;
-		$h1=75;
+		$h1=70;
 		$w1=105;
 ?><!--$html-->
 <div>
@@ -439,14 +439,18 @@ class stock_ViewDetail{
 		}
 	}
 	public function highlight(){
-		if($this->displayStock==null) $this->displayStock=$this->ao->conf["displayStock"];
-		if($this->tableClass!="") {//small
-			$h=22;//33
-			$this->displayStock=$this->ao->conf["displayStock"];
-		}
-		else if($this->tableClass=="") {
-			$h=33;//33
-			$this->displayStock=26;
+		if($this->tableClass==null){
+			if($this->ao->conf!=null) $this->displayStock=$this->ao->conf["displayStock"];
+			$h=33;
+		} else {
+			if($this->tableClass!="") {//small
+				$h=22;//33
+				if($this->ao->conf!=null) $this->displayStock=$this->ao->conf["displayStock"];
+			}
+			else if($this->tableClass=="") {
+				$h=33;//33
+				$this->displayStock=26;
+			}
 		}
 		$fnum = 2;
 		//$jSymbol=$this->divStock->find("[_tag='symbol'],[_tag='symbolLeft'],[_tag='symbolRight'],[_tag='symbolLeft0'],[_tag='symbolRight0']");
@@ -614,8 +618,6 @@ class stock_ViewDetail{
 		} else if($ch == "C"){
 			$this->buttonCand->click();
 		} else if($ch == "P"){
-			//if($this->displayStock==$this->ao->conf["displayStock"]) $this->displayStock=26;
-			//else $this->displayStock=$this->ao->conf["displayStock"];
 			if($this->tableClass==null || $this->tableClass=="") $this->tableClass='class="smallTable"';
 			else $this->tableClass="";
 		} else if($ch == "R"){

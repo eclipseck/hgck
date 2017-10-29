@@ -22,7 +22,6 @@ class stock_ViewChart{
 		
 		$this->rowPriceArrMap=array(
 		);
-		$this->voRowPriceArr=get(new stock_Vo())->_con("maC1,maC2,maC3,maC4,dev,minMax1","");		
 		return $this;
 	}
 
@@ -468,24 +467,23 @@ class stock_ViewChart{
 		$this->rangeY = $this->maxStockDataY - $this->minStockDataY;
 		$this->scaleY = (0.60*$this->height) / $this->rangeY;
 
+		$this->maxStockDataY2=160;
+		$this->minStockDataY2=0;
 		$this->rangeY2 = $this->maxStockDataY2 - $this->minStockDataY2;
-		$this->scaleY2 = (0.60*$this->height) / $this->rangeY2;
+		$this->scaleY2 = (0.03*$this->height) / $this->rangeY2;
 		
-		if($this->oy>500){
+		if($this->oy>100){
 			$this->rangeY = $this->maxStockDataY - $this->minStockDataY;
-			$this->scaleY = (0.32*$this->height) / $this->rangeY;
-
-			$this->rangeY2 = $this->maxStockDataY2 - $this->minStockDataY2;
-			$this->scaleY2 = (0.32*$this->height) / $this->rangeY2;
+			$this->scaleY = (0.30*$this->height) / $this->rangeY;
+			//$this->rangeY2 = $this->maxStockDataY2 - $this->minStockDataY2;
+			$this->scaleY2 = (0.02*$this->height) / $this->rangeY2;
 		}
 
-		$this->maxStockDataY3=10;
-		$this->minStockDataY3=-10;
-		$this->maxStockDataY3=100;
-		$this->minStockDataY3=-130;
+		$this->maxStockDataY3=240;
+		$this->minStockDataY3=-30;
 		
 		$this->rangeY3 = $this->maxStockDataY3 - $this->minStockDataY3;
-		$this->scaleY3 = (0.08*$this->height) / $this->rangeY3;
+		$this->scaleY3 = (0.10*$this->height) / $this->rangeY3;
 		
 		$this->maxStockDataY4=7;
 		$this->minStockDataY4=-7;
@@ -494,16 +492,16 @@ class stock_ViewChart{
 		$this->scaleY4 = (0.2*$this->height) / $this->rangeY4;
 	}
 	public function getY($y){
-		if($this->oy>500) return (0.32*$this->height+$this->oy) - ($y- $this->minStockDataY) * $this->scaleY;
+		if($this->oy>100) return (0.30*$this->height+$this->oy) - ($y- $this->minStockDataY) * $this->scaleY;
 		return (0.60*$this->height+$this->oy) - ($y- $this->minStockDataY) * $this->scaleY;
 	}
 	public function getY2($y){
-		if($this->oy>500) return (0.32*$this->height+$this->oy) - ($y- $this->minStockDataY2) * $this->scaleY2;
+		if($this->oy>100) return (0.30*$this->height+$this->oy) - ($y- $this->minStockDataY2) * $this->scaleY2;
 		return (0.60*$this->height+$this->oy) - ($y- $this->minStockDataY2) * $this->scaleY2;
 	}
 	public function getY3($y){
 		//return ($this->height - $this->oy - $this->padY) - ($y- $this->minStockDataY3) * $this->scaleY3;
-		return (0.68*$this->height+$this->oy) - ($y- $this->minStockDataY3) * $this->scaleY3;
+		return (0.70*$this->height+$this->oy) - ($y- $this->minStockDataY3) * $this->scaleY3;
 	}
 	public function getY4($y){
 		//return ($this->height - $this->oy - $this->padY) - ($y- $this->minStockDataY3) * $this->scaleY3;
@@ -682,7 +680,7 @@ class stock_ViewChart{
 		
 		$this->rowPriceArr = $this->rowPriceArrMap[$this->symbol];
 		
-		$this->oy = 0.68*$this->height;
+		$this->oy = 0.70*$this->height;
 		
 		$this->saveDtParams();
 		
@@ -894,30 +892,38 @@ class stock_ViewChart{
 			$stockData = $this->rowPriceExArr[$i];
 			$y = $stockData[$voRe->perMinMax];
 			if($y==null) break;
-			
-			if($y>$this->maxStockDataY3) $y=$this->maxStockDataY3;
-			if($y<$this->minStockDataY3) $y=$this->minStockDataY3;
+			if( $y<=40) $this->context->fillStyle = 'blue';
+			else $this->context->fillStyle = 'red';
+			$y=8*$y/10;
+			//if($y>$this->maxStockDataY3) $y=$this->maxStockDataY3;
+			//if($y<$this->minStockDataY3) $y=$this->minStockDataY3;
 			$delta=$y*$this->scaleY3;
 			if($i==0 && abs($delta)<3) $delta=3;
 			
 			//$y2 = $vo->getLiveVolume();
 			if($x<$this->padX) break;
-				
-			if( $y>=60) $this->context->fillStyle = 'blue';
-			else $this->context->fillStyle = 'red';
 			
-			$this->context->fillRect($x, $this->getY3(0), $this->w+1 , -$delta);
+			$this->context->fillRect($x, $this->getY3(240), $this->w+1 , +$delta);
+			
+			//$y = 10*$this->rowPriceExArr[$i][$voRe->minClose];
+			$y = 10*$this->rowPriceExArr[$i][$voRe->minClose];
+			if($y>80) $y=80;
+			$delta=$y*$this->scaleY3;
+			if($i==0 && abs($delta)<3) $delta=3;
+
+			if( $y<=50) $this->context->fillStyle = 'blue';
+			else $this->context->fillStyle = 'red';
+			$this->context->fillRect($x, $this->getY3(80), $this->w+1 , -$delta);
 			
 			//$y = 10*$this->rowPriceExArr[$i][$voRe->minClose];
 			$y = 10*$this->rowPriceExArr[$i][$voRe->perHigh];
-			if($y>$this->maxStockDataY3) $y=$this->maxStockDataY3;
-			if($y<$this->minStockDataY3) $y=$this->minStockDataY3;
+			if($y>80) $y=80;
 			$delta=$y*$this->scaleY3;
 			if($i==0 && abs($delta)<3) $delta=3;
 
 			if( $y<=40) $this->context->fillStyle = 'blue';
 			else $this->context->fillStyle = 'red';
-			$this->context->fillRect($x, $this->getY3(0), $this->w+1 , +$delta);
+			$this->context->fillRect($x, $this->getY3(80), $this->w+1 , +$delta);
 			
 			/*
 			$y = 10*$this->rowPriceExArr[$i]["perMa6"];
@@ -965,7 +971,7 @@ class stock_ViewChart{
 				$xm1 = $this->getX($i);
 				$this->context->beginPath();
 				$this->context->fillStyle = 'blue';
-				$this->context->arc($xm1+4, $this->getY3(-100)+10, 6, 0, 2 * Math::PI, false);
+				$this->context->arc($xm1+4, $this->getY3(-30)-10, 6, 0, 2 * Math::PI, false);
 				$this->context->closePath();
 				$this->context->fill();
 				//$this->context->fillStyle = 'green';
@@ -975,7 +981,7 @@ class stock_ViewChart{
 				$this->context->beginPath();
 				if($this->rowPriceExArr[$i]["code2"]=="down") $this->context->fillStyle = 'red';
 				else $this->context->fillStyle = 'red';
-				$this->context->arc($xm1+4, $this->getY3(-100)+10, 6, 0, 2 * Math::PI, false);
+				$this->context->arc($xm1+4, $this->getY3(-30)-10, 6, 0, 2 * Math::PI, false);
 				$this->context->closePath();
 				$this->context->fill();
 				//$this->context->fillStyle = 'hotpink';
@@ -986,7 +992,7 @@ class stock_ViewChart{
 				$this->context->beginPath();
 				$this->context->fillStyle = 'blue';
 				$this->context->strokeStyle = 'blue';
-				$this->context->arc($xm1+4, $this->getY3(-100)+10, 9, 0, 2 * Math::PI, false);
+				$this->context->arc($xm1+4, $this->getY3(-30)-10, 9, 0, 2 * Math::PI, false);
 				$this->context->closePath();
 				$this->context->fill();
 				//$this->context->stroke();
@@ -997,7 +1003,7 @@ class stock_ViewChart{
 				$this->context->beginPath();
 				if($this->rowPriceExArr[$i]["codeB"]=="down") { $this->context->fillStyle = 'red'; $this->context->strokeStyle='red'; }
 				else { $this->context->fillStyle = 'red'; $this->context->strokeStyle='red'; }
-				$this->context->arc($xm1+4, $this->getY3(-100)+10, 9, 0, 2 * Math::PI, false);
+				$this->context->arc($xm1+4, $this->getY3(-30)-10, 9, 0, 2 * Math::PI, false);
 				$this->context->closePath();
 				$this->context->fill();
 				//$this->context->stroke();
@@ -1271,6 +1277,7 @@ class stock_ViewChart{
 	public $alpha = 70;
 	
 	public function paintValue(){
+		$voRe=$this->viewStock->voRowPriceArr;
 		$vo1=$this->voPrice1;
 		$this->context->restore();
 		$this->context->globalAlpha=1;
@@ -1284,16 +1291,22 @@ class stock_ViewChart{
 			if($x< 0*(911-$this->padX1)) break;
 
 			//$y2 = $vo->getLiveVolume();
-			$y2=$stockData[$vo1->volume]*$stockData[$vo1->close];
-			if($y2>=$this->maxStockDataY2/7) $y2=round($this->maxStockDataY2/7);
-			if($y2==null) continue;
+			//$y2=$stockData[$vo1->volume]*$stockData[$vo1->close];
+			$y=$this->rowPriceExArr[$i][$voRe->perValue];
+			//if($y2>=$this->maxStockDataY2/7) $y2=round($this->maxStockDataY2/7);
+			if($y==null) continue;
 			if($x<$this->padX) break;
-			if( $stockData[$vo1->close] >= $stockData[$vo1->open]) $this->context->fillStyle = 'blue';
+			//////if( $stockData[$vo1->close] >= $stockData[$vo1->open]) $this->context->fillStyle = 'blue';
+			if($y>=100) $this->context->fillStyle = 'blue';
 			else $this->context->fillStyle = 'red';
-			if($this->w==2)$this->context->fillRect($x, $this->getY2(0), $this->w+1 , -$y2*$this->scaleY2);
-			else $this->context->fillRect($x, $this->getY2(0), $this->w+1 , -$y2*$this->scaleY2);
+			//if($i==0 && $y>=60) $this->context->fillStyle = 'blue';
+			if($y>160) $y=160;
+			if($this->w==2)$this->context->fillRect($x, $this->getY2(0), $this->w+1 , -$y*$this->scaleY2);
+			else $this->context->fillRect($x, $this->getY2(0), $this->w+1 , -$y*$this->scaleY2);
 
 			if($i==0){
+				//alert($voRe->minClose);
+				//alert($this->rowPriceExArr[$i]);
 				//$buyValue = $stockData->buyPrice3*$stockData->buyVolume3 + $stockData->buyPrice2*$stockData->buyVolume2 + $stockData->buyPrice1*$stockData->buyVolume1;
 				//$sellValue = $stockData->sellPrice3*$stockData->sellVolume3 + $stockData->sellPrice2*$stockData->sellVolume2 + $stockData->sellPrice1*$stockData->sellVolume1;
 				//$buyValue = 0;
@@ -1325,7 +1338,7 @@ class stock_ViewChart{
 	}
 	
 	public function paintMa($limit){
-		$voRe=$this->voRowPriceArr;
+		$voRe=$this->viewStock->voRowPriceArr;
 		$vo1=$this->voPrice1;
 		$this->context->restore();
 		$vo = new stock_VoPrice();
