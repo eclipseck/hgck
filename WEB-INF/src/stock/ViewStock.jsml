@@ -81,7 +81,6 @@ class stock_ViewStock{
 		//@ que($this)->bind("rpc.rpcCon", function($event, $result){ $this->onrpcCon($event, $result); });
 		$this->rpcStockMap();
 		$this->rpcCon();
-		$this->viewDetail->buttonList->click();
 		//@ que($this)->bind("rpc.rpcConf", function($event, $result){ $this->onrpcConf($event, $result); });
 		//@ que($this)->bind("rpc.rpcTradeCap2", function($event, $result){ $this->onrpcTradeCap2($event, $result); });
 		//@ $this->viewDetail->buttonConf->bind("click", function($event){ $this->onclickButtonConf($event); });
@@ -106,6 +105,7 @@ class stock_ViewStock{
 				$this->viewDetail->divStock->find("[_tag='volume0']")->html($str);
 			}
 		//@ },1000);
+		$this->viewDetail->buttonList->click();
 		return $this;
 	}
 	
@@ -399,6 +399,10 @@ class stock_ViewStock{
 			$imaxUp=null;
 			$minMax=null;
 			$minOpen=null;
+			/*$a1=1 - 2/(5+1);
+			$a2=1 - 2/(8+1);
+			$p1=0; $c1=0;
+			$p2=0; $c2=0;*/
 			for($j=0 ; $j < 55 ; $j++){
 				$x=$i+$j;
 				if($this->isNull0($rowPriceArr[$x][$vo->close])) break;
@@ -446,10 +450,18 @@ class stock_ViewStock{
 				//$per = 100*($rowPriceArr[$x][$vo->close] - $rowPriceArr[$x+1][$vo->close])/$rowPriceArr[$x+1][$vo->close];
 				//if(abs($per) <= 15 )$delta += abs($per);
 
-				$maC+=$rowPriceArr[$x+1][$vo->close];
-	
+				$maC+=$rowPriceArr[$x][$vo->close];
+				/*$pa1= pow($a1,$j);
+				$p1+= $pa1*$rowPriceArr[$x][$vo->close];
+				$c1+= $pa1;
+				
+				$pa2= pow($a2,$j);
+				$p2+= $pa2*$rowPriceArr[$x][$vo->close];
+				$c2+= $pa2;*/
+				
 				if($j==5-1){
 					//@ $re[$i]["ma1"]=$maC/($j+1);
+					// $re[$i]["ma1"]=$p1/$c1;
 					$ma1=$maC/($j+1);
 				}
 				if($j==5-1){
@@ -466,7 +478,8 @@ class stock_ViewStock{
 				}
 				if($j==8-1){
 /*<@ 
-					$re[$i]["ma2"]=$maC/($j+1);					
+					$re[$i]["ma2"]=$maC/($j+1);
+					//$re[$i]["ma2"]=$p2/$c2;
 					$ma=$re[$i]["ma2"];
 					if($rowPriceArr[$i][$vo->close]-$ma > $rowPriceArr[$i][$vo->close]-$re[$i]["ma1"]) $ma=$re[$i]["ma1"];
 					$re[$i]["perMa2"]=round(100*($rowPriceArr[$i][$vo->close]-$ma)/$ma);
@@ -1963,8 +1976,8 @@ try{
 					} else {
 						$rate=200100000100000;
 						if($filterMap["fa"]=="fa") $rate+=$stockMap[$symbol][$voStock->ff2];
-						else $rate+=round($perValue*100);
-						//else $rate+=100000*(100000-round($perSell*100))+round($perValue*100);
+						//else $rate+=round($perValue*100);
+						else $rate+=100000*(100000-round($perSell*100))+round($perValue*100);
 						
 						//$rate+= 100*$reRowPriceArr[$i][$voRe->maxC2];
 						//if($filterMap["fa"]=="fa" && ($stockMap[$symbol][$voStock->roe]>=20 || $ysFaMap[$symbol]!=null) && $live[$vo2->close]<=3*$stockMap[$symbol][$voStock->bv] && $noFaMap[$symbol]==null) $rate+=100000;

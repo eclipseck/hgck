@@ -2519,7 +2519,7 @@ var $this = this; var $__arguments = arguments; var $h = null; var $fnum = null;
 			if($this.ao.conf!=null) $this.displayStock=$this.ao.conf["displayStock"];
 			$h=33;
 		} else {
-			if($this.tableClass!="") {				$h=22;				if($this.ao.conf!=null) $this.displayStock=$this.ao.conf["displayStock"];
+			if($this.tableClass!="") {				$h=25;				if($this.ao.conf!=null) $this.displayStock=36;
 			}
 			else if($this.tableClass=="") {
 				$h=33;				$this.displayStock=26;
@@ -3262,7 +3262,6 @@ $html = $__htmlArray.join("");
 	 que($this).bind("rpc.rpcCon", function($event, $result){ $this.onrpcCon($event, $result); });
 	$this.rpcStockMap();
 		$this.rpcCon();
-		$this.viewDetail.buttonList.click();
 		 que($this).bind("rpc.rpcConf", function($event, $result){ $this.onrpcConf($event, $result); });
 	 que($this).bind("rpc.rpcTradeCap2", function($event, $result){ $this.onrpcTradeCap2($event, $result); });
 	 $this.viewDetail.buttonConf.bind("click", function($event){ $this.onclickButtonConf($event); });
@@ -3284,7 +3283,8 @@ $html = $__htmlArray.join("");
 				$this.viewDetail.divStock.find("[_tag='volume0']").html($str);
 			}
 		 },1000);
-	return $this;
+	$this.viewDetail.buttonList.click();
+		return $this;
 	}
 stock_ViewStock.prototype.rpcCon = function(){
 var $this = this; var $__arguments = arguments;
@@ -3463,6 +3463,7 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 			$imaxUp=null;
 			$minMax=null;
 			$minOpen=null;
+			
 			for($j=0 ; $j < 55 ; $j++){
 				$x=$i+$j;
 				if($this.isNull0($rowPriceArr[$x][$vo.close])) break;
@@ -3494,11 +3495,12 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 				}
 
 								
-				$maC+=$rowPriceArr[$x+1][$vo.close];
-	
+				$maC+=$rowPriceArr[$x][$vo.close];
+				
+				
 				if($j==5-1){
 					 $re[$i]["ma1"]=$maC/($j+1);
-				$ma1=$maC/($j+1);
+									$ma1=$maC/($j+1);
 				}
 				if($j==5-1){
 					
@@ -3513,8 +3515,8 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 					
 				}
 				if($j==8-1){
-					$re[$i]["ma2"]=$maC/($j+1);					
-					$ma=$re[$i]["ma2"];
+					$re[$i]["ma2"]=$maC/($j+1);
+										$ma=$re[$i]["ma2"];
 					if($rowPriceArr[$i][$vo.close]-$ma > $rowPriceArr[$i][$vo.close]-$re[$i]["ma1"]) $ma=$re[$i]["ma1"];
 					$re[$i]["perMa2"]=round(100*($rowPriceArr[$i][$vo.close]-$ma)/$ma);
 					
@@ -6060,7 +6062,7 @@ body,div,span,dl,dt,dd,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,textarea,but
 }
 
 .smallTable tr td, .smallTable tr td span, .smallTable tr td div, .smallTable tr td a{
-	font-size: 18px ;
+	font-size: 20px ;
 	font-family: sans-serif,Arial, Times New Roman, Arial, Helvetica, sans-serif, Courier New, Verdana;
 }
 

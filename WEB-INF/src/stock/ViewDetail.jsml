@@ -444,8 +444,8 @@ class stock_ViewDetail{
 			$h=33;
 		} else {
 			if($this->tableClass!="") {//small
-				$h=22;//33
-				if($this->ao->conf!=null) $this->displayStock=$this->ao->conf["displayStock"];
+				$h=25;//22 40  20:25 36
+				if($this->ao->conf!=null) $this->displayStock=36;
 			}
 			else if($this->tableClass=="") {
 				$h=33;//33
