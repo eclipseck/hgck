@@ -300,8 +300,8 @@ try{
 			if($vo->row[$vo->high] == null || $vo->row[$vo->high] == 0) $vo->row[$vo->high] = $vo->row[$vo->ref];
 			if($vo->row[$vo->low] == null  || $vo->row[$vo->low] == 0) $vo->row[$vo->low] = $vo->row[$vo->ref];
 			
-			if($vo->row[$vo->sellPrice1] == "ATO" || $vo->row[$vo->sellPrice1] == "ATC" || $vo->row[$vo->sellPrice1] == 0 || $vo->row[$vo->sellPrice1] == null ) $vo->row[$vo->sellPrice1] = $vo->row[$vo->low];
-			if($vo->row[$vo->buyPrice1] == "ATO" || $vo->row[$vo->buyPrice1] == "ATC" || $vo->row[$vo->buyPrice1] == 0 || $vo->row[$vo->buyPrice1] == null) $vo->row[$vo->buyPrice1] = $vo->row[$vo->high];
+			if($vo->row[$vo->sellPrice1] == "ATO" || $vo->row[$vo->sellPrice1] == "ATC" || $vo->row[$vo->sellPrice1] == 0 || $vo->row[$vo->sellPrice1] == null ) $vo->row[$vo->sellPrice1] = $vo->row[$vo->close];
+			if($vo->row[$vo->buyPrice1] == "ATO" || $vo->row[$vo->buyPrice1] == "ATC" || $vo->row[$vo->buyPrice1] == 0 || $vo->row[$vo->buyPrice1] == null) $vo->row[$vo->buyPrice1] = $vo->row[$vo->close];
 			
 			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->buyPrice1];
 			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->sellPrice1];
@@ -364,8 +364,8 @@ try{
 			if($vo->row[$vo->high] == null || $vo->row[$vo->high] == 0) $vo->row[$vo->high] = $vo->row[$vo->ref];
 			if($vo->row[$vo->low] == null  || $vo->row[$vo->low] == 0) $vo->row[$vo->low] = $vo->row[$vo->ref];
 			
-			if($vo->row[$vo->sellPrice1] == "ATO" || $vo->row[$vo->sellPrice1] == "ATC" || $vo->row[$vo->sellPrice1] == 0 || $vo->row[$vo->sellPrice1] == null ) $vo->row[$vo->sellPrice1] = $vo->row[$vo->low];
-			if($vo->row[$vo->buyPrice1] == "ATO" || $vo->row[$vo->buyPrice1] == "ATC" || $vo->row[$vo->buyPrice1] == 0 || $vo->row[$vo->buyPrice1] == null) $vo->row[$vo->buyPrice1] = $vo->row[$vo->high];
+			if($vo->row[$vo->sellPrice1] == "ATO" || $vo->row[$vo->sellPrice1] == "ATC" || $vo->row[$vo->sellPrice1] == 0 || $vo->row[$vo->sellPrice1] == null ) $vo->row[$vo->sellPrice1] = $vo->row[$vo->close];
+			if($vo->row[$vo->buyPrice1] == "ATO" || $vo->row[$vo->buyPrice1] == "ATC" || $vo->row[$vo->buyPrice1] == 0 || $vo->row[$vo->buyPrice1] == null) $vo->row[$vo->buyPrice1] = $vo->row[$vo->close];
 			
 			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->buyPrice1];
 			if($vo->row[$vo->close] == null  || $vo->row[$vo->close] == 0) $vo->row[$vo->close] = $vo->row[$vo->sellPrice1];

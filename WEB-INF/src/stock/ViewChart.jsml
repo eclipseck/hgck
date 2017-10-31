@@ -377,9 +377,9 @@ class stock_ViewChart{
 				$row = $stock[$voStock->live];
 				if($row==null) continue;
 				
-				if($k==1 && $stock[$voStock->value2] < 5000000) continue;
-				/////if($k==2 && $stock[$voStock->value2] >= 3000000) continue;
-				if($k==2 && $vn30Map[$symbol]==null) continue;
+				if($k==1 && $stock[$voStock->value2] < 3000000) continue;
+				if($k==2 && $stock[$voStock->value2] >= 3000000) continue;
+				//////////////if($k==2 && $vn30Map[$symbol]==null) continue;
 				
 				if( $this->ao->isNull0($row[$vo2->ref]) || $this->ao->isNull0($row[$vo2->close])) continue;
 				

@@ -874,9 +874,9 @@ var $this = this; var $__arguments = arguments; var $voStock = null; var $vo2 = 
 				$row = $stock[$voStock.live];
 				if($row==null) continue;
 				
-				if($k==1 && $stock[$voStock.value2] < 5000000) continue;
-								if($k==2 && $vn30Map[$symbol]==null) continue;
-				
+				if($k==1 && $stock[$voStock.value2] < 3000000) continue;
+				if($k==2 && $stock[$voStock.value2] >= 3000000) continue;
+								
 				if( $this.ao.isNull0($row[$vo2.ref]) || $this.ao.isNull0($row[$vo2.close])) continue;
 				
 				$per = round(100*($row[$vo2.close] - $row[$vo2.ref]) / $row[$vo2.ref],1);
@@ -3758,7 +3758,7 @@ var $this = this; var $__arguments = arguments; var $vo = null; var $price = nul
 		return "<span style='color:"+$color+";"+$style+"'>"+$price+"</span>";
 	}
 stock_ViewStock.prototype.formatPer = function($value,$dt,$symbol){
-var $this = this; var $__arguments = arguments; var $vo = null; var $color = null; var $f = null;
+var $this = this; var $__arguments = arguments; var $vo = null; var $color = null;
 		$vo=$this.voPrice2;
 		
 		if($dt && $this.isMarket($symbol)){
@@ -3775,12 +3775,12 @@ var $this = this; var $__arguments = arguments; var $vo = null; var $color = nul
 		if($value<=0)$color="red";
 		else $color="blue";
 		
-		$f=10;
-		if($value>=10)$value=9.9;
-		if($value<=-10)$value=-9.9;
+		$value=number_format(10*$value,0);
+		if($value>=100)$value=99;
+		if($value<=-100)$value=-99;
 		
-		if($value <0 ) $value = ""+number_format(-$f*$value,0)+"";
-		else $value = number_format($f*$value,0,",","");
+		if($value <0 ) $value = ""+(-$value)+"";
+		else $value = $value;
 		
 		return "<span style='color:"+$color+"'>"+$value+"</span>";
 	}
@@ -4419,7 +4419,7 @@ $__htmlTr2Array.push('">');
 $__htmlTr2Array.push( $this.shortString($marketTrade) );
 
 $__htmlTr2Array.push('</td>\
- <td style="');
+  <td style="');
 $__htmlTr2Array.push( $trStyle );
 
 $__htmlTr2Array.push('">');
