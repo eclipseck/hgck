@@ -2519,7 +2519,7 @@ var $this = this; var $__arguments = arguments; var $h = null; var $fnum = null;
 			if($this.ao.conf!=null) $this.displayStock=$this.ao.conf["displayStock"];
 			$h=33;
 		} else {
-			if($this.tableClass!="") {				$h=25;				if($this.ao.conf!=null) $this.displayStock=36;
+			if($this.tableClass!="") {				$h=24;				if($this.ao.conf!=null) $this.displayStock=36;
 			}
 			else if($this.tableClass=="") {
 				$h=33;				$this.displayStock=26;
@@ -3764,8 +3764,7 @@ var $this = this; var $__arguments = arguments; var $vo = null; var $color = nul
 		if($dt && $this.isMarket($symbol)){
 			return "<div _tag='volume0' style='background-color:blue;color:white;text-align:center;'></div>";
 		}
-		
-		if($value==null) return "";
+				if($value==null) return "";
 		if($value>6) $color="magenta";
 		else if($value>0)$color="blue";
 		else if($value==0)$color="blue";
@@ -3775,7 +3774,7 @@ var $this = this; var $__arguments = arguments; var $vo = null; var $color = nul
 		if($value<=0)$color="red";
 		else $color="blue";
 		
-		$value=number_format(10*$value,0);
+		$value=round(10*$value);
 		if($value>=100)$value=99;
 		if($value<=-100)$value=-99;
 		
@@ -4005,6 +4004,7 @@ stock_ViewStock.prototype.getPricePer = function($name ,$dt){
 var $this = this; var $__arguments = arguments; var $vo = null; var $price = null; var $per = null; var $priceRef = null;
 		$vo=$this.voPrice2;
 		$price=$this.getPrice($name,$dt);
+		if($price==null) return null;
 		if($dt[$vo.ref]!=0) $per=round(100*($price-$dt[$vo.ref])/$dt[$vo.ref],2);
 		if($name==$vo.low){
 			if($price!=0) $per=round(100*($dt[$vo.close]-$price)/$price,2);
@@ -4175,7 +4175,7 @@ var $this = this; var $__arguments = arguments; var $voStock = null;
 		return $this.stockMap[$symbol][$voStock.live];
 	}
 stock_ViewStock.prototype.onrpcStockMap = function($event ,$result){
-var $this = this; var $__arguments = arguments; var $vo = null; var $voStock = null; var $tableClass = null; var $count = null; var $valueT = null; var $valueNowT = null; var $profitT = null; var $valueTfake = null; var $valueNowTfake = null; var $profitTfake = null; var $seperate1 = null; var $seperate2 = null; var $seperate3 = null; var $seperate4 = null; var $seperate5 = null; var $ysFaArr = null; var $ysFaMap = null; var $symbol = null; var $str = null; var $noFaArr = null; var $noFaMap = null; var $isFuture = null; var $futureArr = null; var $futureMap = null; var $_live = null; var $buy = null; var $perSell = null; var $perBuy = null; var $stock = null; var $buyPrice = null; var $symbolTrade = null; var $trade = null; var $dateArr = null; var $priceArr = null; var $volumeArr = null; var $marketArr = null; var $live = null; var $value = null; var $valueNow = null; var $profit = null; var $canSell = null; var $i = null; var $date = null; var $tp = null; var $price = null; var $volume = null; var $marketTrade = null; var $per = null; var $seperate0 = null; var $seperate6 = null; var $seperate7 = null; var $trStyle = null; var $minClose = null; var $bvp = null; var $ysFa = null; var $noFa = null; var $html2 = null; var $htmlTr2 = null; var $html = null; var $arrayStock_symbol = null; var $selectStock = null; var $selectedSymbol = null; var $selectedIndex = null;
+var $this = this; var $__arguments = arguments; var $vo = null; var $voStock = null; var $tableClass = null; var $count = null; var $valueT = null; var $valueNowT = null; var $profitT = null; var $valueTfake = null; var $valueNowTfake = null; var $profitTfake = null; var $seperate1 = null; var $seperate2 = null; var $seperate3 = null; var $seperate4 = null; var $seperate5 = null; var $ysFaArr = null; var $ysFaMap = null; var $symbol = null; var $str = null; var $noFaArr = null; var $noFaMap = null; var $isFuture = null; var $futureArr = null; var $futureMap = null; var $_live = null; var $buy = null; var $perSell = null; var $perBuy = null; var $stock = null; var $buyPrice = null; var $symbolTrade = null; var $trade = null; var $dateArr = null; var $priceArr = null; var $volumeArr = null; var $marketArr = null; var $live = null; var $value = null; var $valueNow = null; var $profit = null; var $canSell = null; var $i = null; var $date = null; var $tp = null; var $price = null; var $volume = null; var $marketTrade = null; var $per = null; var $seperate0 = null; var $seperate8 = null; var $seperate6 = null; var $seperate7 = null; var $trStyle = null; var $minClose = null; var $bvp = null; var $ysFa = null; var $noFa = null; var $html2 = null; var $htmlTr2 = null; var $html = null; var $arrayStock_symbol = null; var $selectStock = null; var $selectedSymbol = null; var $selectedIndex = null;
 		$vo=$this.voPrice2;
 		$voStock=$this.voStock;
 		$this._stockMap=$this.stockMap;
@@ -4342,11 +4342,13 @@ $html2 = $__html2Array.join("");
 		if($seperate4==null && $this.stockMap[$symbol][$voStock.rate]<200100000100000) $seperate4=$count;
 		
 		if($seperate5==null && $this.stockMap[$symbol][$voStock.rate]<400100000100000+700000100000) $seperate5=$count;
+		if($seperate8==null && $this.stockMap[$symbol][$voStock.rate]<400100000100000+700000100000+100000100000) $seperate8=$count;
+		
 		if($seperate6==null && $this.stockMap[$symbol][$voStock.rate]<501100000100000+100000100000) $seperate6=$count;
 		if($seperate7==null && $this.stockMap[$symbol][$voStock.rate]<400100000100000+100000100000) $seperate7=$count;
 		
 		
-		if($seperate1==$count || $seperate2==$count || $seperate3==$count || $seperate4==$count || $seperate0==$count || $seperate5==$count || $seperate6==$count || $seperate7==$count) {
+		if($seperate1==$count || $seperate2==$count || $seperate3==$count || $seperate4==$count || $seperate0==$count || $seperate5==$count || $seperate6==$count || $seperate7==$count || $seperate8==$count) {
 			$trStyle="border-top:2px solid black;";
 		}
 		else $trStyle="";
@@ -4482,11 +4484,32 @@ $__htmlTr2Array.push('"> ');
 $__htmlTr2Array.push( $this.formatMinMax( $stock[$voStock.perMinMax], null ) );
 
 $__htmlTr2Array.push(' </td>\
-<td style="color:black;border-right:0px solid black;');
+<td style="color:black;border-right:2px solid black;');
 $__htmlTr2Array.push( $trStyle );
 
 $__htmlTr2Array.push('" >');
 $__htmlTr2Array.push( $this.formatVolume2($buy,$vo.sellPrice1,$stock[$voStock.live],$_live) );
+
+$__htmlTr2Array.push('</td>\
+ <td style="color:black;border-right:0px solid black;');
+$__htmlTr2Array.push( $trStyle );
+
+$__htmlTr2Array.push('" >');
+$__htmlTr2Array.push( $this.formatRoe($stock[$voStock.roe],$ysFa,$noFa) );
+
+$__htmlTr2Array.push('</td>\
+<td style="color:black;border-right:0px solid black;');
+$__htmlTr2Array.push( $trStyle );
+
+$__htmlTr2Array.push('" >');
+$__htmlTr2Array.push( $this.formatBvp($bvp) );
+
+$__htmlTr2Array.push('</td>\
+<td style="color:black;border-right:0px solid black;');
+$__htmlTr2Array.push( $trStyle );
+
+$__htmlTr2Array.push('" >');
+$__htmlTr2Array.push( $this.formatFf($stock[$voStock.ff2],$ysFa,$noFa) );
 
 $__htmlTr2Array.push('</td>\
  ');
@@ -6062,7 +6085,7 @@ body,div,span,dl,dt,dd,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,textarea,but
 }
 
 .smallTable tr td, .smallTable tr td span, .smallTable tr td div, .smallTable tr td a{
-	font-size: 20px ;
+	font-size: 19px ;
 	font-family: sans-serif,Arial, Times New Roman, Arial, Helvetica, sans-serif, Courier New, Verdana;
 }
 

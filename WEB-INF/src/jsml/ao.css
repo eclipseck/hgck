@@ -10,7 +10,7 @@ body,div,span,dl,dt,dd,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,textarea,but
 }
 
 .smallTable tr td, .smallTable tr td span, .smallTable tr td div, .smallTable tr td a{
-	font-size: 20px ;
+	font-size: 19px ;
 	font-family: sans-serif,Arial, Times New Roman, Arial, Helvetica, sans-serif, Courier New, Verdana;
 }
 
