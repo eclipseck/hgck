@@ -844,7 +844,7 @@ class stock_ViewStock{
 	
 	public function formatRoe($value,$ysFa,$noFa){
 		if($value==null) return "";
-		if($value>=20) $color="blue";
+		if($value>=30) $color="blue";
 		else $color="red";
 		if($value>=100) $value=99;
 		if($value<=-100) $value=-99;

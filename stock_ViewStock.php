@@ -3805,7 +3805,7 @@ var $this = this; var $__arguments = arguments; var $vo = null; var $dt = null; 
 stock_ViewStock.prototype.formatRoe = function($value,$ysFa,$noFa){
 var $this = this; var $__arguments = arguments; var $color = null;
 		if($value==null) return "";
-		if($value>=20) $color="blue";
+		if($value>=30) $color="blue";
 		else $color="red";
 		if($value>=100) $value=99;
 		if($value<=-100) $value=-99;
