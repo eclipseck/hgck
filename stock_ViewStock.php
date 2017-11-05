@@ -629,7 +629,7 @@ $__htmlArray.push('\
 <div>\
 <div id="divCanvasText" style=\'position:relative\'>\
 </div>\
-<div id="divOnePrice" align="right" style=\'position:absolute;left:200px;top:');
+<div id="divOnePrice" align="right" style=\'position:absolute;left:50px;top:');
 $__htmlArray.push( 80+0.0*$this.height );
 
 $__htmlArray.push('px;border:0px solid;width:655px;\'></div>\
@@ -875,8 +875,8 @@ var $this = this; var $__arguments = arguments; var $voStock = null; var $vo2 = 
 				if($row==null) continue;
 				
 				if($k==1 && $stock[$voStock.value2] < 3000000) continue;
-				if($k==2 && $stock[$voStock.value2] >= 3000000) continue;
-								
+								if($k==2 && $vn30Map[$symbol]==null) continue;
+				
 				if( $this.ao.isNull0($row[$vo2.ref]) || $this.ao.isNull0($row[$vo2.close])) continue;
 				
 				$per = round(100*($row[$vo2.close] - $row[$vo2.ref]) / $row[$vo2.ref],1);
@@ -3421,7 +3421,7 @@ var $this = this; var $__arguments = arguments;
 
 	}
 stock_ViewStock.prototype.makeRowPriceArr = function($vo, $rowPriceArr ,$limit){
-var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null; var $len = null; var $i = null;if($limit==null) $limit=null; var $len2 = null; var $codeB = null; var $closeB = null; var $profitCount = null; var $iUp = null; var $CMINMAXHIGH = null; var $CMINMAXUP = null; var $CMAXUP = null; var $CMINUP = null; var $isMarket = null; var $min = null; var $max = null; var $imin = null; var $imax = null; var $max0 = null; var $min1 = null; var $max1 = null; var $value2 = null; var $code = null; var $maC = null; var $isCode = null; var $minC2 = null; var $maxC2 = null; var $delta = null; var $imaxUp = null; var $minMax = null; var $minOpen = null; var $j = null; var $x = null; var $ma1 = null; var $ma = null; var $close = null; var $per = null; var $maC0 = null; var $iUp2 = null; var $closeS = null;
+var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null; var $len = null; var $i = null;if($limit==null) $limit=null; var $len2 = null; var $codeB = null; var $closeB = null; var $profitCount = null; var $iUp = null; var $CMINMAXHIGH = null; var $CMINMAXUP = null; var $CMAXUP = null; var $CMINUP = null; var $CPER1 = null; var $CPER2 = null; var $CIUP = null; var $isMarket = null; var $min = null; var $max = null; var $imin = null; var $imax = null; var $max0 = null; var $min1 = null; var $max1 = null; var $value2 = null; var $code = null; var $maC = null; var $isCode = null; var $minC2 = null; var $maxC2 = null; var $delta = null; var $imaxUp = null; var $minMax = null; var $minOpen = null; var $j = null; var $x = null; var $ma1 = null; var $ma = null; var $close = null; var $per = null; var $maC0 = null; var $iUp2 = null; var $closeS = null;
 				$re=[];
 		$voRe=$this.voRowPriceArr;
 		$len=count($rowPriceArr);
@@ -3442,12 +3442,20 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 		$CMINMAXUP=5;
 		$CMAXUP=3;
 		$CMINUP=2;
+		
+		$CPER1=1.02;
+		$CPER2=1.05;
+		$CIUP=3;
 		$isMarket=$this.isMarket($this.viewChart.symbol);
 		if($isMarket){
 			$CMINMAXHIGH=0;
 			$CMINMAXUP=3;
 			$CMAXUP=3;
 			$CMINUP=0.5;
+			
+			$CPER1=1.007;
+			$CPER2=1.015;
+			$CIUP=1;
 		}
 		for($i=$len2-1 ; $i >=0 ;$i--){
 						if($this.isNull0($rowPriceArr[$i][$vo.close])) continue;
@@ -3566,8 +3574,8 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 						$per = 100*($rowPriceArr[$i][$vo.close] - $rowPriceArr[$i+1][$vo.close])/$rowPriceArr[$i+1][$vo.close];
 												if($per>=0 && $rowPriceArr[$i][$vo.close] >= $rowPriceArr[$i][$vo.open]){
 							
-							$close=1.02*$rowPriceArr[$i][$vo.close];
-							if($close > 1.05*$rowPriceArr[$i+1][$vo.close]) $close=1.05*$rowPriceArr[$i+1][$vo.close]; 
+							$close=$CPER1*$rowPriceArr[$i][$vo.close];
+							if($close > $CPER2*$rowPriceArr[$i+1][$vo.close]) $close=$CPER2*$rowPriceArr[$i+1][$vo.close]; 
 						}
 						$maC0=$maC/($j+1);
 						$maC0=100*($close-$maC0)/$maC0;
@@ -3607,7 +3615,7 @@ var $this = this; var $__arguments = arguments; var $re = null; var $voRe = null
 							
 					}
 				}
-				if($closeB!=null && $iUp>=3+$i){
+				if($closeB!=null && $iUp>=$CIUP+$i){
 					if( ($re[$i][$voRe.code]=="high")						|| $re[$i][$voRe.code]=="down"
 					){
 						$re[$i]["codeB"]=$re[$i][$voRe.code];
@@ -4421,35 +4429,7 @@ $__htmlTr2Array.push('">');
 $__htmlTr2Array.push( $this.shortString($marketTrade) );
 
 $__htmlTr2Array.push('</td>\
-  <td style="');
-$__htmlTr2Array.push( $trStyle );
-
-$__htmlTr2Array.push('">');
-$__htmlTr2Array.push( $this.formatPrice($vo.buyPrice1,$stock[$voStock.live],$_live) );
-
-$__htmlTr2Array.push('</td>\
-<td style="border-right:px solid black;');
-$__htmlTr2Array.push( $trStyle );
-
-$__htmlTr2Array.push('">');
-$__htmlTr2Array.push( $this.formatVolume1($vo.buyVolume1,$stock[$voStock.live],$_live,$symbol) );
-
-$__htmlTr2Array.push('</td>\
-<td style="border-left:0px solid black;');
-$__htmlTr2Array.push( $trStyle );
-
-$__htmlTr2Array.push('">');
-$__htmlTr2Array.push( $this.formatPrice($vo.sellPrice1,$stock[$voStock.live],$_live) );
-
-$__htmlTr2Array.push('</td>\
-<td style="border-right:2px solid black;');
-$__htmlTr2Array.push( $trStyle );
-
-$__htmlTr2Array.push('">');
-$__htmlTr2Array.push( $this.formatVolume1($vo.sellVolume1,$stock[$voStock.live],$_live,$symbol) );
-
-$__htmlTr2Array.push('</td>\
-  <td style="');
+ <td style="');
 $__htmlTr2Array.push( $trStyle );
 
 $__htmlTr2Array.push('">');
@@ -4489,6 +4469,62 @@ $__htmlTr2Array.push( $trStyle );
 
 $__htmlTr2Array.push('" >');
 $__htmlTr2Array.push( $this.formatVolume2($buy,$vo.sellPrice1,$stock[$voStock.live],$_live) );
+
+$__htmlTr2Array.push('</td>\
+ <td style="');
+$__htmlTr2Array.push( $trStyle );
+
+$__htmlTr2Array.push('">');
+$__htmlTr2Array.push( $this.formatPrice($vo.buyPrice2,$stock[$voStock.live],$_live) );
+
+$__htmlTr2Array.push('</td>\
+<td style="border-right:0px solid black;');
+$__htmlTr2Array.push( $trStyle );
+
+$__htmlTr2Array.push('">');
+$__htmlTr2Array.push( $this.formatVolume1($vo.buyVolume2,$stock[$voStock.live],$_live,$symbol) );
+
+$__htmlTr2Array.push('</td>\
+<td style="');
+$__htmlTr2Array.push( $trStyle );
+
+$__htmlTr2Array.push('">');
+$__htmlTr2Array.push( $this.formatPrice($vo.buyPrice1,$stock[$voStock.live],$_live) );
+
+$__htmlTr2Array.push('</td>\
+<td style="border-right:2px solid black;');
+$__htmlTr2Array.push( $trStyle );
+
+$__htmlTr2Array.push('">');
+$__htmlTr2Array.push( $this.formatVolume1($vo.buyVolume1,$stock[$voStock.live],$_live,$symbol) );
+
+$__htmlTr2Array.push('</td>\
+<td style="border-left:0px solid black;');
+$__htmlTr2Array.push( $trStyle );
+
+$__htmlTr2Array.push('">');
+$__htmlTr2Array.push( $this.formatPrice($vo.sellPrice1,$stock[$voStock.live],$_live) );
+
+$__htmlTr2Array.push('</td>\
+<td style="border-right:0px solid black;');
+$__htmlTr2Array.push( $trStyle );
+
+$__htmlTr2Array.push('">');
+$__htmlTr2Array.push( $this.formatVolume1($vo.sellVolume1,$stock[$voStock.live],$_live,$symbol) );
+
+$__htmlTr2Array.push('</td>\
+<td style="border-left:0px solid black;');
+$__htmlTr2Array.push( $trStyle );
+
+$__htmlTr2Array.push('">');
+$__htmlTr2Array.push( $this.formatPrice($vo.sellPrice2,$stock[$voStock.live],$_live) );
+
+$__htmlTr2Array.push('</td>\
+<td style="border-right:2px solid black;');
+$__htmlTr2Array.push( $trStyle );
+
+$__htmlTr2Array.push('">');
+$__htmlTr2Array.push( $this.formatVolume1($vo.sellVolume2,$stock[$voStock.live],$_live,$symbol) );
 
 $__htmlTr2Array.push('</td>\
  <td style="color:black;border-right:0px solid black;');
@@ -4580,6 +4616,11 @@ stock_ViewStock.prototype.isNull0 = function($value){
 var $this = this; var $__arguments = arguments;
 		if($value==null || $value==0) return true;
 		return false;
+	}
+stock_ViewStock.prototype.rpcMakeTa2 = function(){
+var $this = this; var $__arguments = arguments;
+ $this.json();
+
 	}
 stock_ViewStock.prototype.rpcMakeTa = function(){
 var $this = this; var $__arguments = arguments;

@@ -375,6 +375,10 @@ class stock_ViewStock{
 		$CMINMAXUP=5;
 		$CMAXUP=3;
 		$CMINUP=2;
+		
+		$CPER1=1.02;
+		$CPER2=1.05;
+		$CIUP=3;
 /*<@
 		$isMarket=$this->isMarket($this->viewChart->symbol);
 		if($isMarket){
@@ -382,6 +386,10 @@ class stock_ViewStock{
 			$CMINMAXUP=3;
 			$CMAXUP=3;
 			$CMINUP=0.5;
+			
+			$CPER1=1.007;
+			$CPER2=1.015;
+			$CIUP=1;
 		}
 @>*/
 		for($i=$len2-1 ; $i >=0 ;$i--){
@@ -550,8 +558,8 @@ class stock_ViewStock{
 								if($j==34-1 || $j==55-1) $close=1.05*$rowPriceArr[$i+1][$vo->close];
 							}
 							*/
-							$close=1.02*$rowPriceArr[$i][$vo->close];
-							if($close > 1.05*$rowPriceArr[$i+1][$vo->close]) $close=1.05*$rowPriceArr[$i+1][$vo->close]; 
+							$close=$CPER1*$rowPriceArr[$i][$vo->close];
+							if($close > $CPER2*$rowPriceArr[$i+1][$vo->close]) $close=$CPER2*$rowPriceArr[$i+1][$vo->close]; 
 						}
 						$maC0=$maC/($j+1);
 						$maC0=100*($close-$maC0)/$maC0;
@@ -621,7 +629,7 @@ class stock_ViewStock{
 							
 					}
 				}
-				if($closeB!=null && $iUp>=3+$i){
+				if($closeB!=null && $iUp>=$CIUP+$i){
 					if( ($re[$i][$voRe->code]=="high")// && $re[$i+1]["minClose1"]>=18
 						|| $re[$i][$voRe->code]=="down"
 					){
@@ -1479,13 +1487,6 @@ class stock_ViewStock{
 		<td style="border-right:0px solid black;<?= $trStyle ?>"><?= $this->formatPer($perSell,$stock[$voStock->live],null) ?></td>
 		<td style="border-right:2px solid black;<?= $trStyle ?>"><?= $this->shortString($marketTrade) ?></td>
 		
-		
-		<td style="<?= $trStyle ?>"><?= $this->formatPrice($vo->buyPrice1,$stock[$voStock->live],$_live) ?></td>
-		<td style="border-right:px solid black;<?= $trStyle ?>"><?= $this->formatVolume1($vo->buyVolume1,$stock[$voStock->live],$_live,$symbol) ?></td>
-		<td style="border-left:0px solid black;<?= $trStyle ?>"><?= $this->formatPrice($vo->sellPrice1,$stock[$voStock->live],$_live) ?></td>
-		<td style="border-right:2px solid black;<?= $trStyle ?>"><?= $this->formatVolume1($vo->sellVolume1,$stock[$voStock->live],$_live,$symbol) ?></td>
-		
-		
 		<td style="<?= $trStyle ?>"><?=  $this->formatPercentValue( $stock[$voStock->perValue] ) ?></td>
 		<td style="<?= $trStyle ?>;border-right:0px solid black;"><?= $this->formatValue2($stock[$voStock->value2]) ?></td>
 		<td style="border-right:0px solid black;<?= $trStyle ?>"><?= $this->formatPercentRev( $stock[$voStock->perHigh] ) ?> </td>
@@ -1493,18 +1494,20 @@ class stock_ViewStock{
 		<td style="border-right:0px solid black;<?= $trStyle ?>"> <?= $this->formatMinMax( $stock[$voStock->perMinMax], null ) ?> </td>
 		<td style="color:black;border-right:2px solid black;<?= $trStyle ?>" ><?= $this->formatVolume2($buy,$vo->sellPrice1,$stock[$voStock->live],$_live) ?></td>
 		
+		<td style="<?= $trStyle ?>"><?= $this->formatPrice($vo->buyPrice2,$stock[$voStock->live],$_live) ?></td>
+		<td style="border-right:0px solid black;<?= $trStyle ?>"><?= $this->formatVolume1($vo->buyVolume2,$stock[$voStock->live],$_live,$symbol) ?></td>
+		<td style="<?= $trStyle ?>"><?= $this->formatPrice($vo->buyPrice1,$stock[$voStock->live],$_live) ?></td>
+		<td style="border-right:2px solid black;<?= $trStyle ?>"><?= $this->formatVolume1($vo->buyVolume1,$stock[$voStock->live],$_live,$symbol) ?></td>
+		<td style="border-left:0px solid black;<?= $trStyle ?>"><?= $this->formatPrice($vo->sellPrice1,$stock[$voStock->live],$_live) ?></td>
+		<td style="border-right:0px solid black;<?= $trStyle ?>"><?= $this->formatVolume1($vo->sellVolume1,$stock[$voStock->live],$_live,$symbol) ?></td>
+		<td style="border-left:0px solid black;<?= $trStyle ?>"><?= $this->formatPrice($vo->sellPrice2,$stock[$voStock->live],$_live) ?></td>
+		<td style="border-right:2px solid black;<?= $trStyle ?>"><?= $this->formatVolume1($vo->sellVolume2,$stock[$voStock->live],$_live,$symbol) ?></td>
+		
 		<td style="color:black;border-right:0px solid black;<?= $trStyle ?>" ><?= $this->formatRoe($stock[$voStock->roe],$ysFa,$noFa) ?></td>
 		<td style="color:black;border-right:0px solid black;<?= $trStyle ?>" ><?= $this->formatBvp($bvp) ?></td>
 		<td style="color:black;border-right:0px solid black;<?= $trStyle ?>" ><?= $this->formatFf($stock[$voStock->ff2],$ysFa,$noFa) ?></td>
 	
 <? /*
-		
-		<td style="<?= $trStyle ?>"><?= $this->formatPrice($vo->buyPrice2,$stock[$voStock->live],$_live) ?></td>
-		<td style="border-right:0px solid black;<?= $trStyle ?>"><?= $this->formatVolume1($vo->buyVolume2,$stock[$voStock->live],$_live,$symbol) ?></td>
-		
-		<td style="border-left:0px solid black;<?= $trStyle ?>"><?= $this->formatPrice($vo->sellPrice2,$stock[$voStock->live],$_live) ?></td>
-		<td style="border-right:2px solid black;<?= $trStyle ?>"><?= $this->formatVolume1($vo->sellVolume2,$stock[$voStock->live],$_live,$symbol) ?></td>
-		
 		
 		<td style="border-right:0px solid black;<?= $trStyle ?>"> <?= $this->formatCode($stock[$voStock->code]) ?> </td>
 		<td style="color:black;border-right:0px solid black;<?= $trStyle ?>" ><?= $this->formatFf($stock[$voStock->ff1],$ysFa,$noFa) ?></td>
@@ -1627,7 +1630,7 @@ class stock_ViewStock{
 		return false;
 	}
 	
-	public function rpcMakeTa(){
+	public function rpcMakeTa2(){
 //<@ $this->json();
 		$taMap=array(
 		);
@@ -1683,6 +1686,63 @@ try{
 		$this->obJfile->save("stock_ViewStock/taMap",$taMap);
 //@>
 	}
+	
+	public function rpcMakeTa(){
+//<@ $this->json();
+		$taMap=array(
+		);
+		$stockMap=$this->rpcStockMap();
+		//ob_implicit_flush(true);
+		//ob_start();
+		foreach($stockMap as $symbol=>$stock){
+try{
+			if($this->isMarket($symbol)) continue;
+			//if($symbol=="VN30F1710") continue;
+			//$symbol="MWG";
+			$href="http://finance.vietstock.vn/Controls/Report/Data/GetReport.ashx?rptType=CSTC&scode=".$symbol."&bizType=1&rptUnit=1000000&rptTermTypeID=2&page=1";
+			
+			$httpClient = new Zend_Http_Client($href);
+			$html = $httpClient->request('GET')->getBody();
+			$html = '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/></head><body>'.$html.'</body></html>';
+			$doc = new DOMDocument();
+			$old_E = error_reporting(E_ERROR);			
+			$doc->loadHTML($html);
+			error_reporting($old_E);
+			
+			$trNodes = $doc->getElementById("54")->childNodes;
+			if($trNodes==null) continue;
+			$str = $trNodes->item(6)->nodeValue;
+			$str=str_replace(",",".",$str);
+			$taMap[$symbol]["bv"]=(double)$str;
+			
+			$trNodes = $doc->getElementById("45")->childNodes;
+			if($trNodes==null) continue;
+			$str4 = (double)$trNodes->item(3)->nodeValue;
+			$str3 = (double)$trNodes->item(4)->nodeValue;
+			$str2 = (double)$trNodes->item(5)->nodeValue;
+			$str1 = (double)$trNodes->item(6)->nodeValue;
+			
+			//$taMap[$symbol]["roe4"] = $str4;
+			//$taMap[$symbol]["roe3"] = $str3;
+			//$taMap[$symbol]["roe2"] = $str2;
+			//$taMap[$symbol]["roe1"] = $str1;
+			
+			$taMap[$symbol]["roe"]=$str4+$str3+$str2+$str1;
+			//$taMap[$symbol]["name"]=$symbol;
+			//print_p( $taMap );
+			//echo $html;
+			//break;
+			//print_p($taMap[$symbol]);
+			//ob_flush();
+} catch (Exception $ex){
+}
+		}
+		//ob_end_flush();
+		//print_p( $taMap );
+		$this->obJfile->save("stock_ViewStock/taMap",$taMap);
+//@>
+	}
+	
 	public function restartStockMap(){
 		$this->stockMapTime=null;
 		$this->xhrStockMap->abort();

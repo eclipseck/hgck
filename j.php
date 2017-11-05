@@ -73,7 +73,7 @@ function errorHandler($errno, $errstr, $errfile, $errline) {
 //set_error_handler('errorHandler');
 //if($_SERVER["REMOTE_ADDR"] == "127.0.0.1") 
 set_time_limit(0);
-ini_set('max_execution_time', 600);
+//ini_set('max_execution_time', 600);
 
 //ini_set('error_reporting', E_ALL);
 //ini_set('log_errors', true);

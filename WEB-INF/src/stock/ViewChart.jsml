@@ -33,7 +33,7 @@ class stock_ViewChart{
 <div>
 	<div id="divCanvasText" style='position:relative'>
 	</div>
-	<div id="divOnePrice" align="right" style='position:absolute;left:200px;top:<?= 80+0.0*$this->height ?>px;border:0px solid;width:655px;'></div>
+	<div id="divOnePrice" align="right" style='position:absolute;left:50px;top:<?= 80+0.0*$this->height ?>px;border:0px solid;width:655px;'></div>
 	<canvas id="canvas"></canvas>
 </div>
 <!--/$html--><?
@@ -378,8 +378,8 @@ class stock_ViewChart{
 				if($row==null) continue;
 				
 				if($k==1 && $stock[$voStock->value2] < 3000000) continue;
-				if($k==2 && $stock[$voStock->value2] >= 3000000) continue;
-				//////////////if($k==2 && $vn30Map[$symbol]==null) continue;
+				//////////if($k==2 && $stock[$voStock->value2] >= 3000000) continue;
+				if($k==2 && $vn30Map[$symbol]==null) continue;
 				
 				if( $this->ao->isNull0($row[$vo2->ref]) || $this->ao->isNull0($row[$vo2->close])) continue;
 				
